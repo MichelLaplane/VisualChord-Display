@@ -444,6 +444,23 @@
     color:var(--ink-soft);
   }
 
+  .jazz-grid{
+    margin-top:14px;
+  }
+  .jazz-grid svg{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  .jazz-region{
+    fill:transparent;
+    stroke:none;
+    transition:fill .15s ease;
+  }
+  .jazz-region.playing{
+    fill:color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+
   .pos-nav{
     display:flex;
     align-items:center;
@@ -615,6 +632,7 @@
     .result.visible{display:block !important;}
     .chord-mini-card{background:#fff; border-color:#ccc;}
     .measure-group{border-right-color:#ccc;}
+    .jazz-grid{color:#000;}
   }
 </style>
 
@@ -703,11 +721,13 @@
       </div>
 
       <div class="sequence-grid" id="sequenceGrid"></div>
+      <div class="jazz-grid" id="jazzGrid" style="display:none;"></div>
 
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
         <button type="button" class="btn" id="playSequenceBtn">▶ <span id="playSequenceBtnText"></span></button>
         <button type="button" class="btn" id="shareSeqBtn">🔗 <span id="shareSeqBtnText"></span></button>
+        <button type="button" class="btn" id="toggleJazzGridBtn">🎼 <span id="toggleJazzGridBtnText"></span></button>
       </div>
       <p class="note-generated no-print" id="shareStatus" style="display:none;"></p>
       <div class="no-print" id="shareFallbackWrap" style="display:none;margin-top:10px;text-align:center;">
@@ -776,7 +796,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.1.2';
+  var APP_VERSION = '1.1.3';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -859,6 +879,8 @@
       playSequenceBtn:'Écouter la suite',
       stopSequenceBtn:'Arrêter',
       backToSequence:'Retour à la suite',
+      jazzGridBtn:'Grille jazz',
+      cardsGridBtn:'Vue cartes',
       printSequenceBtn:'Imprimer cette suite',
       shareBtn:'Partager le lien',
       shareCopied:'Lien copié dans le presse-papiers !',
@@ -925,6 +947,8 @@
       playSequenceBtn:'Play progression',
       stopSequenceBtn:'Stop',
       backToSequence:'Back to progression',
+      jazzGridBtn:'Jazz grid',
+      cardsGridBtn:'Card view',
       printSequenceBtn:'Print this progression',
       shareBtn:'Share link',
       shareCopied:'Link copied to clipboard!',
@@ -991,6 +1015,8 @@
       playSequenceBtn:'Akkordfolge abspielen',
       stopSequenceBtn:'Stopp',
       backToSequence:'Zurück zur Akkordfolge',
+      jazzGridBtn:'Jazz-Raster',
+      cardsGridBtn:'Kartenansicht',
       printSequenceBtn:'Diese Akkordfolge drucken',
       shareBtn:'Link teilen',
       shareCopied:'Link in die Zwischenablage kopiert!',
@@ -1057,6 +1083,8 @@
       playSequenceBtn:'Ascolta la progressione',
       stopSequenceBtn:'Ferma',
       backToSequence:'Torna alla progressione',
+      jazzGridBtn:'Griglia jazz',
+      cardsGridBtn:'Vista schede',
       printSequenceBtn:'Stampa questa progressione',
       shareBtn:'Condividi link',
       shareCopied:'Link copiato negli appunti!',
@@ -1123,6 +1151,8 @@
       playSequenceBtn:'Escuchar la progresión',
       stopSequenceBtn:'Detener',
       backToSequence:'Volver a la progresión',
+      jazzGridBtn:'Cuadrícula de jazz',
+      cardsGridBtn:'Vista de tarjetas',
       printSequenceBtn:'Imprimir esta progresión',
       shareBtn:'Compartir enlace',
       shareCopied:'¡Enlace copiado al portapapeles!',
@@ -1189,6 +1219,8 @@
       playSequenceBtn:'播放和弦进行',
       stopSequenceBtn:'停止',
       backToSequence:'返回和弦进行',
+      jazzGridBtn:'爵士网格',
+      cardsGridBtn:'卡片视图',
       printSequenceBtn:'打印此和弦进行',
       shareBtn:'分享链接',
       shareCopied:'链接已复制到剪贴板！',
@@ -1829,6 +1861,8 @@
   var printSequenceBtn = document.getElementById('printSequenceBtn');
   var playSequenceBtn = document.getElementById('playSequenceBtn');
   var shareSeqBtn = document.getElementById('shareSeqBtn');
+  var toggleJazzGridBtn = document.getElementById('toggleJazzGridBtn');
+  var jazzGrid = document.getElementById('jazzGrid');
   var shareStatus = document.getElementById('shareStatus');
   var shareFallbackWrap = document.getElementById('shareFallbackWrap');
   var shareFallbackInput = document.getElementById('shareFallbackInput');
@@ -1861,6 +1895,15 @@
     posPrev.setAttribute('aria-label', t('posPrevAria'));
     posNext.setAttribute('aria-label', t('posNextAria'));
     if(langSelect) langSelect.value = currentLang;
+    updateJazzGridToggleLabel();
+  }
+
+  function updateJazzGridToggleLabel(){
+    if(!toggleJazzGridBtn) return;
+    var lbl = document.getElementById('toggleJazzGridBtnText');
+    var isJazz = state.sequenceViewMode === 'jazz';
+    toggleJazzGridBtn.firstChild.textContent = isJazz ? '🗂 ' : '🎼 ';
+    if(lbl) lbl.textContent = t(isJazz ? 'cardsGridBtn' : 'jazzGridBtn');
   }
 
   EXAMPLES.forEach(function(ex){
@@ -1874,7 +1917,7 @@
     chordExamples.appendChild(opt);
   });
 
-  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, currentChord:null, sequencePlaying:false };
+  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, currentChord:null, sequencePlaying:false, sequenceViewMode:'cards' };
   var sequencePlaybackToken = 0;
 
   function instrument(){ return instPiano.checked ? 'piano' : 'guitar'; }
@@ -1885,6 +1928,106 @@
     return raw.split('|').map(function(measureStr){
       return measureStr.split(/[,\s]+/).map(function(s){ return s.trim(); }).filter(Boolean);
     }).filter(function(measure){ return measure.length > 0; });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function jazzChordLabel(x, y, text, size, valid){
+    var fill = valid ? 'var(--ink)' : 'var(--ink-soft)';
+    var style = valid ? '' : 'font-style:italic;';
+    return '<text x="'+x+'" y="'+y+'" text-anchor="middle" style="fill:'+fill+';'+style+'font:700 '+size+'px var(--font-display)">'+escapeHtml(text)+'</text>';
+  }
+
+  // Renders a "real book" style grid: one rectangle per measure, laid out in rows.
+  // 2 chords: single diagonal (bottom-left to top-right). 3 or 4 chords: the main
+  // diagonal runs top-left to bottom-right, and chords fill the resulting regions
+  // in the order left, bottom, top, right (4 chords use the full "X" of both
+  // diagonals; 3 chords merge the top+right region into one for the 3rd chord).
+  function jazzRegionPoly(points, seqIdx){
+    return '<polygon points="'+points+'" class="jazz-region" data-seq="'+seqIdx+'"/>';
+  }
+
+  function renderJazzGridSVG(measures){
+    if(!measures.length) return '';
+    var cellW=160, cellH=96, gap=10, pad=4;
+    var cols = Math.min(4, measures.length);
+    var rows = Math.ceil(measures.length/cols);
+    var totalW = cols*cellW + (cols-1)*gap;
+    var totalH = rows*cellH + (rows-1)*gap;
+    var svg = '<svg viewBox="0 0 '+(totalW+pad*2)+' '+(totalH+pad*2)+'" role="img" aria-label="'+t('sequenceTitle')+' — grille jazz">';
+
+    var seqIdx = 0;
+
+    measures.forEach(function(measure, idx){
+      var col = idx % cols, row = Math.floor(idx/cols);
+      var x0 = pad + col*(cellW+gap);
+      var y0 = pad + row*(cellH+gap);
+      var x1 = x0+cellW, y1 = y0+cellH;
+      var W = cellW, H = cellH;
+
+      svg += '<rect x="'+x0+'" y="'+y0+'" width="'+W+'" height="'+H+'" rx="8" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1.5"/>';
+
+      var parsed = measure.map(function(token){ return parseChordName(token); });
+      var labels = parsed.map(function(p,i){ return p.ok ? displayName(p) : measure[i]; });
+      var n = measure.length;
+
+      var cx = (x0+x1)/2, cy = (y0+y1)/2;
+      var baseIdx = seqIdx;
+
+      if(n <= 1){
+        svg += '<rect x="'+x0+'" y="'+y0+'" width="'+W+'" height="'+H+'" rx="8" class="jazz-region" data-seq="'+baseIdx+'"/>';
+        svg += jazzChordLabel(x0+W/2, y0+H/2+5, labels[0]||'', 16, parsed[0] ? parsed[0].ok : true);
+      } else if(n === 2){
+        // Single diagonal, bottom-left to top-right: chord 1 upper-left, chord 2 lower-right.
+        svg += jazzRegionPoly(x0+','+y0+' '+x1+','+y0+' '+x0+','+y1, baseIdx);
+        svg += jazzRegionPoly(x1+','+y0+' '+x1+','+y1+' '+x0+','+y1, baseIdx+1);
+        svg += '<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y0+'" style="stroke:var(--line)" stroke-width="1.5"/>';
+        svg += jazzChordLabel(x0+W*0.28, y0+H*0.32, labels[0], 12.5, parsed[0].ok);
+        svg += jazzChordLabel(x0+W*0.72, y0+H*0.74, labels[1], 12.5, parsed[1].ok);
+      } else if(n === 3){
+        // Main diagonal top-left to bottom-right, plus a half-line from the center to the
+        // bottom-left corner: this yields a left triangle, a bottom triangle, and a merged
+        // top+right triangle — chords in order: left, bottom, top.
+        svg += jazzRegionPoly(x0+','+y0+' '+x0+','+y1+' '+cx+','+cy, baseIdx);
+        svg += jazzRegionPoly(x0+','+y1+' '+x1+','+y1+' '+cx+','+cy, baseIdx+1);
+        svg += jazzRegionPoly(x0+','+y0+' '+x1+','+y0+' '+x1+','+y1, baseIdx+2);
+        svg += '<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'" style="stroke:var(--line)" stroke-width="1.5"/>';
+        svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x0+'" y2="'+y1+'" style="stroke:var(--line)" stroke-width="1.5"/>';
+        svg += jazzChordLabel((2*x0+cx)/3, (y0+y1+cy)/3, labels[0], 10.5, parsed[0].ok);
+        svg += jazzChordLabel((x0+x1+cx)/3, (2*y1+cy)/3, labels[1], 10.5, parsed[1].ok);
+        svg += jazzChordLabel((x0+2*x1)/3, (2*y0+y1)/3, labels[2], 10.5, parsed[2].ok);
+      } else if(n === 4){
+        // Both diagonals (an "X"), splitting the bar into 4 triangles based on the 4 edges —
+        // chords in order: left, bottom, top, right.
+        svg += jazzRegionPoly(x0+','+y0+' '+x0+','+y1+' '+cx+','+cy, baseIdx);
+        svg += jazzRegionPoly(x0+','+y1+' '+x1+','+y1+' '+cx+','+cy, baseIdx+1);
+        svg += jazzRegionPoly(x0+','+y0+' '+x1+','+y0+' '+cx+','+cy, baseIdx+2);
+        svg += jazzRegionPoly(x1+','+y0+' '+x1+','+y1+' '+cx+','+cy, baseIdx+3);
+        svg += '<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'" style="stroke:var(--line)" stroke-width="1.5"/>';
+        svg += '<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y0+'" style="stroke:var(--line)" stroke-width="1.5"/>';
+        svg += jazzChordLabel((2*x0+cx)/3, (y0+y1+cy)/3, labels[0], 9.5, parsed[0].ok);
+        svg += jazzChordLabel((x0+x1+cx)/3, (2*y1+cy)/3, labels[1], 9.5, parsed[1].ok);
+        svg += jazzChordLabel((x0+x1+cx)/3, (2*y0+cy)/3, labels[2], 9.5, parsed[2].ok);
+        svg += jazzChordLabel((2*x1+cx)/3, (y0+y1+cy)/3, labels[3], 9.5, parsed[3].ok);
+      } else {
+        var stepY = H/(n+1);
+        labels.forEach(function(lbl, i){
+          svg += '<rect x="'+x0+'" y="'+(y0+stepY*i)+'" width="'+W+'" height="'+stepY+'" class="jazz-region" data-seq="'+(baseIdx+i)+'"/>';
+        });
+        labels.forEach(function(lbl, i){
+          svg += jazzChordLabel(x0+W/2, y0+stepY*(i+1)+3, lbl, 9.5, parsed[i].ok);
+        });
+      }
+
+      seqIdx += n;
+    });
+
+    svg += '</svg>';
+    return svg;
   }
 
   function showError(msg){
@@ -2021,11 +2164,26 @@
     sequencePlaybackToken++;
     state.sequencePlaying = false;
     sequenceGrid.querySelectorAll('.chord-mini-card.playing').forEach(function(c){ c.classList.remove('playing'); });
+    if(jazzGrid) jazzGrid.querySelectorAll('.jazz-region.playing').forEach(function(r){ r.classList.remove('playing'); });
     if(playSequenceBtn){
       playSequenceBtn.firstChild.textContent = '▶ ';
       var lbl = document.getElementById('playSequenceBtnText');
       if(lbl) lbl.textContent = t('playSequenceBtn');
     }
+  }
+
+  var SEQUENCE_BEAT_MS = 700; // duration of one "temps" (beat), assuming a 4-beat (4/4) measure
+
+  // Every chord in a measure gets one beat, except the last one, which absorbs
+  // whatever is left so the whole measure always adds up to 4 beats (4/4 time):
+  // 1 chord -> 4 beats; 2 chords -> 1+3; 3 chords -> 1+1+2; 4 chords -> 1+1+1+1.
+  function sequenceBeatCounts(measure){
+    var n = measure.length;
+    if(n <= 1) return [4];
+    var beats = [];
+    for(var i=0; i<n-1; i++){ beats.push(1); }
+    beats.push(Math.max(1, 4-(n-1)));
+    return beats;
   }
 
   function playSequenceSound(measures){
@@ -2039,19 +2197,31 @@
 
     var flatTokens = [].concat.apply([], measures);
     var cards = sequenceGrid.querySelectorAll('.chord-mini-card');
-    var stepMs = 700;
+    var durationsMs = [].concat.apply([], measures.map(function(measure){
+      return sequenceBeatCounts(measure).map(function(beats){ return beats * SEQUENCE_BEAT_MS; });
+    }));
+    var offsetsMs = [];
+    var acc = 0;
+    durationsMs.forEach(function(d){ offsetsMs.push(acc); acc += d; });
+
     flatTokens.forEach(function(token, i){
       setTimeout(function(){
         if(myToken !== sequencePlaybackToken) return;
         sequenceGrid.querySelectorAll('.chord-mini-card.playing').forEach(function(c){ c.classList.remove('playing'); });
         var card = cards[i];
         if(card) card.classList.add('playing');
-        var p = parseChordName(token);
-        if(p.ok) playChordSound(p, 0.6);
-        if(i === flatTokens.length - 1){
-          setTimeout(function(){ if(myToken === sequencePlaybackToken) stopSequencePlayback(); }, 650);
+        if(jazzGrid){
+          jazzGrid.querySelectorAll('.jazz-region.playing').forEach(function(r){ r.classList.remove('playing'); });
+          var region = jazzGrid.querySelector('.jazz-region[data-seq="'+i+'"]');
+          if(region) region.classList.add('playing');
         }
-      }, i * stepMs);
+        var p = parseChordName(token);
+        var ringSeconds = Math.max(0.3, (durationsMs[i]-100)/1000);
+        if(p.ok) playChordSound(p, ringSeconds);
+        if(i === flatTokens.length - 1){
+          setTimeout(function(){ if(myToken === sequencePlaybackToken) stopSequencePlayback(); }, durationsMs[i]);
+        }
+      }, offsetsMs[i]);
     });
   }
 
@@ -2075,7 +2245,17 @@
       });
       sequenceGrid.appendChild(group);
     });
+    if(jazzGrid) jazzGrid.innerHTML = renderJazzGridSVG(measures);
+    applySequenceViewMode();
     hideShareFeedback();
+  }
+
+  function applySequenceViewMode(){
+    if(!jazzGrid) return;
+    var isJazz = state.sequenceViewMode === 'jazz';
+    sequenceGrid.style.display = isJazz ? 'none' : 'flex';
+    jazzGrid.style.display = isJazz ? 'block' : 'none';
+    updateJazzGridToggleLabel();
   }
 
   function render(){
@@ -2135,6 +2315,12 @@
       if(measures.length) playSequenceSound(measures);
     }
   });
+  if(toggleJazzGridBtn){
+    toggleJazzGridBtn.addEventListener('click', function(){
+      state.sequenceViewMode = state.sequenceViewMode === 'jazz' ? 'cards' : 'jazz';
+      applySequenceViewMode();
+    });
+  }
   backToSequenceBtn.addEventListener('click', function(){
     if(state.sequenceInput){
       chordInput.value = state.sequenceInput;
@@ -2189,6 +2375,4 @@
   });
 })();
 </script>
-
-</body>
-</html>
+</body></html>
