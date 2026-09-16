@@ -8,3 +8,7 @@ node_modules/
 npm-debug.log*
 dist/
 build/
+
+# Fichiers personnels à garder en local uniquement
+Conversation Claude.txt
+Claude outputs/
