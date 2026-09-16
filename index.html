@@ -17,6 +17,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="VisualChord">
 
+
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -326,6 +328,86 @@
   .diagram-wrap svg{display:block; width:100%; height:auto; max-width:340px;}
   .diagram-wrap.piano svg{max-width:100%;}
 
+  .back-to-sequence{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:none;
+    border:none;
+    padding:0 0 12px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:13px;
+    color:var(--accent);
+    cursor:pointer;
+  }
+  .back-to-sequence:hover{ text-decoration:underline; }
+
+  .sequence-grid{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    gap:0;
+    row-gap:18px;
+    margin-top:14px;
+  }
+  .measure-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    padding-right:18px;
+    margin-right:18px;
+    border-right:2px solid var(--line);
+  }
+  .measure-group:last-child{
+    border-right:none;
+    padding-right:0;
+    margin-right:0;
+  }
+  .chord-mini-card{
+    background:var(--surface-2);
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:12px 8px 10px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease;
+    width:128px;
+    flex:0 0 auto;
+  }
+  .chord-mini-card:hover, .chord-mini-card:focus-visible{
+    border-color:var(--accent);
+    outline:none;
+  }
+  .chord-mini-card .mini-name{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:17px;
+    margin-bottom:6px;
+  }
+  .chord-mini-card .mini-diagram{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:70px;
+  }
+  .chord-mini-card .mini-diagram svg{width:100%; max-width:112px; height:auto; display:block;}
+  .chord-mini-card .mini-quality{
+    font-size:10.5px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    line-height:1.3;
+  }
+  .chord-mini-card.invalid{
+    border-style:dashed;
+    opacity:.7;
+  }
+  .chord-mini-card.invalid .mini-diagram{
+    font-family:var(--font-mono);
+    font-size:26px;
+    color:var(--ink-soft);
+  }
+
   .pos-nav{
     display:flex;
     align-items:center;
@@ -493,7 +575,9 @@
     .no-print{display:none !important;}
     .card{box-shadow:none; border:1px solid #ccc;}
     .diagram-wrap{background:#fff; border-color:#ccc;}
-    .result{display:block !important;}
+    .result.visible{display:block !important;}
+    .chord-mini-card{background:#fff; border-color:#ccc;}
+    .measure-group{border-right-color:#ccc;}
   }
 </style>
 
@@ -528,6 +612,7 @@
           <input type="text" id="chordInput" list="chordExamples" placeholder="ex. Cmaj7, Am, F#m7b5, G/B…" value="C" autocomplete="off" spellcheck="false">
         </div>
         <datalist id="chordExamples"></datalist>
+        <p id="sequenceHintText" style="margin:8px 0 0;font-size:11.5px;color:var(--ink-soft);"></p>
       </div>
       <div class="field">
         <label id="labelInstrumentText">Instrument</label>
@@ -545,6 +630,7 @@
 
   <section class="result" id="resultSection">
     <div class="card">
+      <button type="button" class="back-to-sequence no-print" id="backToSequenceBtn" style="display:none;">‹ <span id="backToSequenceText"></span></button>
       <div class="result-head">
         <div>
           <h2 class="chord-name" id="chordNameOut">—</h2>
@@ -566,6 +652,29 @@
 
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printBtn">🖨 <span id="printBtnText">Imprimer ce diagramme</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="result sequence-result" id="sequenceSection">
+    <div class="card">
+      <div class="result-head">
+        <div>
+          <h2 class="chord-name" id="sequenceTitleOut" style="font-size:clamp(22px,5vw,30px);"></h2>
+          <p class="quality-label" id="sequenceCountOut"></p>
+        </div>
+        <span class="instrument-tag" id="sequenceInstrumentTag"></span>
+      </div>
+
+      <div class="sequence-grid" id="sequenceGrid"></div>
+
+      <div class="actions-row no-print">
+        <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
+        <button type="button" class="btn" id="shareSeqBtn">🔗 <span id="shareSeqBtnText"></span></button>
+      </div>
+      <p class="note-generated no-print" id="shareStatus" style="display:none;"></p>
+      <div class="no-print" id="shareFallbackWrap" style="display:none;margin-top:10px;text-align:center;">
+        <input type="text" id="shareFallbackInput" readonly style="width:100%;max-width:420px;font-family:var(--font-mono);font-size:12px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);">
       </div>
     </div>
   </section>
@@ -630,7 +739,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.0.1';
+  var APP_VERSION = '1.1.1';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -704,6 +813,15 @@
       posNextAria:'Position suivante',
       handLH:'MG', handRH:'MD',
       langSwitchLabel:'Langue',
+      sequenceHint:"Astuce : saisissez plusieurs accords séparés par des espaces (ex. « C G Am F ») pour afficher toute une suite. Utilisez « | » pour séparer les mesures (ex. « C G | Am F »).",
+      sequenceTitle:"Suite d'accords",
+      sequenceCount:'{n} accords',
+      sequenceMeasures:'{n} mesures',
+      backToSequence:'Retour à la suite',
+      printSequenceBtn:'Imprimer cette suite',
+      shareBtn:'Partager le lien',
+      shareCopied:'Lien copié dans le presse-papiers !',
+      invalidChordLabel:'non reconnu',
       qualities:{
         major:'Majeur', minor:'Mineur', dim:'Diminué', dim7:'Septième diminuée',
         sus2:'Suspendu (sus2)', sus4:'Suspendu (sus4)', '7sus4':'Septième suspendue',
@@ -757,6 +875,15 @@
       posNextAria:'Next position',
       handLH:'LH', handRH:'RH',
       langSwitchLabel:'Language',
+      sequenceHint:'Tip: type several chords separated by spaces (e.g. "C G Am F") to display a full progression. Use "|" to separate bars (e.g. "C G | Am F").',
+      sequenceTitle:'Chord progression',
+      sequenceCount:'{n} chords',
+      sequenceMeasures:'{n} bars',
+      backToSequence:'Back to progression',
+      printSequenceBtn:'Print this progression',
+      shareBtn:'Share link',
+      shareCopied:'Link copied to clipboard!',
+      invalidChordLabel:'not recognized',
       qualities:{
         major:'Major', minor:'Minor', dim:'Diminished', dim7:'Diminished seventh',
         sus2:'Suspended (sus2)', sus4:'Suspended (sus4)', '7sus4':'Dominant seventh, suspended 4th',
@@ -810,6 +937,15 @@
       posNextAria:'Nächste Position',
       handLH:'LH', handRH:'RH',
       langSwitchLabel:'Sprache',
+      sequenceHint:'Tipp: Geben Sie mehrere durch Leerzeichen getrennte Akkorde ein (z. B. „C G Am F"), um eine ganze Akkordfolge anzuzeigen. Mit „|" trennen Sie die Takte (z. B. „C G | Am F").',
+      sequenceTitle:'Akkordfolge',
+      sequenceCount:'{n} Akkorde',
+      sequenceMeasures:'{n} Takte',
+      backToSequence:'Zurück zur Akkordfolge',
+      printSequenceBtn:'Diese Akkordfolge drucken',
+      shareBtn:'Link teilen',
+      shareCopied:'Link in die Zwischenablage kopiert!',
+      invalidChordLabel:'nicht erkannt',
       qualities:{
         major:'Dur', minor:'Moll', dim:'Vermindert', dim7:'Verminderter Septakkord',
         sus2:'Vorhalt (sus2)', sus4:'Vorhalt (sus4)', '7sus4':'Septime mit Quartvorhalt',
@@ -863,6 +999,15 @@
       posNextAria:'Posizione successiva',
       handLH:'MS', handRH:'MD',
       langSwitchLabel:'Lingua',
+      sequenceHint:'Suggerimento: digita più accordi separati da spazi (es. «C G Am F») per visualizzare un\'intera progressione. Usa «|» per separare le battute (es. «C G | Am F»).',
+      sequenceTitle:'Progressione di accordi',
+      sequenceCount:'{n} accordi',
+      sequenceMeasures:'{n} battute',
+      backToSequence:'Torna alla progressione',
+      printSequenceBtn:'Stampa questa progressione',
+      shareBtn:'Condividi link',
+      shareCopied:'Link copiato negli appunti!',
+      invalidChordLabel:'non riconosciuto',
       qualities:{
         major:'Maggiore', minor:'Minore', dim:'Diminuito', dim7:'Settima diminuita',
         sus2:'Sospeso (sus2)', sus4:'Sospeso (sus4)', '7sus4':'Settima con sospensione di quarta',
@@ -916,6 +1061,15 @@
       posNextAria:'Posición siguiente',
       handLH:'MI', handRH:'MD',
       langSwitchLabel:'Idioma',
+      sequenceHint:'Consejo: escriba varios acordes separados por espacios (ej. «C G Am F») para mostrar toda una progresión. Use «|» para separar los compases (ej. «C G | Am F»).',
+      sequenceTitle:'Progresión de acordes',
+      sequenceCount:'{n} acordes',
+      sequenceMeasures:'{n} compases',
+      backToSequence:'Volver a la progresión',
+      printSequenceBtn:'Imprimir esta progresión',
+      shareBtn:'Compartir enlace',
+      shareCopied:'¡Enlace copiado al portapapeles!',
+      invalidChordLabel:'no reconocido',
       qualities:{
         major:'Mayor', minor:'Menor', dim:'Disminuido', dim7:'Séptima disminuida',
         sus2:'Suspendido (sus2)', sus4:'Suspendido (sus4)', '7sus4':'Séptima con cuarta suspendida',
@@ -969,6 +1123,15 @@
       posNextAria:'下一个把位',
       handLH:'左', handRH:'右',
       langSwitchLabel:'语言',
+      sequenceHint:'提示：输入多个用空格分隔的和弦（例如 "C G Am F"）即可显示完整的和弦进行。使用 "|" 分隔小节（例如 "C G | Am F"）。',
+      sequenceTitle:'和弦进行',
+      sequenceCount:'{n} 个和弦',
+      sequenceMeasures:'{n} 个小节',
+      backToSequence:'返回和弦进行',
+      printSequenceBtn:'打印此和弦进行',
+      shareBtn:'分享链接',
+      shareCopied:'链接已复制到剪贴板！',
+      invalidChordLabel:'无法识别',
       qualities:{
         major:'大三和弦', minor:'小三和弦', dim:'减三和弦', dim7:'减七和弦',
         sus2:'挂二和弦 (sus2)', sus4:'挂四和弦 (sus4)', '7sus4':'属七挂四和弦',
@@ -1335,6 +1498,16 @@
   var langSelect = document.getElementById('langSelect');
   var versionBadge = document.getElementById('versionBadge');
   if(versionBadge) versionBadge.textContent = 'v' + APP_VERSION;
+  var backToSequenceBtn = document.getElementById('backToSequenceBtn');
+  var sequenceSection = document.getElementById('sequenceSection');
+  var sequenceGrid = document.getElementById('sequenceGrid');
+  var sequenceCountOut = document.getElementById('sequenceCountOut');
+  var sequenceInstrumentTag = document.getElementById('sequenceInstrumentTag');
+  var printSequenceBtn = document.getElementById('printSequenceBtn');
+  var shareSeqBtn = document.getElementById('shareSeqBtn');
+  var shareStatus = document.getElementById('shareStatus');
+  var shareFallbackWrap = document.getElementById('shareFallbackWrap');
+  var shareFallbackInput = document.getElementById('shareFallbackInput');
 
   var STATIC_TEXT_IDS = {
     eyebrowText:'eyebrow', introText:'intro', labelChordNameText:'labelChordName',
@@ -1343,7 +1516,9 @@
     helpNotesIntroText:'helpNotesIntro', helpTypesTitleText:'helpTypesTitle',
     gTitleBasicText:'gBasic', gTitleSeventhsText:'gSevenths', gTitleExtendedText:'gExtended',
     gTitleAddSixthText:'gAddSixth', gTitleSlashText:'gSlash', helpFingersTitleText:'helpFingersTitle',
-    footerNoteText:'footerNote', langSwitchLabelText:'langSwitchLabel'
+    footerNoteText:'footerNote', langSwitchLabelText:'langSwitchLabel',
+    sequenceHintText:'sequenceHint', sequenceTitleOut:'sequenceTitle', backToSequenceText:'backToSequence',
+    printSequenceBtnText:'printSequenceBtn', shareSeqBtnText:'shareBtn'
   };
   var STATIC_HTML_IDS = { helpFingersTextP:'helpFingersText' };
 
@@ -1374,9 +1549,17 @@
     chordExamples.appendChild(opt);
   });
 
-  var state = { positions: [], posIndex: 0, generated:false };
+  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null };
 
   function instrument(){ return instPiano.checked ? 'piano' : 'guitar'; }
+
+  function splitChordSequence(raw){
+    // "|" separates measures (bars). Within a measure, chords are separated by spaces or commas.
+    // Returns an array of measures, each measure being an array of chord tokens. Empty measures are dropped.
+    return raw.split('|').map(function(measureStr){
+      return measureStr.split(/[,\s]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    }).filter(function(measure){ return measure.length > 0; });
+  }
 
   function showError(msg){
     errorBox.textContent = msg;
@@ -1442,8 +1625,93 @@
       '<span><span class="dot" style="background:var(--accent2)"></span>'+t('legendRH')+'</span>';
   }
 
+  function hideShareFeedback(){
+    if(shareStatus) shareStatus.style.display = 'none';
+    if(shareFallbackWrap) shareFallbackWrap.style.display = 'none';
+  }
+
+  function buildMiniCard(token){
+    var p = parseChordName(token);
+    var card = document.createElement('div');
+    card.className = 'chord-mini-card' + (p.ok ? '' : ' invalid');
+    card.tabIndex = 0;
+    card.setAttribute('role','button');
+    card.setAttribute('aria-label', p.ok ? displayName(p) : token);
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'mini-name';
+    nameEl.textContent = p.ok ? displayName(p) : token;
+    card.appendChild(nameEl);
+
+    var diagEl = document.createElement('div');
+    diagEl.className = 'mini-diagram';
+    if(p.ok){
+      if(instrument()==='guitar'){
+        var db = findGuitarPositions(p);
+        var pos = db ? db.positions[0] : fallbackGuitarPositions(p, 1)[0];
+        if(pos){ diagEl.innerHTML = renderFretboardSVG(pos); }
+        else { diagEl.textContent = t('noFingering'); diagEl.style.fontSize='11px'; diagEl.style.color='var(--ink-soft)'; }
+      } else {
+        var notes = getPianoNotes(p);
+        diagEl.innerHTML = renderPianoSVG(notes.lh, notes.rh);
+      }
+    } else {
+      diagEl.textContent = '?';
+    }
+    card.appendChild(diagEl);
+
+    var subEl = document.createElement('div');
+    subEl.className = 'mini-quality';
+    subEl.textContent = p.ok ? ((LANG_DATA[currentLang].qualities[p.suffix]) || '') : t('invalidChordLabel');
+    card.appendChild(subEl);
+
+    function open(){
+      chordInput.value = token;
+      render();
+      resultSection.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', function(e){
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); }
+    });
+
+    return card;
+  }
+
+  function renderSequence(measures){
+    var flatTokens = [].concat.apply([], measures);
+    state.sequenceInput = measures.map(function(m){ return m.join(' '); }).join(' | ');
+    hideError();
+    resultSection.classList.remove('visible');
+    sequenceSection.classList.add('visible');
+    sequenceInstrumentTag.textContent = instrument()==='guitar' ? t('instrumentTagGuitar') : t('instrumentTagPiano');
+    var countText = t('sequenceCount', {n: flatTokens.length});
+    if(measures.length > 1){ countText += ' · ' + t('sequenceMeasures', {n: measures.length}); }
+    sequenceCountOut.textContent = countText;
+    sequenceGrid.innerHTML = '';
+    measures.forEach(function(measure){
+      var group = document.createElement('div');
+      group.className = 'measure-group';
+      measure.forEach(function(token){
+        group.appendChild(buildMiniCard(token));
+      });
+      sequenceGrid.appendChild(group);
+    });
+    hideShareFeedback();
+  }
+
   function render(){
     var raw = chordInput.value;
+    var measures = splitChordSequence(raw);
+    var flatTokens = [].concat.apply([], measures);
+
+    if(flatTokens.length > 1){
+      renderSequence(measures);
+      return;
+    }
+    sequenceSection.classList.remove('visible');
+    backToSequenceBtn.style.display = state.sequenceInput ? 'flex' : 'none';
+
     var p = parseChordName(raw);
     if(!p.ok){
       if(raw.trim()===''){ hideError(); resultSection.classList.remove('visible'); return; }
@@ -1474,6 +1742,35 @@
   posPrev.addEventListener('click', function(){ if(state.posIndex>0){ state.posIndex--; drawGuitarPosition(); } });
   posNext.addEventListener('click', function(){ if(state.posIndex<state.positions.length-1){ state.posIndex++; drawGuitarPosition(); } });
   printBtn.addEventListener('click', function(){ window.print(); });
+  printSequenceBtn.addEventListener('click', function(){ window.print(); });
+  backToSequenceBtn.addEventListener('click', function(){
+    if(state.sequenceInput){
+      chordInput.value = state.sequenceInput;
+      render();
+      sequenceSection.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+  shareSeqBtn.addEventListener('click', function(){
+    if(!state.sequenceInput) return;
+    var url = location.origin + location.pathname + '?chords=' + encodeURIComponent(state.sequenceInput);
+    function showCopied(){
+      shareFallbackWrap.style.display = 'none';
+      shareStatus.textContent = t('shareCopied');
+      shareStatus.style.display = 'block';
+    }
+    function showFallback(){
+      shareStatus.style.display = 'none';
+      shareFallbackWrap.style.display = 'block';
+      shareFallbackInput.value = url;
+      shareFallbackInput.focus();
+      shareFallbackInput.select();
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(showCopied, showFallback);
+    } else {
+      showFallback();
+    }
+  });
   if(langSelect){
     langSelect.addEventListener('change', function(){
       currentLang = langSelect.value;
@@ -1482,6 +1779,11 @@
       render();
     });
   }
+
+  try {
+    var sharedChords = new URLSearchParams(location.search).get('chords');
+    if(sharedChords){ chordInput.value = sharedChords; }
+  } catch(e){}
 
   applyStaticTranslations();
 
