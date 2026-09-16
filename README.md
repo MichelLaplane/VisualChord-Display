@@ -6,6 +6,8 @@ Elle fonctionne dans n'importe quel navigateur moderne — Windows, macOS, iPhon
 
 **Suites d'accords :** saisissez plusieurs accords séparés par des espaces (ex. `C G Am F`) pour afficher toute une grille — pratique pour une feuille d'accords de morceau, imprimable directement. Utilisez `|` pour séparer les mesures (ex. `C G | Am F | C`) : une barre verticale s'affiche alors entre chaque groupe, comme sur une vraie grille d'accords. Cliquez sur un accord de la suite pour l'afficher en grand (avec les différentes positions possibles à la guitare). Le bouton « Partager le lien » copie une adresse qui rouvre directement cette suite précise, mesures comprises.
 
+**Écouter les accords :** un bouton 🔊 permet d'entendre le son de l'accord affiché. Le timbre s'adapte automatiquement à l'instrument sélectionné : un son de guitare (modèle physique de corde pincée façon nylon, avec caisse de résonance) en mode manche, ou un son de piano (attaque franche, résonance) en mode clavier. Dans une suite d'accords, chaque mini-diagramme possède son propre bouton d'écoute, et le bouton « Écouter la suite » joue l'ensemble des accords les uns après les autres avec surbrillance de l'accord en cours — pratique pour vérifier une grille à l'oreille avant de la jouer. En mode guitare, le bouton **« ⚙️ Régler le son »** ouvre un panneau de réglages avancés (attaque, amortissement, résonance de caisse, volume) pour ajuster le son en écoutant le résultat en direct.
+
 Interface disponible en 6 langues (sélecteur en haut à droite de l'application) : français, anglais, allemand, italien, espagnol, chinois. Le choix est mémorisé automatiquement dans le navigateur.
 
 ## Contenu du dossier
@@ -21,7 +23,7 @@ Interface disponible en 6 langues (sélecteur en haut à droite de l'application
 ## Utiliser l'application
 
 ### Option 1 — en ligne (recommandé)
-L'adresse GitHub Pages une fois déployée — fonctionne immédiatement sur tous vos appareils (Windows, macOS, iPhone, iPad, Android) : il suffit de l'ouvrir dans un navigateur.
+Le lien fourni dans la conversation Claude — ou l'adresse GitHub Pages une fois déployée — fonctionne immédiatement sur tous vos appareils (Windows, macOS, iPhone, iPad, Android) : il suffit de l'ouvrir dans un navigateur.
 
 **Ajouter une icône sur l'écran d'accueil de l'iPhone/iPad :**
 1. Ouvrez l'adresse du site dans **Safari** (l'ajout à l'écran d'accueil depuis Chrome sur iOS ne propose pas cette option).

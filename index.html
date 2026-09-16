@@ -19,6 +19,14 @@
 
 
 
+
+
+
+
+
+
+
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -365,18 +373,46 @@
     margin-right:0;
   }
   .chord-mini-card{
+    position:relative;
     background:var(--surface-2);
     border:1.5px solid var(--line);
     border-radius:12px;
     padding:12px 8px 10px;
     text-align:center;
     cursor:pointer;
-    transition:border-color .15s ease;
+    transition:border-color .15s ease, background-color .15s ease;
     width:128px;
     flex:0 0 auto;
   }
   .chord-mini-card:hover, .chord-mini-card:focus-visible{
     border-color:var(--accent);
+    outline:none;
+  }
+  .chord-mini-card.playing{
+    border-color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  }
+  .mini-play{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:22px;
+    height:22px;
+    padding:0;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    font-size:11px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .mini-play:hover, .mini-play:focus-visible{
+    border-color:var(--accent);
+    color:var(--accent);
     outline:none;
   }
   .chord-mini-card .mini-name{
@@ -486,6 +522,7 @@
     color:var(--accent-ink);
   }
 
+
   .error-box{
     display:none;
     background:var(--danger-bg);
@@ -581,8 +618,6 @@
   }
 </style>
 
-</head>
-<body>
 <div class="app-shell">
   <header class="top no-print">
     <div class="header-row">
@@ -652,6 +687,7 @@
 
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printBtn">🖨 <span id="printBtnText">Imprimer ce diagramme</span></button>
+        <button type="button" class="btn" id="playBtn">🔊 <span id="playBtnText"></span></button>
       </div>
     </div>
   </section>
@@ -670,6 +706,7 @@
 
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
+        <button type="button" class="btn" id="playSequenceBtn">▶ <span id="playSequenceBtnText"></span></button>
         <button type="button" class="btn" id="shareSeqBtn">🔗 <span id="shareSeqBtnText"></span></button>
       </div>
       <p class="note-generated no-print" id="shareStatus" style="display:none;"></p>
@@ -739,7 +776,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.1.1';
+  var APP_VERSION = '1.1.2';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -817,6 +854,10 @@
       sequenceTitle:"Suite d'accords",
       sequenceCount:'{n} accords',
       sequenceMeasures:'{n} mesures',
+      playChord:'Écouter cet accord',
+      playAria:'Écouter',
+      playSequenceBtn:'Écouter la suite',
+      stopSequenceBtn:'Arrêter',
       backToSequence:'Retour à la suite',
       printSequenceBtn:'Imprimer cette suite',
       shareBtn:'Partager le lien',
@@ -879,6 +920,10 @@
       sequenceTitle:'Chord progression',
       sequenceCount:'{n} chords',
       sequenceMeasures:'{n} bars',
+      playChord:'Play this chord',
+      playAria:'Play',
+      playSequenceBtn:'Play progression',
+      stopSequenceBtn:'Stop',
       backToSequence:'Back to progression',
       printSequenceBtn:'Print this progression',
       shareBtn:'Share link',
@@ -941,6 +986,10 @@
       sequenceTitle:'Akkordfolge',
       sequenceCount:'{n} Akkorde',
       sequenceMeasures:'{n} Takte',
+      playChord:'Diesen Akkord abspielen',
+      playAria:'Abspielen',
+      playSequenceBtn:'Akkordfolge abspielen',
+      stopSequenceBtn:'Stopp',
       backToSequence:'Zurück zur Akkordfolge',
       printSequenceBtn:'Diese Akkordfolge drucken',
       shareBtn:'Link teilen',
@@ -1003,6 +1052,10 @@
       sequenceTitle:'Progressione di accordi',
       sequenceCount:'{n} accordi',
       sequenceMeasures:'{n} battute',
+      playChord:'Ascolta questo accordo',
+      playAria:'Ascolta',
+      playSequenceBtn:'Ascolta la progressione',
+      stopSequenceBtn:'Ferma',
       backToSequence:'Torna alla progressione',
       printSequenceBtn:'Stampa questa progressione',
       shareBtn:'Condividi link',
@@ -1065,6 +1118,10 @@
       sequenceTitle:'Progresión de acordes',
       sequenceCount:'{n} acordes',
       sequenceMeasures:'{n} compases',
+      playChord:'Escuchar este acorde',
+      playAria:'Escuchar',
+      playSequenceBtn:'Escuchar la progresión',
+      stopSequenceBtn:'Detener',
       backToSequence:'Volver a la progresión',
       printSequenceBtn:'Imprimir esta progresión',
       shareBtn:'Compartir enlace',
@@ -1127,6 +1184,10 @@
       sequenceTitle:'和弦进行',
       sequenceCount:'{n} 个和弦',
       sequenceMeasures:'{n} 个小节',
+      playChord:'播放此和弦',
+      playAria:'播放',
+      playSequenceBtn:'播放和弦进行',
+      stopSequenceBtn:'停止',
       backToSequence:'返回和弦进行',
       printSequenceBtn:'打印此和弦进行',
       shareBtn:'分享链接',
@@ -1366,6 +1427,267 @@
     return { lh:lh, rh:rh };
   }
 
+  // ---------- Audio (Web Audio API, no external files) ----------
+
+  var audioCtx = null;
+  function getAudioCtx(){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    if(!audioCtx){ audioCtx = new AC(); }
+    if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+    return audioCtx;
+  }
+
+  // A single note sounds fine on its own, but several notes played
+  // together (a chord, or several resonance-box modes lining up near the
+  // same frequency) can sum to a peak well above the destination's [-1,1]
+  // range, which Web Audio simply clips - a harsh, "degraded" digital
+  // distortion. Routing everything through one shared limiter before the
+  // real output avoids that, the way any real mixing chain would.
+  var masterBus = null;
+  function getMasterBus(ctx){
+    if(!masterBus){
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -10;
+      comp.knee.value = 14;
+      comp.ratio.value = 10;
+      comp.attack.value = 0.003;
+      comp.release.value = 0.22;
+      comp.connect(ctx.destination);
+      masterBus = comp;
+    }
+    return masterBus;
+  }
+
+  function noteFrequency(pc, octave){
+    // abs = octave*12 + pc puts C4 (middle C) at abs=48; MIDI note = abs+12; A4=440Hz is MIDI 69.
+    var abs = octave*12 + pc;
+    return 440 * Math.pow(2, (abs - 57) / 12);
+  }
+
+  // Piano voice: struck string - a few additive harmonics on top of the
+  // fundamental (gives body/brightness), fast attack, smooth long decay.
+  function playPianoTone(ctx, freq, startTime, duration, peakGain){
+    var partials = [
+      {mult:1, gain:1.00, type:'sine'},
+      {mult:2, gain:0.32, type:'sine'},
+      {mult:3, gain:0.14, type:'triangle'},
+      {mult:4, gain:0.06, type:'sine'}
+    ];
+    var g = peakGain || 0.16;
+    partials.forEach(function(part){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = part.type;
+      osc.frequency.value = freq * part.mult;
+      var peak = g * part.gain;
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.linearRampToValueAtTime(peak, startTime + 0.006);
+      gain.gain.exponentialRampToValueAtTime(Math.max(peak*0.35, 0.0005), startTime + duration*0.35);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(getMasterBus(ctx));
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.05);
+    });
+  }
+
+  // Guitar voice: a sample-accurate port of the user's Python reference
+  // (GuitarSynth.karplus_strong_nylon + ResonanceBox + RoomReverb): a
+  // nylon-string Karplus-Strong string excited by a "pinch"-shaped pluck
+  // (rather than plain noise), a small resonance box (four parallel body
+  // resonances), and a simple room reverb (three comb filters, one
+  // diffusing allpass, a soft loss-of-highs lowpass), applied once after
+  // the strummed notes are summed. Everything here is computed as plain
+  // JS array math - exactly like numpy would - rather than built as a
+  // live Web Audio node graph.
+  //
+  // That is a deliberate change from the previous version: Web Audio
+  // processes its graph in fixed 128-sample blocks, so any node graph
+  // with a feedback loop (a DelayNode looping back into itself, as the
+  // Karplus-Strong string needs) always rings one block longer than the
+  // delay actually requested - a real bug that silently detuned every
+  // note above ~344Hz and was fixed with a compensation hack in the
+  // previous version. Plain JS array math has no such floor: a loop can
+  // hold *any* integer sample period exactly, so every note is simply
+  // correct, with no compensation needed anywhere. Web Audio is only
+  // used afterwards, to play back the finished waveform.
+  var GUITAR_SR = 44100;
+  var GUITAR_RING_SECONDS = 2.0;       // how long a note/chord rings out for
+  var GUITAR_STRUM_STAGGER_S = 0.005;  // 5ms between successive strummed notes
+  var GUITAR_PINCH = 0.45;             // pluck/pinch position (0..1)
+
+  // Guitar body resonance modes (frequency in Hz, relative gain) - the
+  // "air"/A0/soundboard/harmonic peaks of a nylon-string guitar body.
+  var GUITAR_BODY_MODES = [
+    {freq:90,  gain:0.4},
+    {freq:110, gain:0.7},
+    {freq:220, gain:0.5},
+    {freq:440, gain:0.3}
+  ];
+
+  function peakNormalize(arr){
+    var peak = 0;
+    for(var i=0;i<arr.length;i++){ var a = Math.abs(arr[i]); if(a>peak) peak = a; }
+    if(peak > 1e-9){
+      var inv = 1/peak;
+      for(var i=0;i<arr.length;i++){ arr[i] *= inv; }
+    }
+    return arr;
+  }
+
+  // The string itself: a half-sine excitation shaped by the pinch
+  // position (plus a little per-sample jitter for a natural, non-robotic
+  // attack), fed into the classic two-sample-average delay loop, with a
+  // touch of extra damping on the bass strings and a brief "opening up"
+  // of the tone right after the pluck. Matches
+  // GuitarSynth.karplus_strong_nylon() sample for sample.
+  function karplusStrongNylon(freq, durationSeconds, pinch){
+    var sr = GUITAR_SR;
+    var N = Math.max(2, Math.round(sr / freq));
+    var buf = new Float64Array(N);
+    for(var i=0;i<N;i++){
+      var shape = Math.sin(Math.PI * pinch * i / N);
+      buf[i] = shape * (0.8 + 0.2 * Math.random());
+    }
+    var total = Math.max(1, Math.round(sr * durationSeconds));
+    var out = new Float64Array(total);
+    var damping = 0.995 + (freq < 150 ? 0.002 : 0);
+    var head = 0;
+    for(var n=0; n<total; n++){
+      var b0 = buf[head];
+      var b1 = buf[(head+1) % N];
+      var avg = 0.5 * (b0 + b1) * damping;
+      var tone = 0.98 - 0.03 * Math.exp(-n / (sr * 0.02));
+      avg *= tone;
+      out[n] = b0;
+      buf[head] = avg;
+      head = (head + 1) % N;
+    }
+    return peakNormalize(out);
+  }
+
+  // Resonance box: four parallel narrow bandpass "body modes", mixed 60%
+  // dry / 40% resonance. Matches ResonanceBox.apply() sample for sample
+  // (each bandpass is the standard constant-peak-gain biquad; the
+  // Python's alpha = sin(w0)*0.02 corresponds to Q = 25 here).
+  function applyResonanceBox(input){
+    var n = input.length, sr = GUITAR_SR;
+    var wet = new Float64Array(n);
+    for(var m=0; m<GUITAR_BODY_MODES.length; m++){
+      var freq = GUITAR_BODY_MODES[m].freq, gain = GUITAR_BODY_MODES[m].gain;
+      var w0 = 2*Math.PI*freq/sr;
+      var alpha = Math.sin(w0) * 0.02;
+      var b0 = alpha, b2 = -alpha, a0 = 1+alpha, a1 = -2*Math.cos(w0), a2 = 1-alpha;
+      var x1=0, x2=0, y1=0, y2=0;
+      for(var i=0;i<n;i++){
+        var x0 = input[i];
+        var y0 = (b0*x0 + b2*x2 - a1*y1 - a2*y2) / a0;
+        wet[i] += gain * y0;
+        x2=x1; x1=x0; y2=y1; y1=y0;
+      }
+    }
+    var out = new Float64Array(n);
+    for(var i=0;i<n;i++){ out[i] = 0.6*input[i] + 0.4*wet[i]; }
+    return peakNormalize(out);
+  }
+
+  // Small room reverb: three early-reflection comb filters, one
+  // diffusing allpass, and a soft loss-of-highs lowpass on the wet path.
+  // Matches RoomReverb.apply() sample for sample. Applied ONCE, after
+  // the strings are summed - like a real room around the whole chord,
+  // not one room per string.
+  function applyRoomReverb(input){
+    var n = input.length, sr = GUITAR_SR;
+    var delays = [Math.round(0.012*sr), Math.round(0.017*sr), Math.round(0.031*sr)];
+    var gains = [0.5, 0.4, 0.3];
+    var wet = new Float64Array(n);
+    for(var d=0; d<delays.length; d++){
+      var delay = delays[d], g = gains[d];
+      var y = new Float64Array(n);
+      for(var i=delay;i<n;i++){ y[i] = input[i] + g*y[i-delay]; }
+      for(var i=0;i<n;i++){ wet[i] += y[i]; }
+    }
+    var apDelay = Math.round(0.009*sr), apGain = 0.7;
+    var ap = new Float64Array(n);
+    for(var i=apDelay;i<n;i++){ ap[i] = apGain*ap[i-apDelay] + input[i] - apGain*input[i-apDelay]; }
+    for(var i=0;i<n;i++){ wet[i] += ap[i]; }
+
+    var lowpass = new Float64Array(n);
+    var alpha = 0.1;
+    for(var i=1;i<n;i++){ lowpass[i] = alpha*wet[i] + (1-alpha)*lowpass[i-1]; }
+
+    var out = new Float64Array(n);
+    for(var i=0;i<n;i++){ out[i] = 0.7*input[i] + 0.3*lowpass[i]; }
+    return peakNormalize(out);
+  }
+
+  // One fully-processed string (pluck + body), ready to be mixed into a
+  // chord. Matches `box.apply(karplus_strong_nylon(...))` in play_chord().
+  function buildGuitarString(freq, durationSeconds){
+    return applyResonanceBox(karplusStrongNylon(freq, durationSeconds, GUITAR_PINCH));
+  }
+
+  // Strums every note of a chord: each string is rendered and processed
+  // on its own, staggered by ~5ms like a real strum, then summed,
+  // normalized, sent through the room reverb, and normalized again -
+  // matching GuitarSynth.play_chord(). The result is one finished
+  // buffer, handed to Web Audio only for playback.
+  function renderGuitarChord(notes, durationSeconds){
+    var sr = GUITAR_SR;
+    var dur = Math.max(durationSeconds, GUITAR_RING_SECONDS);
+    var total = Math.max(1, Math.round(sr * dur));
+    var all = [notes.lh].concat(notes.rh);
+    all.sort(function(a,b){ return (a.octave*12+a.pc) - (b.octave*12+b.pc); });
+
+    var chord = new Float64Array(total);
+    all.forEach(function(n, k){
+      var freq = noteFrequency(n.pc, n.octave);
+      var string = buildGuitarString(freq, dur);
+      var offset = Math.round(GUITAR_STRUM_STAGGER_S * sr * k);
+      for(var i=offset; i<total; i++){
+        var src = i - offset;
+        if(src < string.length) chord[i] += string[src];
+      }
+    });
+    peakNormalize(chord);
+    var withReverb = applyRoomReverb(chord);
+    // A little headroom under full scale; the master bus compressor
+    // below handles the rest.
+    for(var i=0;i<withReverb.length;i++){ withReverb[i] *= 0.85; }
+    return withReverb;
+  }
+
+  function playGuitarChord(ctx, notes, dur){
+    var samples = renderGuitarChord(notes, dur);
+    var buffer = ctx.createBuffer(1, samples.length, GUITAR_SR);
+    buffer.copyToChannel(Float32Array.from(samples), 0);
+    var src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(getMasterBus(ctx));
+    src.start(ctx.currentTime + 0.02);
+    setTimeout(function(){ try{ src.disconnect(); }catch(e){} }, (buffer.duration + 0.3) * 1000);
+  }
+
+  function playChordSound(p, duration){
+    var ctx = getAudioCtx();
+    if(!ctx || !p || !p.ok) return;
+    var notes = getPianoNotes(p);
+    if(!notes) return;
+    var dur = duration || 1.1;
+    var now = ctx.currentTime + 0.02;
+
+    if(instrument()==='guitar'){
+      playGuitarChord(ctx, notes, dur);
+    } else {
+      playPianoTone(ctx, noteFrequency(notes.lh.pc, notes.lh.octave), now, dur, 0.20);
+      var chordStart = now + 0.09;
+      notes.rh.forEach(function(n){
+        playPianoTone(ctx, noteFrequency(n.pc, n.octave), chordStart, Math.max(dur - 0.09, 0.2), 0.11);
+      });
+    }
+  }
+
   // ---------- SVG rendering ----------
 
   function renderFretboardSVG(position){
@@ -1495,6 +1817,7 @@
   var noteGenerated = document.getElementById('noteGenerated');
   var legendOut = document.getElementById('legendOut');
   var printBtn = document.getElementById('printBtn');
+  var playBtn = document.getElementById('playBtn');
   var langSelect = document.getElementById('langSelect');
   var versionBadge = document.getElementById('versionBadge');
   if(versionBadge) versionBadge.textContent = 'v' + APP_VERSION;
@@ -1504,6 +1827,7 @@
   var sequenceCountOut = document.getElementById('sequenceCountOut');
   var sequenceInstrumentTag = document.getElementById('sequenceInstrumentTag');
   var printSequenceBtn = document.getElementById('printSequenceBtn');
+  var playSequenceBtn = document.getElementById('playSequenceBtn');
   var shareSeqBtn = document.getElementById('shareSeqBtn');
   var shareStatus = document.getElementById('shareStatus');
   var shareFallbackWrap = document.getElementById('shareFallbackWrap');
@@ -1518,7 +1842,8 @@
     gTitleAddSixthText:'gAddSixth', gTitleSlashText:'gSlash', helpFingersTitleText:'helpFingersTitle',
     footerNoteText:'footerNote', langSwitchLabelText:'langSwitchLabel',
     sequenceHintText:'sequenceHint', sequenceTitleOut:'sequenceTitle', backToSequenceText:'backToSequence',
-    printSequenceBtnText:'printSequenceBtn', shareSeqBtnText:'shareBtn'
+    printSequenceBtnText:'printSequenceBtn', shareSeqBtnText:'shareBtn',
+    playBtnText:'playChord', playSequenceBtnText:'playSequenceBtn'
   };
   var STATIC_HTML_IDS = { helpFingersTextP:'helpFingersText' };
 
@@ -1549,7 +1874,8 @@
     chordExamples.appendChild(opt);
   });
 
-  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null };
+  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, currentChord:null, sequencePlaying:false };
+  var sequencePlaybackToken = 0;
 
   function instrument(){ return instPiano.checked ? 'piano' : 'guitar'; }
 
@@ -1665,6 +1991,19 @@
     subEl.textContent = p.ok ? ((LANG_DATA[currentLang].qualities[p.suffix]) || '') : t('invalidChordLabel');
     card.appendChild(subEl);
 
+    if(p.ok){
+      var playMini = document.createElement('button');
+      playMini.type = 'button';
+      playMini.className = 'mini-play no-print';
+      playMini.setAttribute('aria-label', t('playAria'));
+      playMini.textContent = '🔊';
+      playMini.addEventListener('click', function(e){
+        e.stopPropagation();
+        playChordSound(p, 0.7);
+      });
+      card.appendChild(playMini);
+    }
+
     function open(){
       chordInput.value = token;
       render();
@@ -1678,7 +2017,46 @@
     return card;
   }
 
+  function stopSequencePlayback(){
+    sequencePlaybackToken++;
+    state.sequencePlaying = false;
+    sequenceGrid.querySelectorAll('.chord-mini-card.playing').forEach(function(c){ c.classList.remove('playing'); });
+    if(playSequenceBtn){
+      playSequenceBtn.firstChild.textContent = '▶ ';
+      var lbl = document.getElementById('playSequenceBtnText');
+      if(lbl) lbl.textContent = t('playSequenceBtn');
+    }
+  }
+
+  function playSequenceSound(measures){
+    stopSequencePlayback();
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var myToken = ++sequencePlaybackToken;
+    state.sequencePlaying = true;
+    playSequenceBtn.firstChild.textContent = '⏹ ';
+    document.getElementById('playSequenceBtnText').textContent = t('stopSequenceBtn');
+
+    var flatTokens = [].concat.apply([], measures);
+    var cards = sequenceGrid.querySelectorAll('.chord-mini-card');
+    var stepMs = 700;
+    flatTokens.forEach(function(token, i){
+      setTimeout(function(){
+        if(myToken !== sequencePlaybackToken) return;
+        sequenceGrid.querySelectorAll('.chord-mini-card.playing').forEach(function(c){ c.classList.remove('playing'); });
+        var card = cards[i];
+        if(card) card.classList.add('playing');
+        var p = parseChordName(token);
+        if(p.ok) playChordSound(p, 0.6);
+        if(i === flatTokens.length - 1){
+          setTimeout(function(){ if(myToken === sequencePlaybackToken) stopSequencePlayback(); }, 650);
+        }
+      }, i * stepMs);
+    });
+  }
+
   function renderSequence(measures){
+    stopSequencePlayback();
     var flatTokens = [].concat.apply([], measures);
     state.sequenceInput = measures.map(function(m){ return m.join(' '); }).join(' | ');
     hideError();
@@ -1710,10 +2088,12 @@
       return;
     }
     sequenceSection.classList.remove('visible');
+    stopSequencePlayback();
     backToSequenceBtn.style.display = state.sequenceInput ? 'flex' : 'none';
 
     var p = parseChordName(raw);
     if(!p.ok){
+      state.currentChord = null;
       if(raw.trim()===''){ hideError(); resultSection.classList.remove('visible'); return; }
       var msg = p.reason==='root'
         ? t('errorRoot')
@@ -1722,6 +2102,7 @@
       return;
     }
     hideError();
+    state.currentChord = p;
     resultSection.classList.add('visible');
     chordNameOut.textContent = displayName(p);
     qualityLabelOut.textContent = (LANG_DATA[currentLang].qualities[p.suffix]) || '';
@@ -1743,6 +2124,17 @@
   posNext.addEventListener('click', function(){ if(state.posIndex<state.positions.length-1){ state.posIndex++; drawGuitarPosition(); } });
   printBtn.addEventListener('click', function(){ window.print(); });
   printSequenceBtn.addEventListener('click', function(){ window.print(); });
+  playBtn.addEventListener('click', function(){
+    if(state.currentChord) playChordSound(state.currentChord, 1.1);
+  });
+  playSequenceBtn.addEventListener('click', function(){
+    if(state.sequencePlaying){
+      stopSequencePlayback();
+    } else {
+      var measures = splitChordSequence(state.sequenceInput || '');
+      if(measures.length) playSequenceSound(measures);
+    }
+  });
   backToSequenceBtn.addEventListener('click', function(){
     if(state.sequenceInput){
       chordInput.value = state.sequenceInput;
@@ -1771,6 +2163,7 @@
       showFallback();
     }
   });
+
   if(langSelect){
     langSelect.addEventListener('change', function(){
       currentLang = langSelect.value;
