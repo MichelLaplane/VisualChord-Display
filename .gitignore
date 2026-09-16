@@ -1,0 +1,10 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node (utile seulement si vous ajoutez un jour de l'outillage, ex. Capacitor)
+node_modules/
+npm-debug.log*
+dist/
+build/
