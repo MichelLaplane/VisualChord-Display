@@ -241,6 +241,26 @@
     outline-offset:1px;
     border-color:var(--accent);
   }
+  .clear-input-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    font-size:17px;
+    line-height:1;
+    cursor:pointer;
+    flex:0 0 auto;
+  }
+  .clear-input-btn:hover, .clear-input-btn:focus-visible{
+    border-color:var(--danger);
+    color:var(--danger);
+    background:var(--danger-bg);
+    outline:none;
+  }
 
   .segmented{
     display:inline-flex;
@@ -842,6 +862,7 @@
         <label for="chordInput" id="labelChordNameText">Nom de l'accord</label>
         <div class="input-row">
           <input type="text" id="chordInput" placeholder="ex. Cmaj7, Am, F#m7b5, G/B…" value="C" autocomplete="off" spellcheck="false">
+          <button type="button" id="clearChordInputBtn" class="clear-input-btn" title="Réinitialiser les accords" aria-label="Réinitialiser les accords">✕</button>
         </div>
         <p id="sequenceHintText" style="margin:8px 0 0;font-size:11.5px;color:var(--ink-soft);"></p>
       </div>
@@ -1003,7 +1024,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.1.4';
+  var APP_VERSION = '1.1.5';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -1046,6 +1067,8 @@
       eyebrow:'Guitare, Ukulélé & Piano',
       intro:"Saisissez le nom d'un accord, choisissez l'instrument : le manche de guitare, celui de l'ukulélé, ou le clavier (main gauche / main droite) s'affiche instantanément, prêt à imprimer.",
       labelChordName:"Nom de l'accord",
+      labelChordNamePlural:"Noms des accords",
+      clearInputAria:'Réinitialiser les accords',
       placeholder:'ex. Cmaj7, Am, F#m7b5, G/B…',
       labelInstrument:'Instrument',
       guitareLabel:'Guitare',
@@ -1098,7 +1121,7 @@
       seqViewCards:'Carte',
       chordViewDiagram:'Diagramme',
       pickerHeading:"Assistant de saisie : touchez une note pour construire un accord, sans avoir à le taper.",
-      pickerFamilyBass:'Basse', pickerBack:'Retour', pickerTriad:'Triade',
+      pickerFamilyBass:'Basse', pickerBack:'Retour', pickerTriad:'Basique',
       printSequenceBtn:'Imprimer cette suite',
       shareBtn:'Partager le lien',
       shareCopied:'Lien copié dans le presse-papiers !',
@@ -1125,6 +1148,8 @@
       eyebrow:'Guitar, Ukulele & Piano',
       intro:'Enter a chord name and choose an instrument: the guitar fretboard, the ukulele fretboard, or the keyboard (left hand / right hand) appears instantly, ready to print.',
       labelChordName:'Chord name',
+      labelChordNamePlural:'Chord names',
+      clearInputAria:'Reset chords',
       placeholder:'e.g. Cmaj7, Am, F#m7b5, G/B…',
       labelInstrument:'Instrument',
       guitareLabel:'Guitar',
@@ -1177,7 +1202,7 @@
       seqViewCards:'Card',
       chordViewDiagram:'Diagram',
       pickerHeading:'Chord builder: tap a note to compose a chord without typing it.',
-      pickerFamilyBass:'Bass', pickerBack:'Back', pickerTriad:'Triad',
+      pickerFamilyBass:'Bass', pickerBack:'Back', pickerTriad:'Basic',
       printSequenceBtn:'Print this progression',
       shareBtn:'Share link',
       shareCopied:'Link copied to clipboard!',
@@ -1204,6 +1229,8 @@
       eyebrow:'Gitarre, Ukulele & Klavier',
       intro:'Geben Sie einen Akkordnamen ein und wählen Sie ein Instrument: Das Gitarrengriffbrett, das Ukulele-Griffbrett oder die Klaviatur (linke / rechte Hand) erscheint sofort, druckbereit.',
       labelChordName:'Akkordname',
+      labelChordNamePlural:'Akkordnamen',
+      clearInputAria:'Akkorde zurücksetzen',
       placeholder:'z. B. Cmaj7, Am, F#m7b5, G/B…',
       labelInstrument:'Instrument',
       guitareLabel:'Gitarre',
@@ -1256,7 +1283,7 @@
       seqViewCards:'Karte',
       chordViewDiagram:'Diagramm',
       pickerHeading:'Akkord-Assistent: Tippen Sie auf eine Note, um einen Akkord zusammenzustellen, ohne ihn einzutippen.',
-      pickerFamilyBass:'Bass', pickerBack:'Zurück', pickerTriad:'Dreiklang',
+      pickerFamilyBass:'Bass', pickerBack:'Zurück', pickerTriad:'Basis',
       printSequenceBtn:'Diese Akkordfolge drucken',
       shareBtn:'Link teilen',
       shareCopied:'Link in die Zwischenablage kopiert!',
@@ -1283,6 +1310,8 @@
       eyebrow:'Chitarra, Ukulele e Pianoforte',
       intro:'Digita il nome di un accordo e scegli lo strumento: il manico della chitarra, quello dell’ukulele, o la tastiera del pianoforte (mano sinistra / destra) appare all’istante, pronto per la stampa.',
       labelChordName:"Nome dell'accordo",
+      labelChordNamePlural:"Nomi degli accordi",
+      clearInputAria:'Reimposta gli accordi',
       placeholder:'es. Cmaj7, Am, F#m7b5, G/B…',
       labelInstrument:'Strumento',
       guitareLabel:'Chitarra',
@@ -1335,7 +1364,7 @@
       seqViewCards:'Scheda',
       chordViewDiagram:'Diagramma',
       pickerHeading:'Assistente per gli accordi: tocca una nota per comporre un accordo senza doverlo digitare.',
-      pickerFamilyBass:'Basso', pickerBack:'Indietro', pickerTriad:'Triade',
+      pickerFamilyBass:'Basso', pickerBack:'Indietro', pickerTriad:'Base',
       printSequenceBtn:'Stampa questa progressione',
       shareBtn:'Condividi link',
       shareCopied:'Link copiato negli appunti!',
@@ -1362,6 +1391,8 @@
       eyebrow:'Guitarra, Ukelele y Piano',
       intro:'Escriba el nombre de un acorde y elija el instrumento: el mástil de la guitarra, el del ukelele, o el teclado (mano izquierda / derecha) aparece al instante, listo para imprimir.',
       labelChordName:'Nombre del acorde',
+      labelChordNamePlural:'Nombres de los acordes',
+      clearInputAria:'Reiniciar acordes',
       placeholder:'ej. Cmaj7, Am, F#m7b5, G/B…',
       labelInstrument:'Instrumento',
       guitareLabel:'Guitarra',
@@ -1414,7 +1445,7 @@
       seqViewCards:'Tarjeta',
       chordViewDiagram:'Diagrama',
       pickerHeading:'Asistente de acordes: toca una nota para componer un acorde sin tener que escribirlo.',
-      pickerFamilyBass:'Bajo', pickerBack:'Atrás', pickerTriad:'Tríada',
+      pickerFamilyBass:'Bajo', pickerBack:'Atrás', pickerTriad:'Básico',
       printSequenceBtn:'Imprimir esta progresión',
       shareBtn:'Compartir enlace',
       shareCopied:'¡Enlace copiado al portapapeles!',
@@ -1441,6 +1472,8 @@
       eyebrow:'吉他、尤克里里与钢琴',
       intro:'输入和弦名称并选择乐器：吉他指板、尤克里里指板或钢琴键盘（左手/右手）会立即显示，可直接打印。',
       labelChordName:'和弦名称',
+      labelChordNamePlural:'和弦名称',
+      clearInputAria:'重置和弦',
       placeholder:'例如 Cmaj7, Am, F#m7b5, G/B…',
       labelInstrument:'乐器',
       guitareLabel:'吉他',
@@ -1493,7 +1526,7 @@
       seqViewCards:'卡片',
       chordViewDiagram:'图表',
       pickerHeading:'和弦助手：点按一个音符即可组合出和弦，无需手动输入。',
-      pickerFamilyBass:'低音', pickerBack:'返回', pickerTriad:'三和弦',
+      pickerFamilyBass:'低音', pickerBack:'返回', pickerTriad:'基础',
       printSequenceBtn:'打印此和弦进行',
       shareBtn:'分享链接',
       shareCopied:'链接已复制到剪贴板！',
@@ -2909,6 +2942,7 @@
   // ---------- UI wiring ----------
 
   var chordInput = document.getElementById('chordInput');
+  var clearChordInputBtn = document.getElementById('clearChordInputBtn');
   var instGuitar = document.getElementById('instGuitar');
   var instUkulele = document.getElementById('instUkulele');
   var instPiano = document.getElementById('instPiano');
@@ -2965,6 +2999,17 @@
   };
   var STATIC_HTML_IDS = { helpFingersTextP:'helpFingersText' };
 
+  // The "Chord name" field label switches to its plural form ("Chord
+  // names") as soon as more than one chord token is present, so the field
+  // still reads naturally once the user has built up a short progression
+  // via the note/family/quality picker or by typing several chords.
+  function updateChordNameLabel(){
+    var labelEl = document.getElementById('labelChordNameText');
+    if(!labelEl) return;
+    var tokens = [].concat.apply([], splitChordSequence(chordInput.value || ''));
+    labelEl.textContent = t(tokens.length > 1 ? 'labelChordNamePlural' : 'labelChordName');
+  }
+
   function applyStaticTranslations(){
     document.documentElement.lang = currentLang;
     Object.keys(STATIC_TEXT_IDS).forEach(function(id){
@@ -2978,9 +3023,14 @@
     chordInput.setAttribute('placeholder', t('placeholder'));
     posPrev.setAttribute('aria-label', t('posPrevAria'));
     posNext.setAttribute('aria-label', t('posNextAria'));
+    if(clearChordInputBtn){
+      clearChordInputBtn.setAttribute('aria-label', t('clearInputAria'));
+      clearChordInputBtn.title = t('clearInputAria');
+    }
     if(langSelect) langSelect.value = currentLang;
     syncViewControls();
     refreshBuilderTexts();
+    updateChordNameLabel();
   }
 
   // Both view dropdowns (single chord: diagram/staff: sequence: cards/jazz
@@ -3042,7 +3092,11 @@
     builderStep2.hidden = true; builderStep3.hidden = true;
   }
   function builderFinish(chordText){
-    chordInput.value = chordText;
+    // Append the newly built chord to whatever is already in the field
+    // (rather than replacing it) so tapping through the picker several
+    // times in a row builds up a chord progression, one chord at a time.
+    var existing = chordInput.value.trim();
+    chordInput.value = existing ? (existing + ' ' + chordText) : chordText;
     builderCollapseToStep1();
     render();
   }
@@ -3646,6 +3700,7 @@
     var raw = chordInput.value;
     var measures = splitChordSequence(raw);
     var flatTokens = [].concat.apply([], measures);
+    updateChordNameLabel();
 
     if(flatTokens.length > 1){
       renderSequence(measures, raw.indexOf('|') !== -1);
@@ -3685,6 +3740,14 @@
   chordInput.addEventListener('keydown', function(e){
     if(e.key==='Enter'){ clearTimeout(debounceTimer); render(); }
   });
+  if(clearChordInputBtn){
+    clearChordInputBtn.addEventListener('click', function(){
+      chordInput.value = '';
+      builderCollapseToStep1();
+      render();
+      chordInput.focus();
+    });
+  }
   function setShowStaff(val){
     state.showStaff = val;
     syncViewControls();
