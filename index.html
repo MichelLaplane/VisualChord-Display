@@ -315,6 +315,62 @@
     white-space:nowrap;
   }
 
+  .scale-controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:16px;
+    margin:2px 0 4px;
+  }
+  .scale-speed{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .scale-speed-label{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .scale-speed-btn{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .scale-speed-btn:hover:not(:disabled){
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+  .scale-speed-btn:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+  .scale-speed-btn:disabled{
+    opacity:.4;
+    cursor:default;
+  }
+  .scale-speed-value{
+    font-family:var(--font-mono);
+    font-weight:600;
+    font-size:12.5px;
+    color:var(--ink);
+    min-width:28px;
+    text-align:center;
+  }
+
   .seq-view-label{
     display:inline-flex;
     align-items:center;
@@ -497,6 +553,37 @@
     padding:12px 4px 4px;
   }
   .diagram-wrap.staff svg{max-width:100%;}
+  .diagram-wrap.scale{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .diagram-wrap.scale svg{max-width:100%;}
+  /* Guitar/ukulele scale neck is now drawn vertically (see
+     renderNeckScaleSVG), so it's narrow and tall like the ordinary
+     "Diagramme" chord neck - center it and cap its width the same way,
+     instead of the piano keyboard's edge-to-edge stretch above. */
+  .diagram-wrap.scale.fretted{ align-items:center; }
+  .diagram-wrap.scale.fretted svg{ max-width:340px; }
+  .scale-caption{
+    margin:0 0 10px;
+    text-align:center;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .scale-note{
+    transform-box:fill-box;
+    transform-origin:center;
+    transition:transform .08s ease;
+  }
+  .scale-note.playing{transform:scale(1.4);}
+  .scale-note.playing circle{fill:var(--ink) !important;}
+  .scale-note.playing text{fill:var(--surface) !important;}
+  .scale-key.playing rect{
+    fill:var(--ink) !important;
+    stroke:var(--ink) !important;
+  }
+  .scale-key.playing text{fill:var(--surface) !important;}
 
   .back-to-sequence{
     display:flex;
@@ -656,6 +743,45 @@
     fill:color-mix(in srgb, var(--accent) 20%, transparent);
   }
 
+  .sequence-scale-wrap{
+    display:block;
+    margin-top:14px;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .sequence-scale-block{
+    margin-bottom:22px;
+  }
+  .sequence-scale-block:last-child{ margin-bottom:0; }
+  .sequence-scale-block svg{display:block; width:100%; height:auto;}
+  /* Same narrow/tall vertical neck as the single-chord scale view - cap
+     and center it here too, so a guitar/ukulele progression doesn't turn
+     into a stack of edge-to-edge, extremely tall diagrams. */
+  .sequence-scale-block.fretted{display:flex; flex-direction:column; align-items:center;}
+  .sequence-scale-block.fretted svg{width:100%; max-width:260px;}
+  .sequence-scale-block .staff-measure-hit{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    flex-wrap:wrap;
+    border-radius:8px;
+    padding:4px 6px;
+    cursor:pointer;
+    transition:background-color .15s ease;
+  }
+  .sequence-scale-block .staff-measure-hit:hover, .sequence-scale-block .staff-measure-hit:focus-visible{
+    background-color:color-mix(in srgb, var(--accent) 10%, transparent);
+    outline:none;
+  }
+  .sequence-scale-name{
+    font:700 15px var(--font-body);
+    color:var(--ink);
+  }
+  .sequence-scale-caption{
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+
   .pos-nav{
     display:flex;
     align-items:center;
@@ -681,6 +807,32 @@
     color:var(--ink-soft);
     text-align:center;
     min-width:150px;
+  }
+
+  .scale-pos-nav{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+  .scale-pos-nav button{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:15px;
+    width:28px;height:28px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .scale-pos-nav button:disabled{opacity:.35; cursor:default;}
+  .scale-pos-nav .pos-info{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    min-width:110px;
   }
 
   .note-generated{
@@ -902,6 +1054,7 @@
             <select id="chordViewSelect" class="seq-view-select">
               <option value="diagram" id="chordViewOptDiagram">Diagramme</option>
               <option value="staff" id="chordViewOptStaff">Afficher la portée</option>
+              <option value="scale" id="chordViewOptScale">Gammes</option>
             </select>
           </label>
           <span class="instrument-tag" id="instrumentTag"></span>
@@ -918,6 +1071,24 @@
       <p class="note-generated" id="noteGenerated" style="display:none;"></p>
 
       <div class="legend" id="legendOut"></div>
+
+      <div class="scale-controls no-print" id="scaleControls" style="display:none;">
+        <label class="staff-toggle-inline" for="pentatonicToggle">
+          <input type="checkbox" id="pentatonicToggle">
+          <span id="pentatonicToggleText">Pentatonique</span>
+        </label>
+        <div class="scale-pos-nav no-print" id="scalePosNav">
+          <button type="button" id="scalePosPrev" aria-label="Position précédente">‹</button>
+          <span class="pos-info" id="scalePosInfo"></span>
+          <button type="button" id="scalePosNext" aria-label="Position suivante">›</button>
+        </div>
+        <div class="scale-speed">
+          <span class="scale-speed-label" id="scaleSpeedLabelText">Vitesse</span>
+          <button type="button" class="scale-speed-btn" id="scaleSpeedDown" aria-label="Diminuer la vitesse">−</button>
+          <span class="scale-speed-value" id="scaleSpeedValue">×1</span>
+          <button type="button" class="scale-speed-btn" id="scaleSpeedUp" aria-label="Augmenter la vitesse">+</button>
+        </div>
+      </div>
 
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printBtn">🖨 <span id="printBtnText">Imprimer ce diagramme</span></button>
@@ -941,6 +1112,7 @@
               <option value="jazz" id="sequenceViewOptJazz">Grille jazz</option>
               <option value="tab" id="sequenceViewOptTab">Tablature</option>
               <option value="staff" id="sequenceViewOptStaff">Afficher la portée</option>
+              <option value="scale" id="sequenceViewOptScale">Gammes</option>
             </select>
           </label>
           <span class="instrument-tag" id="sequenceInstrumentTag"></span>
@@ -951,6 +1123,19 @@
       <div class="jazz-grid" id="jazzGrid" style="display:none;"></div>
       <div class="tab-grid" id="tabGrid" style="display:none;"></div>
       <div class="sequence-staff-wrap" id="staffWrap" style="display:none;"></div>
+      <div class="sequence-scale-wrap" id="sequenceScaleWrap" style="display:none;"></div>
+
+      <div class="scale-controls no-print" id="sequenceScaleControls" style="display:none;">
+        <label class="staff-toggle-inline" for="pentatonicToggleSeq">
+          <input type="checkbox" id="pentatonicToggleSeq">
+          <span id="pentatonicToggleSeqText">Pentatonique</span>
+        </label>
+        <div class="scale-pos-nav no-print" id="scalePosNavSeq">
+          <button type="button" id="scalePosPrevSeq" aria-label="Position précédente">‹</button>
+          <span class="pos-info" id="scalePosInfoSeq"></span>
+          <button type="button" id="scalePosNextSeq" aria-label="Position suivante">›</button>
+        </div>
+      </div>
 
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
@@ -1024,7 +1209,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.1.5';
+  var APP_VERSION = '1.2.0';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -1061,6 +1246,69 @@
     add9:'add9', madd9:'madd9', '5':'5'
   };
 
+  // ---------- Chord -> scale mapping (for the "Gammes" / Scales view) ----------
+  // Each of the 41 chord qualities above is mapped to one of 12 standard
+  // scales, chosen so the scale's pitch-class set is always a strict
+  // superset of the chord's own pitch-class set (INTERVALS[quality] mod 12) -
+  // every note of the chord is guaranteed to also appear in the scale drawn
+  // alongside it. mmaj7b5 is the one documented approximation: no standard
+  // 7-note scale contains a root, b3, b5 AND maj7 together, so it borrows
+  // the melodic minor scale already used for the rest of the mmaj7 family.
+  var SCALE_DEFS = {
+    ionian:          [0,2,4,5,7,9,11],
+    dorian:          [0,2,3,5,7,9,10],
+    aeolian:         [0,2,3,5,7,8,10],
+    locrian:         [0,1,3,5,6,8,10],
+    lydian:          [0,2,4,6,7,9,11],
+    mixolydian:      [0,2,4,5,7,9,10],
+    melodicMinor:    [0,2,3,5,7,9,11],
+    lydianDominant:  [0,2,4,6,7,9,10],
+    lydianAugmented: [0,2,4,6,8,9,11],
+    wholeTone:       [0,2,4,6,8,10],
+    diminishedWH:    [0,2,3,5,6,8,9,11],
+    halfWholeDim:    [0,1,3,4,6,7,9,10],
+    majorPentatonic: [0,2,4,7,9],
+    minorPentatonic: [0,3,5,7,10]
+  };
+
+  // Approximate mapping used to swap a full 7-note scale for its closest
+  // major/minor pentatonic when the pentatonic option is enabled.
+  var SCALE_TO_PENTATONIC = {
+    ionian:'majorPentatonic', dorian:'minorPentatonic', aeolian:'minorPentatonic',
+    locrian:'minorPentatonic', lydian:'majorPentatonic', mixolydian:'majorPentatonic',
+    melodicMinor:'minorPentatonic', lydianDominant:'majorPentatonic',
+    lydianAugmented:'majorPentatonic', wholeTone:'majorPentatonic',
+    diminishedWH:'minorPentatonic', halfWholeDim:'minorPentatonic'
+  };
+
+  var QUALITY_TO_SCALE = {
+    major:'ionian', minor:'aeolian', dim:'locrian', dim7:'diminishedWH',
+    sus2:'ionian', sus4:'ionian', '7sus4':'mixolydian', '9sus4':'mixolydian',
+    aug:'wholeTone', '6':'ionian', '69':'ionian',
+    '7':'mixolydian', '7b5':'wholeTone', aug7:'wholeTone',
+    '9':'mixolydian', '9b5':'wholeTone', aug9:'wholeTone',
+    '7b9':'halfWholeDim', '7#9':'halfWholeDim',
+    '11':'mixolydian', '9#11':'lydianDominant', '13':'mixolydian',
+    maj7:'ionian', maj7b5:'lydian', 'maj7#5':'lydianAugmented',
+    maj9:'ionian', maj11:'ionian', maj13:'ionian',
+    m6:'dorian', m69:'dorian', m7:'dorian', m7b5:'locrian', m9:'dorian', m11:'dorian',
+    mmaj7:'melodicMinor', mmaj7b5:'melodicMinor', mmaj9:'melodicMinor', mmaj11:'melodicMinor',
+    add9:'ionian', madd9:'aeolian', '5':'ionian'
+  };
+
+  // Resolves a parsed chord (from parseChordName) to the scale that should
+  // be drawn for it: which named scale, its semitone intervals from the
+  // root, and the absolute pitch classes (0-11) that make it up.
+  function chordScaleInfo(p, pentatonic){
+    var scaleKey = QUALITY_TO_SCALE[p.suffix] || 'ionian';
+    if(pentatonic){
+      scaleKey = SCALE_TO_PENTATONIC[scaleKey] || 'majorPentatonic';
+    }
+    var intervals = SCALE_DEFS[scaleKey] || SCALE_DEFS.ionian;
+    var pitchClasses = intervals.map(function(iv){ return (p.rootSemitone + iv) % 12; });
+    return { scaleKey: scaleKey, intervals: intervals, pitchClasses: pitchClasses };
+  }
+
   var LANG_DATA = {
     fr: {
       name:'Français',
@@ -1075,6 +1323,12 @@
       ukuleleLabel:'Ukulélé (C6)',
       pianoLabel:'Piano',
       showStaffLabel:'Afficher la portée',
+      gammesLabel:'Gammes',
+      scaleCaption:'Gamme : {scale}',
+      legendScaleRoot:'Fondamentale',
+      legendScaleNote:'Note de la gamme',
+      scaleNeckAria:'Gamme sur tout le manche',
+      scalePianoAria:'Gamme sur un octave',
       staffAria:"Portée musicale de l'accord",
       printBtn:'Imprimer ce diagramme',
       helpSummary:'Aide & vocabulaire des accords',
@@ -1110,6 +1364,12 @@
       sequenceCount:'{n} accords',
       sequenceMeasures:'{n} mesures',
       playChord:'Écouter cet accord',
+      playScale:'Écouter la gamme',
+      pentatonicToggleLabel:'Pentatonique',
+      scaleSpeedLabel:'Vitesse',
+      scaleSpeedDownAria:'Diminuer la vitesse',
+      scaleSpeedUpAria:'Augmenter la vitesse',
+      fretLimitToggleLabel:'5 cases',
       playAria:'Écouter',
       playSequenceBtn:'Écouter la suite',
       stopSequenceBtn:'Arrêter',
@@ -1141,6 +1401,22 @@
         mmaj7:'Mineur, majeur septième', mmaj7b5:'Mineur majeur septième, quinte diminuée',
         mmaj9:'Mineur, majeur neuvième', mmaj11:'Mineur, majeur onzième',
         add9:'Ajout de neuvième', madd9:'Mineur, ajout de neuvième', '5':'Quinte (power chord)'
+      },
+      scales:{
+        ionian:'Ionien (Majeur)',
+        dorian:'Dorien',
+        aeolian:'Éolien (Mineur naturel)',
+        locrian:'Locrien',
+        lydian:'Lydien',
+        mixolydian:'Mixolydien',
+        melodicMinor:'Mineur mélodique',
+        lydianDominant:'Lydien dominant',
+        lydianAugmented:'Lydien augmenté',
+        wholeTone:'Gamme par tons',
+        diminishedWH:'Diminuée (ton-demiton)',
+        halfWholeDim:'Diminuée (demiton-ton)',
+        majorPentatonic:'Pentatonique majeure',
+        minorPentatonic:'Pentatonique mineure'
       }
     },
     en: {
@@ -1156,6 +1432,12 @@
       ukuleleLabel:'Ukulele (C6)',
       pianoLabel:'Piano',
       showStaffLabel:'Show staff notation',
+      gammesLabel:'Scales',
+      scaleCaption:'Scale: {scale}',
+      legendScaleRoot:'Root',
+      legendScaleNote:'Scale note',
+      scaleNeckAria:'Full-neck scale',
+      scalePianoAria:'One-octave scale',
       staffAria:'Musical staff of the chord',
       printBtn:'Print this diagram',
       helpSummary:'Help & chord vocabulary',
@@ -1191,6 +1473,12 @@
       sequenceCount:'{n} chords',
       sequenceMeasures:'{n} bars',
       playChord:'Play this chord',
+      playScale:'Play the scale',
+      pentatonicToggleLabel:'Pentatonic',
+      scaleSpeedLabel:'Speed',
+      scaleSpeedDownAria:'Decrease speed',
+      scaleSpeedUpAria:'Increase speed',
+      fretLimitToggleLabel:'5 frets',
       playAria:'Play',
       playSequenceBtn:'Play progression',
       stopSequenceBtn:'Stop',
@@ -1222,6 +1510,22 @@
         mmaj7:'Minor, major seventh', mmaj7b5:'Minor major seventh, flat five',
         mmaj9:'Minor, major ninth', mmaj11:'Minor, major eleventh',
         add9:'Added ninth', madd9:'Minor, added ninth', '5':'Fifth (power chord)'
+      },
+      scales:{
+        ionian:'Ionian (Major)',
+        dorian:'Dorian',
+        aeolian:'Aeolian (Natural minor)',
+        locrian:'Locrian',
+        lydian:'Lydian',
+        mixolydian:'Mixolydian',
+        melodicMinor:'Melodic minor',
+        lydianDominant:'Lydian dominant',
+        lydianAugmented:'Lydian augmented',
+        wholeTone:'Whole tone',
+        diminishedWH:'Diminished (whole-half)',
+        halfWholeDim:'Diminished (half-whole)',
+        majorPentatonic:'Major pentatonic',
+        minorPentatonic:'Minor pentatonic'
       }
     },
     de: {
@@ -1237,6 +1541,12 @@
       ukuleleLabel:'Ukulele (C6)',
       pianoLabel:'Klavier',
       showStaffLabel:'Notenlinien anzeigen',
+      gammesLabel:'Tonleitern',
+      scaleCaption:'Tonleiter: {scale}',
+      legendScaleRoot:'Grundton',
+      legendScaleNote:'Tonleiterton',
+      scaleNeckAria:'Tonleiter über das ganze Griffbrett',
+      scalePianoAria:'Tonleiter über eine Oktave',
       staffAria:'Notenlinie des Akkords',
       printBtn:'Dieses Diagramm drucken',
       helpSummary:'Hilfe & Akkord-Vokabular',
@@ -1272,6 +1582,12 @@
       sequenceCount:'{n} Akkorde',
       sequenceMeasures:'{n} Takte',
       playChord:'Diesen Akkord abspielen',
+      playScale:'Tonleiter abspielen',
+      pentatonicToggleLabel:'Pentatonik',
+      scaleSpeedLabel:'Geschwindigkeit',
+      scaleSpeedDownAria:'Geschwindigkeit verringern',
+      scaleSpeedUpAria:'Geschwindigkeit erhöhen',
+      fretLimitToggleLabel:'5 Bünde',
       playAria:'Abspielen',
       playSequenceBtn:'Akkordfolge abspielen',
       stopSequenceBtn:'Stopp',
@@ -1303,6 +1619,22 @@
         mmaj7:'Moll mit großer Septime', mmaj7b5:'Moll mit großer Septime, verminderte Quinte',
         mmaj9:'Moll mit großer None', mmaj11:'Moll mit großer Undezime',
         add9:'Hinzugefügte None', madd9:'Moll, hinzugefügte None', '5':'Quinte (Powerchord)'
+      },
+      scales:{
+        ionian:'Ionisch (Dur)',
+        dorian:'Dorisch',
+        aeolian:'Äolisch (natürlich Moll)',
+        locrian:'Lokrisch',
+        lydian:'Lydisch',
+        mixolydian:'Mixolydisch',
+        melodicMinor:'Melodisch Moll',
+        lydianDominant:'Lydisch-Dominant',
+        lydianAugmented:'Lydisch übermäßig',
+        wholeTone:'Ganztonleiter',
+        diminishedWH:'Vermindert (Ganzton-Halbton)',
+        halfWholeDim:'Vermindert (Halbton-Ganzton)',
+        majorPentatonic:'Dur-Pentatonik',
+        minorPentatonic:'Moll-Pentatonik'
       }
     },
     it: {
@@ -1318,6 +1650,12 @@
       ukuleleLabel:'Ukulele (C6)',
       pianoLabel:'Pianoforte',
       showStaffLabel:'Mostra il pentagramma',
+      gammesLabel:'Scale',
+      scaleCaption:'Scala: {scale}',
+      legendScaleRoot:'Fondamentale',
+      legendScaleNote:'Nota della scala',
+      scaleNeckAria:'Scala su tutto il manico',
+      scalePianoAria:"Scala su un'ottava",
       staffAria:"Pentagramma musicale dell'accordo",
       printBtn:'Stampa questo diagramma',
       helpSummary:'Guida e vocabolario degli accordi',
@@ -1353,6 +1691,12 @@
       sequenceCount:'{n} accordi',
       sequenceMeasures:'{n} battute',
       playChord:'Ascolta questo accordo',
+      playScale:'Ascolta la scala',
+      pentatonicToggleLabel:'Pentatonica',
+      scaleSpeedLabel:'Velocità',
+      scaleSpeedDownAria:'Diminuisci velocità',
+      scaleSpeedUpAria:'Aumenta velocità',
+      fretLimitToggleLabel:'5 tasti',
       playAria:'Ascolta',
       playSequenceBtn:'Ascolta la progressione',
       stopSequenceBtn:'Ferma',
@@ -1384,6 +1728,22 @@
         mmaj7:'Minore con settima maggiore', mmaj7b5:'Minore con settima maggiore, quinta diminuita',
         mmaj9:'Minore con nona maggiore', mmaj11:'Minore con undicesima maggiore',
         add9:'Nona aggiunta', madd9:'Minore, nona aggiunta', '5':'Quinta (power chord)'
+      },
+      scales:{
+        ionian:'Ionico (Maggiore)',
+        dorian:'Dorico',
+        aeolian:'Eolio (Minore naturale)',
+        locrian:'Locrio',
+        lydian:'Lidio',
+        mixolydian:'Misolidio',
+        melodicMinor:'Minore melodico',
+        lydianDominant:'Lidio dominante',
+        lydianAugmented:'Lidio aumentato',
+        wholeTone:'Scala esatonale',
+        diminishedWH:'Diminuita (tono-semitono)',
+        halfWholeDim:'Diminuita (semitono-tono)',
+        majorPentatonic:'Pentatonica maggiore',
+        minorPentatonic:'Pentatonica minore'
       }
     },
     es: {
@@ -1399,6 +1759,12 @@
       ukuleleLabel:'Ukelele (C6)',
       pianoLabel:'Piano',
       showStaffLabel:'Mostrar el pentagrama',
+      gammesLabel:'Escalas',
+      scaleCaption:'Escala: {scale}',
+      legendScaleRoot:'Fundamental',
+      legendScaleNote:'Nota de la escala',
+      scaleNeckAria:'Escala en todo el mástil',
+      scalePianoAria:'Escala de una octava',
       staffAria:'Pentagrama musical del acorde',
       printBtn:'Imprimir este diagrama',
       helpSummary:'Ayuda y vocabulario de acordes',
@@ -1434,6 +1800,12 @@
       sequenceCount:'{n} acordes',
       sequenceMeasures:'{n} compases',
       playChord:'Escuchar este acorde',
+      playScale:'Escuchar la escala',
+      pentatonicToggleLabel:'Pentatónica',
+      scaleSpeedLabel:'Velocidad',
+      scaleSpeedDownAria:'Disminuir velocidad',
+      scaleSpeedUpAria:'Aumentar velocidad',
+      fretLimitToggleLabel:'5 trastes',
       playAria:'Escuchar',
       playSequenceBtn:'Escuchar la progresión',
       stopSequenceBtn:'Detener',
@@ -1465,6 +1837,22 @@
         mmaj7:'Menor con séptima mayor', mmaj7b5:'Menor con séptima mayor, quinta disminuida',
         mmaj9:'Menor con novena mayor', mmaj11:'Menor con oncena mayor',
         add9:'Novena añadida', madd9:'Menor, novena añadida', '5':'Quinta (power chord)'
+      },
+      scales:{
+        ionian:'Jónico (Mayor)',
+        dorian:'Dórico',
+        aeolian:'Eólico (Menor natural)',
+        locrian:'Locrio',
+        lydian:'Lidio',
+        mixolydian:'Mixolidio',
+        melodicMinor:'Menor melódico',
+        lydianDominant:'Lidio dominante',
+        lydianAugmented:'Lidio aumentado',
+        wholeTone:'Escala de tonos enteros',
+        diminishedWH:'Disminuida (tono-semitono)',
+        halfWholeDim:'Disminuida (semitono-tono)',
+        majorPentatonic:'Pentatónica mayor',
+        minorPentatonic:'Pentatónica menor'
       }
     },
     zh: {
@@ -1480,6 +1868,12 @@
       ukuleleLabel:'尤克里里 (C6)',
       pianoLabel:'钢琴',
       showStaffLabel:'显示五线谱',
+      gammesLabel:'音阶',
+      scaleCaption:'音阶：{scale}',
+      legendScaleRoot:'根音',
+      legendScaleNote:'音阶音',
+      scaleNeckAria:'整个指板音阶',
+      scalePianoAria:'单八度音阶',
       staffAria:'和弦的五线谱',
       printBtn:'打印此图表',
       helpSummary:'帮助与和弦词汇',
@@ -1515,6 +1909,12 @@
       sequenceCount:'{n} 个和弦',
       sequenceMeasures:'{n} 个小节',
       playChord:'播放此和弦',
+      playScale:'播放音阶',
+      pentatonicToggleLabel:'五声音阶',
+      scaleSpeedLabel:'速度',
+      scaleSpeedDownAria:'降低速度',
+      scaleSpeedUpAria:'提高速度',
+      fretLimitToggleLabel:'限制5品',
       playAria:'播放',
       playSequenceBtn:'播放和弦进行',
       stopSequenceBtn:'停止',
@@ -1546,6 +1946,22 @@
         mmaj7:'小大七和弦', mmaj7b5:'小大七减五和弦',
         mmaj9:'小大九和弦', mmaj11:'小大十一和弦',
         add9:'加九和弦', madd9:'小加九和弦', '5':'五度和弦（强力和弦）'
+      },
+      scales:{
+        ionian:'伊奥尼亚调式（大调）',
+        dorian:'多利亚调式',
+        aeolian:'爱奥利亚调式（自然小调）',
+        locrian:'洛克里亚调式',
+        lydian:'利底亚调式',
+        mixolydian:'混合利底亚调式',
+        melodicMinor:'旋律小调',
+        lydianDominant:'利底亚属七调式',
+        lydianAugmented:'利底亚增三调式',
+        wholeTone:'全音阶',
+        diminishedWH:'减音阶（全半）',
+        halfWholeDim:'减音阶（半全）',
+        majorPentatonic:'大调五声音阶',
+        minorPentatonic:'小调五声音阶'
       }
     }
   };
@@ -2095,15 +2511,16 @@
     return withReverb;
   }
 
-  function playPluckedChord(ctx, notes, dur, opts){
+  function playPluckedChord(ctx, notes, dur, opts, startDelay){
     var samples = renderPluckedChord(notes, dur, opts);
     var buffer = ctx.createBuffer(1, samples.length, GUITAR_SR);
     buffer.copyToChannel(Float32Array.from(samples), 0);
     var src = ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(getMasterBus(ctx));
-    src.start(ctx.currentTime + 0.02);
-    setTimeout(function(){ try{ src.disconnect(); }catch(e){} }, (buffer.duration + 0.3) * 1000);
+    var delay = (startDelay!=null) ? startDelay : 0.02;
+    src.start(ctx.currentTime + delay);
+    setTimeout(function(){ try{ src.disconnect(); }catch(e){} }, (delay + buffer.duration + 0.3) * 1000);
   }
 
   function playGuitarChord(ctx, notes, dur){ playPluckedChord(ctx, notes, dur, GUITAR_SYNTH_OPTS); }
@@ -2122,19 +2539,51 @@
     return { lh: shift(notes.lh), rh: notes.rh.map(shift) };
   }
 
+  // The notes to actually SOUND for a chord on the current instrument.
+  // Guitar/ukulele: the REAL sounding pitches of the chord's own fretboard
+  // fingering (open strings included at their true pitch, muted strings
+  // excluded, fretted strings at their true octave via
+  // frettedPositionNotes) - the very same notes renderStaffForChord already
+  // draws on the staff - rather than a generic theoretical voicing that
+  // ignores which strings are actually fretted/open/muted. Always uses the
+  // chord's first/primary fingering (fretPositionsFor's positions[0]),
+  // matching renderStaffForChord's own convention, so audio and staff never
+  // disagree regardless of which position the diagram happens to be
+  // navigated to. Falls back to the generic getPianoNotes() voicing only if
+  // no fingering could be found at all, so playback never goes silent.
+  // Piano has no strings to match, so it always uses getPianoNotes().
+  function chordAudioNotes(p, inst){
+    if(inst==='guitar' || inst==='ukulele'){
+      var r = fretPositionsFor(inst, p);
+      var pos = r.positions && r.positions[0];
+      if(pos){
+        var flat = frettedPositionNotes(pos, inst);
+        if(flat && flat.length){
+          var sorted = flat.slice().sort(function(a,b){ return (a.octave*12+a.pc)-(b.octave*12+b.pc); });
+          return { lh: sorted[0], rh: sorted.slice(1), __fretted:true };
+        }
+      }
+    }
+    return getPianoNotes(p);
+  }
+
   function playChordSound(p, duration){
     var ctx = getAudioCtx();
     if(!ctx || !p || !p.ok) return;
-    var notes = getPianoNotes(p);
+    var inst = instrument();
+    var notes = chordAudioNotes(p, inst);
     if(!notes) return;
     var dur = duration || 1.1;
     var now = ctx.currentTime + 0.02;
 
-    var inst = instrument();
     if(inst==='guitar'){
       playGuitarChord(ctx, notes, dur);
     } else if(inst==='ukulele'){
-      playUkuleleChord(ctx, transposeNotes(notes, 12), dur);
+      // Real fretted ukulele notes (notes.__fretted) are already at the
+      // instrument's true pitch (UKULELE_OPEN_STRINGS/octaves) - only the
+      // generic piano-voicing fallback needs the +12 to reach ukulele's
+      // higher register.
+      playUkuleleChord(ctx, notes.__fretted ? notes : transposeNotes(notes, 12), dur);
     } else {
       playPianoTone(ctx, noteFrequency(notes.lh.pc, notes.lh.octave), now, dur, 0.20);
       var chordStart = now + 0.09;
@@ -2144,11 +2593,151 @@
     }
   }
 
+  // Plays the chord's whole scale (see chordScaleInfo()). For piano, a
+  // single ascending run root to root an octave up, matching the
+  // one-octave piano scale diagram - not the chord's own notes played
+  // together, which playChordSound already covers. Anchored at the same
+  // reference octave (root at octave 4) used for the piano scale diagram
+  // and for the ordinary chord voicing above, so switching between
+  // "Écouter cet accord" and "Écouter la gamme" doesn't jump registers.
+  // For guitar/ukulele, instead of a single octave, plays every scale tone
+  // across the FULL displayed neck (via scaleNeckPositions(), the same
+  // helper renderNeckScaleSVG uses to draw it), deduplicated by real
+  // absolute pitch and sorted ascending low to high, so the audio always
+  // covers exactly the range shown on screen. Guitar/ukulele notes reuse
+  // the same plucked-string synth as chords (one note at a time instead of
+  // a strum, via playPluckedChord's startDelay), so the timbre matches
+  // whichever instrument is selected. Each played note is also scheduled
+  // in animateScaleNotes() against the matching data-abs element(s) in the
+  // diagram, so the visual highlight stays in sync with what's heard.
+  // Builds the note-by-note schedule for ONE chord's whole scale run -
+  // guitar/ukulele: every scale tone across the currently drawn fret range
+  // (scaleFretRange - either the full neck or the anchored "5 cases"
+  // position), deduplicated by real absolute pitch and sorted low to high;
+  // piano: a single ascending root-to-root run - independent of exactly
+  // *when* it starts. Every delay/dur/hldur below is in seconds relative to
+  // this chord's own start (not ctx.currentTime), so the same schedule can
+  // be played immediately (playScaleSound, a single chord) or offset by a
+  // running cursor (playSequenceScaleSound, several chords back to back) -
+  // both reuse this one function, so the audio and the diagram/animation
+  // never drift apart between the two playback modes. Returns
+  // {events, duration}: duration is how long this chord's run takes before
+  // the next one may safely start.
+  function buildChordScaleSchedule(p, inst, speed){
+    var info = chordScaleInfo(p, state.usePentatonic);
+    var events = [];
+    var duration;
+    if(inst==='guitar' || inst==='ukulele'){
+      var config = FRETTED_CONFIGS[inst];
+      var range = scaleFretRange(info, config, state.scalePosIndex);
+      var positions = scaleNeckPositions(info, config, range.start, range.end);
+      // Only ONE position is kept per unique absolute pitch (so a unison -
+      // the same pitch reachable at two different neck spots - is only
+      // played/highlighted once), but the actual chosen position
+      // (string+fret) is kept alongside it, not just the pitch, so
+      // animateScaleNotes can light up that one exact dot instead of every
+      // dot that happens to share the same note name.
+      var seen = {};
+      var uniqueList = [];
+      positions.forEach(function(pos){
+        if(!seen[pos.abs]){ seen[pos.abs]=true; uniqueList.push(pos); }
+      });
+      uniqueList.sort(function(a,b){ return a.abs-b.abs; });
+      var noteStep = 0.3/speed, noteDur = 0.64/speed; // base = half speed (was 0.15 / 0.32)
+      uniqueList.forEach(function(pos, i){
+        var startDelay = 0.05 + i*noteStep;
+        // The audio note rings for noteDur (0.64s), well past the next
+        // note's start (noteStep, 0.3s) - which is correct for the sound
+        // (a plucked string decays gradually) but would leave 2-3 dots lit
+        // at once if the highlight used that same duration. hldur caps the
+        // VISUAL highlight to the step interval instead, so only the note
+        // actually being attacked right now is ever highlighted.
+        events.push({abs:pos.abs, delay:startDelay, dur:noteDur, hldur:noteStep*0.92, posKey: pos.string+'-'+pos.fret});
+      });
+      duration = 0.05 + uniqueList.length*noteStep;
+    } else {
+      var degrees = info.intervals.concat([12]); // close the octave: root, ..., root+12
+      var rootAbsBase = 4*12 + p.rootSemitone;
+      var noteDur2 = 0.8/speed, step = 0.4/speed; // base = half speed (was 0.4 / 0.2)
+      degrees.forEach(function(iv, i){
+        events.push({abs: rootAbsBase+iv, delay:0.05+i*step, dur:noteDur2, hldur:step*0.92});
+      });
+      duration = 0.05 + degrees.length*step;
+    }
+    return { events: events, duration: duration };
+  }
+
+  function playScaleSound(p){
+    var ctx = getAudioCtx();
+    if(!ctx || !p || !p.ok) return;
+    var inst = instrument();
+    var speed = state.scaleSpeed || 1;
+    var built = buildChordScaleSchedule(p, inst, speed);
+    var now = ctx.currentTime;
+    if(inst==='guitar' || inst==='ukulele'){
+      var opts = inst==='guitar' ? GUITAR_SYNTH_OPTS : UKULELE_SYNTH_OPTS;
+      built.events.forEach(function(ev){
+        var octave = Math.floor(ev.abs/12);
+        var pc = ((ev.abs%12)+12)%12;
+        var noteOctave = inst==='ukulele' ? octave+1 : octave;
+        var note = { pc:pc, octave:noteOctave, name: SEMI_TO_NAME[pc] };
+        playPluckedChord(ctx, {lh:note, rh:[]}, ev.dur, opts, ev.delay);
+      });
+    } else {
+      built.events.forEach(function(ev){
+        var octave = Math.floor(ev.abs/12);
+        var pc = ((ev.abs%12)+12)%12;
+        playPianoTone(ctx, noteFrequency(pc, octave), now+ev.delay, ev.dur, 0.16);
+      });
+    }
+    animateScaleNotes(built.events);
+  }
+
+  // Drives the .playing highlight class on the scale diagram in sync with
+  // playScaleSound()'s audio schedule ({abs, delay, dur, hldur} in seconds
+  // from "now"). hldur (when present) is the VISUAL highlight duration,
+  // shorter than the audio's own ring/decay duration (dur), so only the
+  // note actually being attacked is ever highlighted - not every note
+  // still ringing from a moment ago. Looks up elements by data-pos (or, if
+  // absent, data-abs) so a unison (same pitch at two
+  // different neck positions) highlights together. Always clears any
+  // previous run's timers/highlights first, so replaying the scale (or
+  // switching chord) never leaves stale highlights behind.
+  var scaleAnimTimers = [];
+  function stopScalePlaybackAnimation(){
+    scaleAnimTimers.forEach(function(id){ clearTimeout(id); });
+    scaleAnimTimers = [];
+    if(diagramWrap){
+      var playing = diagramWrap.querySelectorAll('.playing');
+      for(var i=0;i<playing.length;i++){ playing[i].classList.remove('playing'); }
+    }
+  }
+  function animateScaleNotes(schedule){
+    stopScalePlaybackAnimation();
+    if(!diagramWrap || !schedule.length) return;
+    schedule.forEach(function(step){
+      // posKey (guitar/ukulele) targets the exact string/fret dot that's
+      // actually sounding, so a note name that recurs elsewhere on the
+      // neck doesn't light up everywhere at once - only where it's
+      // actually being played. Piano has no such duplicates (one key per
+      // pitch), so it keeps matching by data-abs.
+      var selector = step.posKey ? '[data-pos="'+step.posKey+'"]' : '[data-abs="'+step.abs+'"]';
+      var els = diagramWrap.querySelectorAll(selector);
+      var onId = setTimeout(function(){
+        for(var i=0;i<els.length;i++){ els[i].classList.add('playing'); }
+      }, step.delay*1000);
+      var offId = setTimeout(function(){
+        for(var i=0;i<els.length;i++){ els[i].classList.remove('playing'); }
+      }, (step.delay+(step.hldur||step.dur))*1000);
+      scaleAnimTimers.push(onId, offId);
+    });
+  }
+
   // ---------- SVG rendering ----------
 
   var FRETTED_CONFIGS = {
-    guitar: { strings:6, labels:['E','A','D','G','B','E'], ariaLabel:'Diagramme du manche de guitare' },
-    ukulele: { strings:4, labels:['G','C','E','A'], ariaLabel:"Diagramme du manche d'ukulélé" }
+    guitar: { strings:6, labels:['E','A','D','G','B','E'], ariaLabel:'Diagramme du manche de guitare', openStrings:OPEN_STRINGS, openOctaves:OPEN_STRING_OCTAVES },
+    ukulele: { strings:4, labels:['G','C','E','A'], ariaLabel:"Diagramme du manche d'ukulélé", openStrings:UKULELE_OPEN_STRINGS, openOctaves:UKULELE_OPEN_STRING_OCTAVES }
   };
 
   function renderFretboardSVG(position, config){
@@ -2269,6 +2858,279 @@
         }
       });
     }
+    svg += '</svg>';
+    return svg;
+  }
+
+  // ---------- Scale diagrams ("Gammes" view) ----------
+  //
+  // Unlike the fretboard/keyboard diagrams above, which draw one particular
+  // fingering/voicing of a chord, these draw every position of the chord's
+  // whole scale (see chordScaleInfo()) across a fixed, generous span: the
+  // full practical neck (~15 frets) for guitar/ukulele, one full octave
+  // (root to root+12, 13 keys) for piano - regardless of which chord is
+  // showing. Every scale position is labelled with its note name; the
+  // root note is drawn in the accent color, the rest of the scale in the
+  // secondary accent color, matching the LH/RH color convention already
+  // used for the piano chord diagram above.
+
+  var SCALE_NECK_FRETS_FULL = 15;
+  var SCALE_NECK_FRETS_LIMITED = 5;
+  var SCALE_MARKER_FRETS = {3:1,5:1,7:1,9:1,12:2,15:1};
+
+  // The scale view shows one playable hand position at a time rather than
+  // the whole practical neck at once - a wide window can contain notes
+  // that are diatonically correct but sit outside any natural,
+  // commonly-taught position for that particular scale (e.g. the C at
+  // fret 1 on the B string of a G major scale: a real scale tone, but not
+  // part of the natural 3rd-position G-major box most guitarists would
+  // actually play). This mirrors the classic "box pattern" system taught
+  // in most guitar methods (and the one used by sites such as
+  // guitare-live.com's own gammes tool): each position is anchored to a
+  // fret on the neck's lowest-pitched open string (the traditional
+  // starting string for that system - low E on guitar, the re-entrant C
+  // string on ukulele) where a scale tone falls. One octave (frets 1-11,
+  // open strings/fret 0 excluded - same as scaleNeckPositions below) holds
+  // exactly one such fret per scale degree except the one that happens to
+  // sit on the open string itself, so a 7-note scale yields 6 positions in
+  // the ordinary case (5 for a pentatonic scale), though the exact count
+  // can vary with the root: some roots land the open string itself outside
+  // the scale, which yields one more. For G major this includes an anchor
+  // at fret 3 - window [3,7], which correctly excludes the B-string C
+  // (only reachable at frets 1 and 13, both outside that window).
+  function scalePositionWindows(scaleInfo, config, span){
+    span = span || SCALE_NECK_FRETS_LIMITED;
+    var pcSet = {};
+    scaleInfo.pitchClasses.forEach(function(pc){ pcSet[pc]=true; });
+    var refString = 0, refAbs = null;
+    for(var si=0; si<config.strings; si++){
+      var abs0 = config.openOctaves[si]*12+config.openStrings[si];
+      if(refAbs===null || abs0<refAbs){ refAbs = abs0; refString = si; }
+    }
+    var openPc = config.openStrings[refString];
+    var anchors = [];
+    for(var f=1; f<=11; f++){
+      if(pcSet[(openPc+f)%12]) anchors.push(f);
+    }
+    if(!anchors.length) anchors.push(1);
+    return anchors.map(function(f){
+      var start = f, end = f+span-1;
+      if(end > SCALE_NECK_FRETS_FULL){ end = SCALE_NECK_FRETS_FULL; start = Math.max(1, end-span+1); }
+      return { start: start, end: end };
+    });
+  }
+
+  // The fret range to actually draw/play: the posIndex-th box pattern from
+  // scalePositionWindows above, clamped to however many positions this
+  // particular scale actually has (posIndex/count let the caller drive and
+  // display a "Position X / N" navigator). Shared by renderScaleForChord,
+  // renderSequenceScaleBlocks and buildChordScaleSchedule so the diagram
+  // and the audio/highlight always agree on exactly which frets are in
+  // play.
+  function scaleFretRange(scaleInfo, config, posIndex){
+    var windows = scalePositionWindows(scaleInfo, config);
+    var maxIndex = windows.length; // 0 = full neck, 1..windows.length = each box
+    var idx = Math.max(0, Math.min(posIndex||0, maxIndex));
+    if(idx===0){
+      return { start: 1, end: SCALE_NECK_FRETS_FULL, index: 0, count: windows.length, full: true };
+    }
+    var win = windows[idx-1];
+    return { start: win.start, end: win.end, index: idx, count: windows.length, full: false };
+  }
+
+  // Every scale-tone position across the neck (all strings, frets startFret
+  // to endFret) for a given scale - shared by the neck diagram
+  // (renderNeckScaleSVG) and the "Écouter la gamme" playback/animation
+  // (playScaleSound/buildChordScaleSchedule), so what's heard and what's
+  // animated always exactly match what's drawn. "abs" is the REAL absolute
+  // pitch (octave included, via config.openOctaves), not just a pitch
+  // class - two different string/fret positions can land on the very same
+  // abs (a unison). Open strings (fret 0 / the nut) are deliberately
+  // excluded: these are fretted, movable scale-pattern shapes, not
+  // open-position scales, so no note is ever drawn or played sitting on the
+  // nut itself. "finger" is a simple 1-4 suggested-fingering number, one
+  // finger per fret counting up from startFret (capped at 4) - only shown
+  // in the anchored position view (see renderNeckScaleSVG's showFingers),
+  // where a single hand position makes "one finger per fret" a meaningful,
+  // playable suggestion; across the full 15-fret neck it wouldn't be.
+  function scaleNeckPositions(scaleInfo, config, startFret, endFret){
+    startFret = startFret || 1;
+    endFret = endFret || SCALE_NECK_FRETS_FULL;
+    var pcSet = {};
+    scaleInfo.pitchClasses.forEach(function(pc){ pcSet[pc]=true; });
+    var rootPc = scaleInfo.pitchClasses[0];
+    var positions = [];
+    for(var si=0; si<config.strings; si++){
+      for(var fr=startFret; fr<=endFret; fr++){
+        var pc = (config.openStrings[si]+fr)%12;
+        if(!pcSet[pc]) continue;
+        var abs = config.openOctaves[si]*12 + config.openStrings[si] + fr;
+        positions.push({ string:si, fret:fr, pc:pc, abs:abs, isRoot: pc===rootPc, finger: Math.min(4, fr-startFret+1) });
+      }
+    }
+    // A scale is defined by its root: it starts there and ascends. The
+    // fretboard doesn't respect that on its own - the low E string reaches
+    // notes a fixed fret window on a higher string cannot, and those can
+    // sit BELOW the root's own pitch even though they're genuinely diatonic
+    // (e.g. for C major, the low E string's 1st fret is an in-scale F2,
+    // well below the root's own lowest occurrence, C3 on the A string).
+    // Anchoring the window on the fret where the root occurs (see
+    // scalePositionWindows) only picks WHICH FRETS are shown - it says
+    // nothing about pitch, so without this, "every in-range scale tone,
+    // low to high" can start on any degree except the root. The fix: drop
+    // every position below the root's own lowest occurrence in this range,
+    // so the scale - both drawn and played - always starts on its root and
+    // only ascends from there, exactly like the piano scale view already
+    // does by construction.
+    var rootAbsMin = null;
+    positions.forEach(function(p){
+      if(p.isRoot && (rootAbsMin===null || p.abs<rootAbsMin)) rootAbsMin = p.abs;
+    });
+    if(rootAbsMin!==null){
+      positions = positions.filter(function(p){ return p.abs>=rootAbsMin; });
+    }
+    return positions;
+  }
+
+  function renderNeckScaleSVG(scaleInfo, config, range){
+    // Vertical layout - strings as columns (left to right, low to high),
+    // frets as rows top to bottom - matching how renderFretboardSVG draws
+    // the ordinary "Diagramme" chord neck. String names sit at the HEAD of
+    // the neck, like on a real fretboard. "range" ({start,end,full}, from
+    // scaleFretRange) sets which frets are drawn: either the whole
+    // practical neck (range.full, "Position 0") or one box/position
+    // pattern at a time (see scalePositionWindows) - the latter always
+    // shown with a plain fret-number position label, matching
+    // renderFretboardSVG's own convention for a chord fingering that isn't
+    // in open position, since a box is always a movable fretted shape,
+    // never a literal open/nut position, even when it happens to start at
+    // fret 1. showFingers (a small finger-number badge next to each note
+    // dot, meaningful because a single box is one hand position) is
+    // derived from range.full rather than passed in, since the two always
+    // go together: the full neck spans more than one hand position, so no
+    // per-fret fingering suggestion applies there.
+    config = config || FRETTED_CONFIGS.guitar;
+    range = range || { start:1, end: SCALE_NECK_FRETS_FULL, full:true };
+    var showFingers = !range.full;
+    var strings = config.strings;
+    var frets = range.end - range.start + 1;
+    var showNut = !!range.full;
+    var stringGap = 36.4, fretGap = 34;
+    var padL = 30, padR = 18, padTop = 40, padBottom = 14;
+    var W = padL+padR+(strings-1)*stringGap;
+    var H = padTop+padBottom+frets*fretGap;
+    var dotR = Math.min(stringGap,fretGap)*0.33;
+    var positions = scaleNeckPositions(scaleInfo, config, range.start, range.end);
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t('scaleNeckAria')+'">';
+    config.labels.forEach(function(l,i){
+      var lx = padL+i*stringGap;
+      svg += '<text x="'+lx+'" y="14" text-anchor="middle" style="fill:var(--ink-soft);font:600 11px var(--font-mono)">'+l+'</text>';
+    });
+    for(var i=0;i<strings;i++){
+      var x = padL+i*stringGap;
+      svg += '<line x1="'+x+'" y1="'+padTop+'" x2="'+x+'" y2="'+(padTop+frets*fretGap)+'" style="stroke:var(--line)" stroke-width="1.6"/>';
+    }
+    for(var f=0; f<=frets; f++){
+      var y = padTop+f*fretGap;
+      var isNut = showNut && f===0;
+      svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(padL+(strings-1)*stringGap)+'" y2="'+y+'" style="stroke:'+(isNut?'var(--ink)':'var(--line)')+'" stroke-width="'+(isNut?4:1.4)+'"/>';
+    }
+    if(showNut){
+      Object.keys(SCALE_MARKER_FRETS).forEach(function(fk){
+        var fn = parseInt(fk,10);
+        if(fn>frets) return;
+        var my = padTop+(fn-0.5)*fretGap;
+        var dots = SCALE_MARKER_FRETS[fk];
+        svg += '<text x="'+(padL-12)+'" y="'+(my+3.5)+'" text-anchor="end" style="fill:var(--ink-soft);font:'+(dots===2?'700':'600')+' 10px var(--font-mono)">'+fn+'</text>';
+      });
+    } else {
+      svg += '<text x="'+(padL-12)+'" y="'+(padTop+fretGap*0.65)+'" text-anchor="end" style="fill:var(--ink);font:700 12px var(--font-mono)">'+range.start+'</text>';
+    }
+    positions.forEach(function(p){
+      // Every position here is fretted (fret >= 1, see scaleNeckPositions),
+      // centered inside its fret space (case), not on the fret wire -
+      // matching how renderFretboardSVG places its finger dots. x2/y2 are
+      // relative to the drawn window (range.start), not the absolute fret.
+      var x2 = padL+p.string*stringGap;
+      var y2 = padTop+(p.fret-range.start+0.5)*fretGap;
+      var fill = p.isRoot ? 'var(--accent)' : 'var(--accent2)';
+      var textFill = p.isRoot ? 'var(--accent-ink)' : 'var(--accent2-ink)';
+      // data-pos uniquely identifies THIS string/fret dot (unlike data-abs,
+      // which several dots can share when the same pitch recurs at
+      // different neck positions) - see playScaleSound/animateScaleNotes,
+      // which highlight only the one dot actually being played.
+      svg += '<g class="scale-note" data-abs="'+p.abs+'" data-pos="'+p.string+'-'+p.fret+'">';
+      svg += '<circle cx="'+x2+'" cy="'+y2+'" r="'+dotR+'" style="fill:'+fill+'"/>';
+      svg += '<text x="'+x2+'" y="'+(y2+3)+'" text-anchor="middle" style="fill:'+textFill+';font:700 7.8px var(--font-mono)">'+SEMI_TO_NAME[p.pc]+'</text>';
+      if(showFingers){
+        var fx = x2+dotR*0.8, fy = y2-dotR*0.8, fr2 = dotR*0.55;
+        svg += '<circle cx="'+fx+'" cy="'+fy+'" r="'+fr2+'" style="fill:var(--surface);stroke:var(--ink-soft)" stroke-width="0.8"/>';
+        svg += '<text x="'+fx+'" y="'+(fy+2.6)+'" text-anchor="middle" style="fill:var(--ink);font:700 7px var(--font-mono)">'+p.finger+'</text>';
+      }
+      svg += '</g>';
+    });
+    svg += '</svg>';
+    return svg;
+  }
+
+  function renderPianoScaleSVG(scaleInfo){
+    var whiteW=34, whiteH=132, blackW=20, blackH=82, topPad=32;
+    var pcSet = {};
+    scaleInfo.pitchClasses.forEach(function(pc){ pcSet[pc]=true; });
+    var rootPc = scaleInfo.pitchClasses[0];
+    // Anchored at a fixed reference octave (C4-based), offset to the root,
+    // so the real keyboard geometry (white key widths, black key offsets)
+    // comes out correct no matter which pitch class the scale starts on.
+    var baseAbs = 48+rootPc;
+    var keys = [];
+    for(var s=baseAbs; s<=baseAbs+12; s++){
+      var pc = ((s%12)+12)%12;
+      var oct = Math.floor(s/12);
+      var isBlack = BLACK_SEMIS.indexOf(pc)!==-1;
+      var rectX, width, height;
+      if(!isBlack){
+        var wi = WHITE_SEMIS.indexOf(pc);
+        rectX = (oct*7+wi)*whiteW;
+        width = whiteW-1;
+        height = whiteH;
+      } else {
+        var boundary = BLACK_BOUNDARY[pc];
+        rectX = (oct*7+boundary)*whiteW - blackW/2;
+        width = blackW;
+        height = blackH;
+      }
+      keys.push({pc:pc, abs:s, isBlack:isBlack, rectX:rectX, width:width, height:height, isRoot:(s===baseAbs || s===baseAbs+12)});
+    }
+    var minX = Math.min.apply(null, keys.map(function(k){return k.rectX;}));
+    var maxX = Math.max.apply(null, keys.map(function(k){return k.rectX+k.width;}));
+    var shift = -minX+3;
+    var W = (maxX-minX)+6;
+    var H = whiteH+topPad+18;
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t('scalePianoAria')+'">';
+    keys.filter(function(k){ return !k.isBlack; }).forEach(function(k){
+      var inScale = pcSet[k.pc];
+      var fill = !inScale ? 'var(--surface)' : (k.isRoot ? 'var(--accent)' : 'var(--accent2)');
+      var x = k.rectX+shift;
+      if(inScale) svg += '<g class="scale-key" data-abs="'+k.abs+'">';
+      svg += '<rect x="'+x+'" y="'+topPad+'" width="'+k.width+'" height="'+k.height+'" rx="3" style="fill:'+fill+';stroke:var(--ink-soft)" stroke-width="1.2"/>';
+      if(inScale){
+        var textFill = k.isRoot ? 'var(--accent-ink)' : 'var(--accent2-ink)';
+        svg += '<text x="'+(x+k.width/2)+'" y="'+(topPad+k.height-14)+'" text-anchor="middle" style="fill:'+textFill+';font:700 10.5px var(--font-mono)">'+SEMI_TO_NAME[k.pc]+'</text>';
+        svg += '</g>';
+      }
+    });
+    keys.filter(function(k){ return k.isBlack; }).forEach(function(k){
+      var inScale = pcSet[k.pc];
+      var fill = !inScale ? 'var(--ink)' : (k.isRoot ? 'var(--accent)' : 'var(--accent2)');
+      var x = k.rectX+shift;
+      if(inScale) svg += '<g class="scale-key" data-abs="'+k.abs+'">';
+      svg += '<rect x="'+x+'" y="'+topPad+'" width="'+k.width+'" height="'+k.height+'" rx="2" style="fill:'+fill+'"/>';
+      if(inScale){
+        var textFill2 = k.isRoot ? 'var(--accent-ink)' : 'var(--accent2-ink)';
+        svg += '<text x="'+(x+k.width/2)+'" y="'+(topPad+k.height-9)+'" text-anchor="middle" style="fill:'+textFill2+';font:700 8.5px var(--font-mono)">'+SEMI_TO_NAME[k.pc]+'</text>';
+        svg += '</g>';
+      }
+    });
     svg += '</svg>';
     return svg;
   }
@@ -2960,6 +3822,15 @@
   var posNext = document.getElementById('posNext');
   var noteGenerated = document.getElementById('noteGenerated');
   var legendOut = document.getElementById('legendOut');
+  var scaleControls = document.getElementById('scaleControls');
+  var pentatonicToggle = document.getElementById('pentatonicToggle');
+  var scalePosNav = document.getElementById('scalePosNav');
+  var scalePosInfo = document.getElementById('scalePosInfo');
+  var scalePosPrev = document.getElementById('scalePosPrev');
+  var scalePosNext = document.getElementById('scalePosNext');
+  var scaleSpeedDown = document.getElementById('scaleSpeedDown');
+  var scaleSpeedUp = document.getElementById('scaleSpeedUp');
+  var scaleSpeedValue = document.getElementById('scaleSpeedValue');
   var printBtn = document.getElementById('printBtn');
   var playBtn = document.getElementById('playBtn');
   var langSelect = document.getElementById('langSelect');
@@ -2977,6 +3848,13 @@
   var jazzGrid = document.getElementById('jazzGrid');
   var tabGrid = document.getElementById('tabGrid');
   var staffWrap = document.getElementById('staffWrap');
+  var sequenceScaleWrap = document.getElementById('sequenceScaleWrap');
+  var sequenceScaleControls = document.getElementById('sequenceScaleControls');
+  var pentatonicToggleSeq = document.getElementById('pentatonicToggleSeq');
+  var scalePosNavSeq = document.getElementById('scalePosNavSeq');
+  var scalePosInfoSeq = document.getElementById('scalePosInfoSeq');
+  var scalePosPrevSeq = document.getElementById('scalePosPrevSeq');
+  var scalePosNextSeq = document.getElementById('scalePosNextSeq');
   var shareStatus = document.getElementById('shareStatus');
   var shareFallbackWrap = document.getElementById('shareFallbackWrap');
   var shareFallbackInput = document.getElementById('shareFallbackInput');
@@ -2984,7 +3862,7 @@
   var STATIC_TEXT_IDS = {
     eyebrowText:'eyebrow', introText:'intro', labelChordNameText:'labelChordName',
     labelInstrumentText:'labelInstrument', labelInstGuitarText:'guitareLabel', labelInstUkuleleText:'ukuleleLabel', labelInstPianoText:'pianoLabel',
-    labelChordViewText:'seqViewLabel', chordViewOptDiagram:'chordViewDiagram', chordViewOptStaff:'showStaffLabel',
+    labelChordViewText:'seqViewLabel', chordViewOptDiagram:'chordViewDiagram', chordViewOptStaff:'showStaffLabel', chordViewOptScale:'gammesLabel',
     printBtnText:'printBtn', helpSummaryText:'helpSummary', helpNotesTitleText:'helpNotesTitle',
     helpNotesIntroText:'helpNotesIntro', helpTypesTitleText:'helpTypesTitle',
     gTitleBasicText:'gBasic', gTitleSeventhsText:'gSevenths', gTitleExtendedText:'gExtended',
@@ -2994,8 +3872,10 @@
     printSequenceBtnText:'printSequenceBtn', shareSeqBtnText:'shareBtn',
     playBtnText:'playChord', playSequenceBtnText:'playSequenceBtn',
     labelSequenceViewText:'seqViewLabel', sequenceViewOptCards:'seqViewCards',
-    sequenceViewOptJazz:'jazzGridBtn', sequenceViewOptTab:'tabGridBtn', sequenceViewOptStaff:'showStaffLabel',
-    chordBuilderLabelText:'pickerHeading'
+    sequenceViewOptJazz:'jazzGridBtn', sequenceViewOptTab:'tabGridBtn', sequenceViewOptStaff:'showStaffLabel', sequenceViewOptScale:'gammesLabel',
+    chordBuilderLabelText:'pickerHeading',
+    pentatonicToggleText:'pentatonicToggleLabel', pentatonicToggleSeqText:'pentatonicToggleLabel',
+    scaleSpeedLabelText:'scaleSpeedLabel'
   };
   var STATIC_HTML_IDS = { helpFingersTextP:'helpFingersText' };
 
@@ -3023,6 +3903,12 @@
     chordInput.setAttribute('placeholder', t('placeholder'));
     posPrev.setAttribute('aria-label', t('posPrevAria'));
     posNext.setAttribute('aria-label', t('posNextAria'));
+    if(scalePosPrev) scalePosPrev.setAttribute('aria-label', t('posPrevAria'));
+    if(scalePosNext) scalePosNext.setAttribute('aria-label', t('posNextAria'));
+    if(scalePosPrevSeq) scalePosPrevSeq.setAttribute('aria-label', t('posPrevAria'));
+    if(scalePosNextSeq) scalePosNextSeq.setAttribute('aria-label', t('posNextAria'));
+    if(scaleSpeedDown) scaleSpeedDown.setAttribute('aria-label', t('scaleSpeedDownAria'));
+    if(scaleSpeedUp) scaleSpeedUp.setAttribute('aria-label', t('scaleSpeedUpAria'));
     if(clearChordInputBtn){
       clearChordInputBtn.setAttribute('aria-label', t('clearInputAria'));
       clearChordInputBtn.title = t('clearInputAria');
@@ -3033,18 +3919,48 @@
     updateChordNameLabel();
   }
 
-  // Both view dropdowns (single chord: diagram/staff: sequence: cards/jazz
-  // grid/tablature/staff) are driven by shared state rather than tracked
-  // on their own, and re-applied here after every render / language change.
+  // Both view dropdowns (single chord: diagram/staff/scale; sequence:
+  // cards/jazz grid/tablature/staff/scale) are driven by shared state
+  // rather than tracked on their own, and re-applied here after every
+  // render / language change.
   function currentSequenceViewMode(){
-    if(state.showStaff) return 'staff';
+    if(state.sequenceViewMode === 'staff') return 'staff';
+    if(state.sequenceViewMode === 'scale') return 'scale';
     if(state.sequenceViewMode === 'jazz') return 'jazz';
     if(state.sequenceViewMode === 'tab') return 'tab';
     return 'cards';
   }
   function syncViewControls(){
     if(sequenceViewSelect) sequenceViewSelect.value = currentSequenceViewMode();
-    if(chordViewSelect) chordViewSelect.value = state.showStaff ? 'staff' : 'diagram';
+    if(chordViewSelect) chordViewSelect.value = state.chordViewMode || 'diagram';
+    updatePlayButtonLabel();
+  }
+
+  // "Écouter cet accord" becomes "Écouter la gamme" (and its translations)
+  // while the Gammes view is showing, since the button then plays the
+  // scale rather than the chord itself - see the playBtn click handler.
+  function updatePlayButtonLabel(){
+    var el = document.getElementById('playBtnText');
+    if(!el) return;
+    el.textContent = t(state.chordViewMode === 'scale' ? 'playScale' : 'playChord');
+  }
+
+  // Keeps the pentatonic checkbox(es) and the speed +/- control in sync
+  // with shared state, whichever scale view (single-chord or sequence) is
+  // currently on screen. Both pentatonic checkboxes (single-chord and
+  // sequence) mirror the same state.usePentatonic flag, since it's one
+  // shared setting rather than a per-view one. The scale position
+  // navigator(s) are NOT synced here - unlike a plain checkbox they need
+  // the position count for whichever chord(s) are on screen, so their text
+  // and prev/next disabled state are set directly in renderScaleForChord /
+  // renderSequenceScaleBlocks instead, right where that count is known.
+  function syncScaleControlsUI(){
+    if(pentatonicToggle) pentatonicToggle.checked = !!state.usePentatonic;
+    if(pentatonicToggleSeq) pentatonicToggleSeq.checked = !!state.usePentatonic;
+    if(scaleSpeedValue) scaleSpeedValue.textContent = '×' + state.scaleSpeed;
+    var idx = SCALE_SPEED_LEVELS.indexOf(state.scaleSpeed);
+    if(scaleSpeedDown) scaleSpeedDown.disabled = idx <= 0;
+    if(scaleSpeedUp) scaleSpeedUp.disabled = idx === -1 || idx >= SCALE_SPEED_LEVELS.length-1;
   }
 
   // ---------- Chord-builder cascading picker ----------
@@ -3163,8 +4079,13 @@
     chipRow.appendChild(chip);
   });
 
-  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, sequenceFlatTokens:[], currentChord:null, sequencePlaying:false, sequenceViewMode:'cards', instrumentKind:'guitar', showStaff:false };
+  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, sequenceFlatTokens:[], currentChord:null, sequencePlaying:false, sequenceViewMode:'cards', instrumentKind:'guitar', chordViewMode:'diagram', usePentatonic:false, scaleSpeed:1, scalePosIndex:0 };
+  var SCALE_SPEED_LEVELS = [0.25, 0.5, 1, 2, 4];
   var sequencePlaybackToken = 0;
+  // Pending setTimeout ids driving playSequenceScaleSound's per-note
+  // highlighting - mirrors scaleAnimTimers (single-chord view) but scoped
+  // to the sequence's scale blocks; cleared in stopSequencePlayback().
+  var sequenceScaleAnimTimers = [];
 
   function instrument(){
     if(instUkulele && instUkulele.checked) return 'ukulele';
@@ -3405,6 +4326,49 @@
     legendOut.innerHTML = '';
   }
 
+  // Renders the "Gammes" (scale) view directly into diagramWrap, in place
+  // of the usual fretboard/keyboard diagram: every position of the chord's
+  // whole scale (see chordScaleInfo()), one hand-position box at a time for
+  // guitar/ukulele (see scalePositionWindows) or one full octave for piano
+  // - not just the chord's own notes. A caption names the scale, and the
+  // legend distinguishes the root note from the rest of the scale.
+  function renderScaleForChord(p, inst){
+    stopScalePlaybackAnimation();
+    var isFretted = inst==='guitar' || inst==='ukulele';
+    // "fretted" narrows and centers the vertical neck diagram (see the
+    // .diagram-wrap.scale.fretted rules) so it matches the width of the
+    // ordinary "Diagramme" chord neck instead of stretching edge to edge
+    // like the piano keyboard does.
+    diagramWrap.className = 'diagram-wrap scale' + (isFretted ? ' fretted' : '');
+    var info = chordScaleInfo(p, state.usePentatonic);
+    var scaleName = (LANG_DATA[currentLang].scales && LANG_DATA[currentLang].scales[info.scaleKey]) || info.scaleKey;
+    var caption = '<p class="scale-caption">'+t('scaleCaption',{scale:scaleName})+'</p>';
+    if(isFretted){
+      var config = FRETTED_CONFIGS[inst];
+      var range = scaleFretRange(info, config, state.scalePosIndex);
+      // Normalize state to whatever position actually got shown (it may
+      // have been clamped down for a scale with fewer positions than the
+      // last-selected index), so a later prev/next click starts from the
+      // position really on screen instead of a stale, out-of-range index.
+      state.scalePosIndex = range.index;
+      diagramWrap.innerHTML = caption + renderNeckScaleSVG(info, config, range);
+      if(scalePosNav) scalePosNav.style.display = 'flex';
+      if(scalePosInfo) scalePosInfo.textContent = t('posWord')+' '+range.index+' / '+range.count;
+      if(scalePosPrev) scalePosPrev.disabled = range.index===0;
+      if(scalePosNext) scalePosNext.disabled = range.index===range.count;
+    } else {
+      diagramWrap.innerHTML = caption + renderPianoScaleSVG(info);
+      if(scalePosNav) scalePosNav.style.display = 'none';
+    }
+    posNav.style.display='none';
+    noteGenerated.style.display='none';
+    legendOut.innerHTML =
+      '<span><span class="dot" style="background:var(--accent)"></span>'+t('legendScaleRoot')+'</span>' +
+      '<span><span class="dot" style="background:var(--accent2)"></span>'+t('legendScaleNote')+'</span>';
+    if(scaleControls) scaleControls.style.display='flex';
+    syncScaleControlsUI();
+  }
+
   function hideShareFeedback(){
     if(shareStatus) shareStatus.style.display = 'none';
     if(shareFallbackWrap) shareFallbackWrap.style.display = 'none';
@@ -3428,10 +4392,11 @@
     if(p.ok){
       var miniInst = instrument();
       // The "Carte" grid always shows the fretboard/keyboard diagram, never
-      // a staff snippet - unlike the single-chord view, its own toggle
-      // ("Afficher la portée") for a sequence is a separate, dedicated
-      // dropdown option (staffWrap's continuous multi-measure staff, not a
-      // per-card one), so state.showStaff plays no part here.
+      // a staff snippet or a scale diagram - unlike the single-chord view,
+      // the staff/scale modes for a sequence are separate, dedicated
+      // dropdown options (staffWrap's continuous multi-measure staff and
+      // sequenceScaleWrap's per-chord scale blocks, not per-card ones), so
+      // state.sequenceViewMode plays no part here.
       if(miniInst==='guitar' || miniInst==='ukulele'){
         var config = FRETTED_CONFIGS[miniInst];
         var r = fretPositionsFor(miniInst, p);
@@ -3485,6 +4450,16 @@
     if(staffWrap) staffWrap.querySelectorAll('.staff-measure-hit.playing').forEach(function(c){ c.classList.remove('playing'); });
     if(jazzGrid) jazzGrid.querySelectorAll('.jazz-region.playing').forEach(function(r){ r.classList.remove('playing'); });
     if(tabGrid) tabGrid.querySelectorAll('.staff-measure-hit.playing').forEach(function(c){ c.classList.remove('playing'); });
+    // Cancel any pending playSequenceScaleSound() timers and clear whatever
+    // highlight (block header + note dots) they'd already turned on -
+    // otherwise stopping (or switching away from) a mid-playback scale
+    // sequence would leave a stale dot lit forever.
+    sequenceScaleAnimTimers.forEach(function(id){ clearTimeout(id); });
+    sequenceScaleAnimTimers = [];
+    if(sequenceScaleWrap){
+      var scalePlaying = sequenceScaleWrap.querySelectorAll('.playing');
+      for(var i=0;i<scalePlaying.length;i++){ scalePlaying[i].classList.remove('playing'); }
+    }
     if(playSequenceBtn){
       playSequenceBtn.firstChild.textContent = '▶ ';
       var lbl = document.getElementById('playSequenceBtnText');
@@ -3565,11 +4540,157 @@
     });
   }
 
+  // Plays every chord's whole scale, one after another - the "Gammes"
+  // counterpart to playSequenceSound() above (which only ever plays the
+  // chords themselves, never the scale view). Each chord's run is built by
+  // buildChordScaleSchedule(), the very same helper playScaleSound() uses
+  // for a single chord, so the audio and the on-screen diagrams can never
+  // drift apart between the two playback modes. All the notes for the
+  // whole sequence are scheduled up front (one synchronous pass, like
+  // playScaleSound does for a single chord) rather than via nested
+  // setTimeouts, with each chord's run offset by a running "cursor" plus a
+  // short gap; the per-note highlight is scoped to that chord's own block
+  // (via its data-idx, set in renderSequenceScaleBlocks) so two chords that
+  // happen to share a neck position never light up each other's dots.
+  var SEQUENCE_SCALE_GAP = 0.35; // seconds of silence between one chord's scale and the next
+  function playSequenceScaleSound(){
+    stopSequencePlayback();
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var flatTokens = state.sequenceFlatTokens || [];
+    if(!flatTokens.length) return;
+    var inst = instrument();
+    var speed = state.scaleSpeed || 1;
+    var opts = inst==='guitar' ? GUITAR_SYNTH_OPTS : (inst==='ukulele' ? UKULELE_SYNTH_OPTS : null);
+    var myToken = ++sequencePlaybackToken;
+    state.sequencePlaying = true;
+    playSequenceBtn.firstChild.textContent = '⏹ ';
+    document.getElementById('playSequenceBtnText').textContent = t('stopSequenceBtn');
+
+    var now = ctx.currentTime;
+    var cursor = 0;
+    var perChord = []; // {idx, events, start}
+    flatTokens.forEach(function(token, idx){
+      var p = parseChordName(token);
+      if(!p.ok) return;
+      var built = buildChordScaleSchedule(p, inst, speed);
+      var chordStart = cursor;
+      built.events.forEach(function(ev){
+        var octave = Math.floor(ev.abs/12);
+        var pc = ((ev.abs%12)+12)%12;
+        var absDelay = chordStart + ev.delay;
+        if(inst==='guitar' || inst==='ukulele'){
+          var noteOctave = inst==='ukulele' ? octave+1 : octave;
+          var note = { pc:pc, octave:noteOctave, name: SEMI_TO_NAME[pc] };
+          playPluckedChord(ctx, {lh:note, rh:[]}, ev.dur, opts, absDelay);
+        } else {
+          playPianoTone(ctx, noteFrequency(pc, octave), now+absDelay, ev.dur, 0.16);
+        }
+      });
+      perChord.push({ idx:idx, events: built.events, start: chordStart });
+      cursor = chordStart + built.duration + SEQUENCE_SCALE_GAP;
+    });
+    var totalDuration = cursor;
+    if(!perChord.length){ stopSequencePlayback(); return; }
+
+    perChord.forEach(function(chord){
+      var headerOnId = setTimeout(function(){
+        if(myToken !== sequencePlaybackToken) return;
+        sequenceScaleWrap.querySelectorAll('.staff-measure-hit.playing').forEach(function(c){ c.classList.remove('playing'); });
+        var hit = sequenceScaleWrap.querySelector('.staff-measure-hit[data-seq="'+chord.idx+'"]');
+        if(hit) hit.classList.add('playing');
+      }, chord.start*1000);
+      sequenceScaleAnimTimers.push(headerOnId);
+      var blockPrefix = '.sequence-scale-block[data-idx="'+chord.idx+'"] ';
+      chord.events.forEach(function(ev){
+        var selector = blockPrefix + (ev.posKey ? '[data-pos="'+ev.posKey+'"]' : '[data-abs="'+ev.abs+'"]');
+        var onId = setTimeout(function(){
+          if(myToken !== sequencePlaybackToken) return;
+          var els = sequenceScaleWrap.querySelectorAll(selector);
+          for(var i=0;i<els.length;i++){ els[i].classList.add('playing'); }
+        }, (chord.start+ev.delay)*1000);
+        var offId = setTimeout(function(){
+          if(myToken !== sequencePlaybackToken) return;
+          var els = sequenceScaleWrap.querySelectorAll(selector);
+          for(var i=0;i<els.length;i++){ els[i].classList.remove('playing'); }
+        }, (chord.start+ev.delay+(ev.hldur||ev.dur))*1000);
+        sequenceScaleAnimTimers.push(onId, offId);
+      });
+    });
+
+    var endId = setTimeout(function(){
+      if(myToken === sequencePlaybackToken) stopSequencePlayback();
+    }, Math.max(totalDuration, 0.3)*1000);
+    sequenceScaleAnimTimers.push(endId);
+  }
+
+  // Builds the "Gammes" view for a chord sequence: one full-size scale
+  // block per chord, stacked vertically, rather than trying to cram a
+  // ~15-fret neck diagram into the small per-chord mini-cards used by the
+  // "Carte" view. Each block is clickable (via the same staff-measure-hit
+  // wiring used by the staff/tablature sequence views) to jump to that
+  // chord's own enlarged single-chord view.
+  function renderSequenceScaleBlocks(flatTokens, inst){
+    if(!sequenceScaleWrap) return;
+    var html = '';
+    var isFretted = inst==='guitar' || inst==='ukulele';
+    // The fret range is computed PER CHORD, inside the loop below, rather
+    // than once up front: each chord's box positions are anchored to its
+    // own root (see scalePositionWindows), so two chords in the same
+    // sequence generally have different windows for the same shared
+    // position index - there is no single fret range for the whole
+    // sequence. maxCount tracks the largest position count across all the
+    // chords shown, so the one shared navigator below can display and step
+    // through "Position X / maxCount" even though individual chords may
+    // have fewer positions of their own (they just clamp to their last one
+    // once the shared index runs past what they have).
+    var maxCount = 1;
+    flatTokens.forEach(function(token, idx){
+      var p = parseChordName(token);
+      // data-idx scopes playSequenceScaleSound's per-note highlighting to
+      // this specific block, so two chords that happen to share a neck
+      // position never light up each other's dots.
+      html += '<div class="sequence-scale-block'+(isFretted?' fretted':'')+'" data-idx="'+idx+'">';
+      html += '<div class="staff-measure-hit" data-seq="'+idx+'" tabindex="0" role="button" aria-label="'+(p.ok?displayName(p):token)+'">';
+      html += '<span class="sequence-scale-name">'+(p.ok?displayName(p):token)+'</span>';
+      if(p.ok){
+        var info = chordScaleInfo(p, state.usePentatonic);
+        var scaleName = (LANG_DATA[currentLang].scales && LANG_DATA[currentLang].scales[info.scaleKey]) || info.scaleKey;
+        html += '<span class="sequence-scale-caption">'+t('scaleCaption',{scale:scaleName})+'</span>';
+      }
+      html += '</div>';
+      if(p.ok){
+        var info2 = chordScaleInfo(p, state.usePentatonic);
+        if(isFretted){
+          var config = FRETTED_CONFIGS[inst];
+          var range = scaleFretRange(info2, config, state.scalePosIndex);
+          if(range.count > maxCount) maxCount = range.count;
+          html += renderNeckScaleSVG(info2, config, range);
+        } else {
+          html += renderPianoScaleSVG(info2);
+        }
+      } else {
+        html += '<p style="font-size:13px;color:var(--ink-soft);text-align:center;">'+t('noFingering')+'</p>';
+      }
+      html += '</div>';
+    });
+    sequenceScaleWrap.innerHTML = html;
+    if(scalePosNavSeq) scalePosNavSeq.style.display = isFretted ? 'flex' : 'none';
+    if(isFretted){
+      var idx = Math.max(0, Math.min(state.scalePosIndex||0, maxCount));
+      state.scalePosIndex = idx;
+      if(scalePosInfoSeq) scalePosInfoSeq.textContent = t('posWord')+' '+idx+' / '+maxCount;
+      if(scalePosPrevSeq) scalePosPrevSeq.disabled = idx===0;
+      if(scalePosNextSeq) scalePosNextSeq.disabled = idx===maxCount;
+    }
+  }
+
   function renderSequence(measures, hasExplicitBars){
     stopSequencePlayback();
     var flatTokens = [].concat.apply([], measures);
     state.sequenceInput = measures.map(function(m){ return m.join(' '); }).join(' | ');
     state.sequenceFlatTokens = flatTokens;
+    state.scalePosIndex = 0;
     hideError();
     resultSection.classList.remove('visible');
     sequenceSection.classList.add('visible');
@@ -3617,6 +4738,7 @@
         ? renderSequenceTabSVG(linearBars, flatTokens, inst)
         : '<p style="text-align:center;font-size:12.5px;color:var(--ink-soft);padding:24px 12px;">'+t('tabPianoNote')+'</p>';
     }
+    renderSequenceScaleBlocks(flatTokens, inst);
     applySequenceViewMode();
     hideShareFeedback();
   }
@@ -3650,7 +4772,7 @@
   // (e.g. a long sequence in tablature) can still grow taller than that.
   function alignSequenceSectionHeight(){
     var h = measureCardsGridHeight();
-    var targets = [jazzGrid, tabGrid, staffWrap];
+    var targets = [jazzGrid, tabGrid, staffWrap, sequenceScaleWrap];
     targets.forEach(function(el){
       if(el) el.style.minHeight = h ? (h + 'px') : '';
     });
@@ -3662,10 +4784,14 @@
     var isJazz = mode === 'jazz';
     var isTab = mode === 'tab';
     var isStaff = mode === 'staff';
-    sequenceGrid.style.display = (isJazz || isTab || isStaff) ? 'none' : 'flex';
+    var isScale = mode === 'scale';
+    sequenceGrid.style.display = (isJazz || isTab || isStaff || isScale) ? 'none' : 'flex';
     jazzGrid.style.display = isJazz ? 'flex' : 'none';
     if(tabGrid) tabGrid.style.display = isTab ? 'flex' : 'none';
     if(staffWrap) staffWrap.style.display = isStaff ? 'flex' : 'none';
+    if(sequenceScaleWrap) sequenceScaleWrap.style.display = isScale ? 'flex' : 'none';
+    if(sequenceScaleControls) sequenceScaleControls.style.display = isScale ? 'flex' : 'none';
+    if(isScale) syncScaleControlsUI();
     alignSequenceSectionHeight();
     syncViewControls();
   }
@@ -3695,6 +4821,7 @@
   }
   if(staffWrap) wireSequenceHitTargets(staffWrap);
   if(tabGrid) wireSequenceHitTargets(tabGrid);
+  if(sequenceScaleWrap) wireSequenceHitTargets(sequenceScaleWrap);
 
   function render(){
     var raw = chordInput.value;
@@ -3722,13 +4849,17 @@
     }
     hideError();
     state.currentChord = p;
+    state.scalePosIndex = 0;
     resultSection.classList.add('visible');
     chordNameOut.textContent = displayName(p);
     qualityLabelOut.textContent = (LANG_DATA[currentLang].qualities[p.suffix]) || '';
     instrumentTag.textContent = t(instrumentTagKey());
     var inst = instrument();
-    if(state.showStaff){
+    if(state.chordViewMode !== 'scale' && scaleControls) scaleControls.style.display='none';
+    if(state.chordViewMode === 'staff'){
       renderStaffForChord(p, inst);
+    } else if(state.chordViewMode === 'scale'){
+      renderScaleForChord(p, inst);
     } else if(inst==='guitar'){ renderGuitar(p); } else if(inst==='ukulele'){ renderUkulele(p); } else { renderPiano(p); }
   }
 
@@ -3748,14 +4879,14 @@
       chordInput.focus();
     });
   }
-  function setShowStaff(val){
-    state.showStaff = val;
+  function setChordViewMode(mode){
+    state.chordViewMode = mode;
     syncViewControls();
     render();
   }
   if(chordViewSelect){
     chordViewSelect.addEventListener('change', function(){
-      setShowStaff(chordViewSelect.value === 'staff');
+      setChordViewMode(chordViewSelect.value);
     });
   }
   instGuitar.addEventListener('change', render);
@@ -3766,20 +4897,83 @@
   printBtn.addEventListener('click', function(){ window.print(); });
   printSequenceBtn.addEventListener('click', function(){ window.print(); });
   playBtn.addEventListener('click', function(){
-    if(state.currentChord) playChordSound(state.currentChord, 1.1);
+    if(!state.currentChord) return;
+    if(state.chordViewMode === 'scale'){
+      playScaleSound(state.currentChord);
+    } else {
+      playChordSound(state.currentChord, 1.1);
+    }
   });
+  // Pentatonic option: one shared flag (state.usePentatonic) that both the
+  // single-chord and sequence scale views read from, so toggling it in
+  // either place re-renders whichever scale view(s) are on screen and
+  // keeps both checkboxes mirrored (see syncScaleControlsUI).
+  function onPentatonicToggleChange(checked){
+    state.usePentatonic = checked;
+    syncScaleControlsUI();
+    if(state.chordViewMode === 'scale' && state.currentChord){
+      renderScaleForChord(state.currentChord, instrument());
+    }
+    if(currentSequenceViewMode() === 'scale' && state.sequenceFlatTokens && state.sequenceFlatTokens.length){
+      renderSequenceScaleBlocks(state.sequenceFlatTokens, instrument());
+    }
+  }
+  if(pentatonicToggle){
+    pentatonicToggle.addEventListener('change', function(){ onPentatonicToggleChange(pentatonicToggle.checked); });
+  }
+  if(pentatonicToggleSeq){
+    pentatonicToggleSeq.addEventListener('change', function(){ onPentatonicToggleChange(pentatonicToggleSeq.checked); });
+  }
+  // Scale position navigator: cycles through the classic overlapping
+  // fretboard box patterns for the current scale (see scalePositionWindows
+  // for how they're generated). One shared index drives both the
+  // single-chord view and every block of the sequence view - same
+  // shared-state pattern as the pentatonic toggle above, but only ever
+  // shown for guitar/ukulele (see renderScaleForChord/
+  // renderSequenceScaleBlocks, which hide it for piano) since it only
+  // affects the fretted neck diagram. Each render call clamps and
+  // re-normalizes state.scalePosIndex to whatever position actually ends
+  // up on screen (a chord/scale with fewer positions than the last
+  // selected index just shows its own last one), so stepping always
+  // continues from what's really displayed rather than a stale index.
+  function stepScalePosition(dir){
+    state.scalePosIndex = Math.max(0, (state.scalePosIndex||0) + dir);
+    if(state.chordViewMode === 'scale' && state.currentChord){
+      renderScaleForChord(state.currentChord, instrument());
+    }
+    if(currentSequenceViewMode() === 'scale' && state.sequenceFlatTokens && state.sequenceFlatTokens.length){
+      renderSequenceScaleBlocks(state.sequenceFlatTokens, instrument());
+    }
+  }
+  if(scalePosPrev) scalePosPrev.addEventListener('click', function(){ stepScalePosition(-1); });
+  if(scalePosNext) scalePosNext.addEventListener('click', function(){ stepScalePosition(1); });
+  if(scalePosPrevSeq) scalePosPrevSeq.addEventListener('click', function(){ stepScalePosition(-1); });
+  if(scalePosNextSeq) scalePosNextSeq.addEventListener('click', function(){ stepScalePosition(1); });
+  // Speed control: +/- step through SCALE_SPEED_LEVELS by doubling/halving,
+  // clamped at the array bounds. Only affects playback timing inside
+  // playScaleSound (via state.scaleSpeed) - no diagram to redraw.
+  function stepScaleSpeed(dir){
+    var idx = SCALE_SPEED_LEVELS.indexOf(state.scaleSpeed);
+    if(idx === -1) idx = SCALE_SPEED_LEVELS.indexOf(1);
+    var next = idx + dir;
+    if(next < 0 || next >= SCALE_SPEED_LEVELS.length) return;
+    state.scaleSpeed = SCALE_SPEED_LEVELS[next];
+    syncScaleControlsUI();
+  }
+  if(scaleSpeedDown) scaleSpeedDown.addEventListener('click', function(){ stepScaleSpeed(-1); });
+  if(scaleSpeedUp) scaleSpeedUp.addEventListener('click', function(){ stepScaleSpeed(1); });
   playSequenceBtn.addEventListener('click', function(){
     if(state.sequencePlaying){
       stopSequencePlayback();
+    } else if(currentSequenceViewMode() === 'scale'){
+      playSequenceScaleSound();
     } else {
       playSequenceSound();
     }
   });
   if(sequenceViewSelect){
     sequenceViewSelect.addEventListener('change', function(){
-      var mode = sequenceViewSelect.value;
-      state.showStaff = (mode === 'staff');
-      if(mode !== 'staff') state.sequenceViewMode = (mode === 'jazz' || mode === 'tab') ? mode : 'cards';
+      state.sequenceViewMode = sequenceViewSelect.value;
       syncViewControls();
       render();
     });
