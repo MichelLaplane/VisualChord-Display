@@ -392,25 +392,6 @@
     border-color:var(--accent);
   }
 
-  .chip-row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-top:14px;
-  }
-  .chip{
-    font-family:var(--font-mono);
-    font-size:12.5px;
-    font-weight:600;
-    background:var(--surface-2);
-    border:1px solid var(--line);
-    color:var(--ink-soft);
-    border-radius:20px;
-    padding:6px 12px;
-    cursor:pointer;
-  }
-  .chip:hover{border-color:var(--accent); color:var(--accent-ink); background:color-mix(in srgb, var(--accent) 18%, var(--surface-2));}
-
   .chord-builder{
     margin-top:14px;
     padding:10px 12px;
@@ -486,6 +467,101 @@
     font-weight:700;
     color:var(--ink-soft);
     padding:6px 4px;
+  }
+
+  .audio-import{
+    margin-top:10px;
+    padding:10px 12px;
+    background:var(--surface-2);
+    border:1px dashed var(--line);
+    border-radius:12px;
+  }
+  .audio-import-btn-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .audio-import-status{
+    margin:10px 0 0;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .audio-import-player-wrap{
+    margin-top:10px;
+  }
+  .audio-import-player-wrap .audio-import-note{
+    margin:0 0 6px;
+  }
+  #audioImportPlayer{
+    display:block;
+    border-radius:8px;
+  }
+  .audio-import-spinner{
+    width:13px;height:13px;
+    border-radius:50%;
+    border:2px solid var(--line);
+    border-top-color:var(--accent);
+    animation:audio-import-spin .7s linear infinite;
+    flex:0 0 auto;
+  }
+  @keyframes audio-import-spin{ to{ transform:rotate(360deg); } }
+  .audio-import-status.error{ color:var(--danger); }
+  .audio-import-result{
+    margin-top:10px;
+  }
+  .audio-import-note{
+    margin:0 0 8px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .audio-import-filename{
+    font-style:normal;
+    font-weight:600;
+    color:var(--ink);
+    word-break:break-all;
+  }
+  .audio-import-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .audio-import-input{
+    flex:1 1 220px;
+    min-width:0;
+    font-family:var(--font-mono);
+    font-size:14px;
+    font-weight:600;
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:9px 12px;
+    color:var(--ink);
+  }
+  .audio-import-row .btn{
+    padding:9px 14px;
+    font-size:13px;
+  }
+  .audio-import-sync-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .audio-import-sync-row .btn{
+    padding:9px 14px;
+    font-size:13px;
+  }
+  .audio-import-now-playing{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:13px;
+    color:var(--accent);
   }
 
   .top-row{
@@ -574,11 +650,20 @@
   .scale-note{
     transform-box:fill-box;
     transform-origin:center;
-    transition:transform .08s ease;
+    transition:transform .08s ease, opacity .12s ease;
+    cursor:pointer;
   }
   .scale-note.playing{transform:scale(1.4);}
   .scale-note.playing circle{fill:var(--ink) !important;}
   .scale-note.playing text{fill:var(--surface) !important;}
+  /* A dot not in a given window's "played" set is a unison already
+     covered by another dot (see scaleNeckPlayedKeys) - "Écouter la
+     gamme" never sounds it, so it's shown noticeably lighter than the
+     dots that actually play, while staying clickable on its own (see
+     wireScaleNoteClickToPlay). Not !important, so .playing's own colors
+     (the brief click/playback flash) still take over correctly. */
+  .scale-note.unplayed{ opacity:.38; }
+  .scale-key{ cursor:pointer; }
   .scale-key.playing rect{
     fill:var(--ink) !important;
     stroke:var(--ink) !important;
@@ -664,6 +749,47 @@
     color:var(--accent);
     outline:none;
   }
+  .mini-mute{
+    position:absolute;
+    top:6px;
+    left:6px;
+    width:22px;
+    height:22px;
+    padding:0;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    font-size:11px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .mini-mute:hover, .mini-mute:focus-visible{
+    border-color:var(--accent);
+    color:var(--accent);
+    outline:none;
+  }
+  /* A muted card stays in place (same position/timing in the sequence) but
+     reads as "disabled" at a glance - opacity is applied to the chord's
+     own content (name/diagram/quality), not the whole card, so the mute
+     button itself (and the play button, if any) stay fully visible and
+     easy to click even once a card has been faded out. */
+  .chord-mini-card.muted{
+    border-style:dashed;
+  }
+  .chord-mini-card.muted .mini-name,
+  .chord-mini-card.muted .mini-diagram,
+  .chord-mini-card.muted .mini-quality{
+    opacity:.28;
+  }
+  .chord-mini-card.muted .mini-mute{
+    border-color:var(--accent);
+    color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 14%, var(--surface));
+  }
   .chord-mini-card .mini-name{
     font-family:var(--font-display);
     font-weight:700;
@@ -696,7 +822,13 @@
   .jazz-grid{
     margin-top:14px;
     flex-direction:column;
-    justify-content:center;
+    /* flex-start, not center: alignSequenceSectionHeight (see JS) can set
+       this element's min-height to match the card grid's own natural
+       height, which for a long sequence is far taller than the jazz grid
+       actually needs - centering would then open up a large empty band
+       above the content (and an equal one below) before anything is
+       visible at all. */
+    justify-content:flex-start;
   }
   .jazz-grid svg{
     width:100%;
@@ -711,11 +843,21 @@
   .jazz-region.playing{
     fill:color-mix(in srgb, var(--accent) 20%, transparent);
   }
+  /* A disabled/muted chord's region: faint tint at rest so a "many chords in
+     one cell" row still shows something is off even without a background
+     rect of its own; dimmer tint while playing than the normal "playing"
+     tint, since the chord is still highlighted in sync but makes no sound. */
+  .jazz-region.muted{
+    fill:color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+  .jazz-region.muted.playing{
+    fill:color-mix(in srgb, var(--accent) 10%, transparent);
+  }
 
   .tab-grid{
     margin-top:14px;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start; /* see .jazz-grid's comment above */
   }
   .tab-grid svg{
     width:100%;
@@ -727,7 +869,7 @@
     display:block;
     margin-top:14px;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start; /* see .jazz-grid's comment above */
   }
   .sequence-staff-wrap svg{display:block; width:100%; height:auto;}
   .staff-measure-hit{
@@ -747,7 +889,7 @@
     display:block;
     margin-top:14px;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start; /* see .jazz-grid's comment above */
   }
   .sequence-scale-block{
     margin-bottom:22px;
@@ -1036,7 +1178,38 @@
       <div class="chord-builder-row" id="builderStep2" hidden></div>
       <div class="chord-builder-row" id="builderStep3" hidden></div>
     </div>
-    <div class="chip-row" id="chipRow"></div>
+    <div class="audio-import no-print" id="audioImportBlock">
+      <div class="audio-import-btn-row">
+        <button type="button" class="btn" id="audioImportBtn">🎵 <span id="audioImportBtnText">Analyser un fichier audio</span></button>
+        <input type="file" id="audioFileInput" accept="audio/*" style="display:none;">
+        <label style="display:flex;align-items:center;gap:6px;">
+          <span class="scale-speed-label" id="audioImportGranularityLabelText"></span>
+          <select id="audioImportGranularitySelect" class="seq-view-select">
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="4"></option>
+            <option value="6"></option>
+          </select>
+        </label>
+      </div>
+      <div class="audio-import-player-wrap" id="audioImportPlayerWrap" style="display:none;">
+        <p class="audio-import-note"><span id="audioImportPlayerLabelText"></span> <span id="audioImportFileNameText" class="audio-import-filename"></span></p>
+        <audio id="audioImportPlayer" controls preload="metadata" style="width:100%;"></audio>
+      </div>
+      <div class="audio-import-status" id="audioImportStatus" style="display:none;"></div>
+      <div class="audio-import-result" id="audioImportResult" style="display:none;">
+        <p class="audio-import-note" id="audioImportNoteText"></p>
+        <div class="audio-import-row">
+          <input type="text" id="audioImportChords" class="audio-import-input" autocomplete="off" spellcheck="false">
+          <button type="button" class="btn primary" id="audioImportUseBtn"></button>
+          <button type="button" class="btn" id="audioImportDismissBtn"></button>
+        </div>
+        <div class="audio-import-sync-row">
+          <button type="button" class="btn" id="audioImportSyncBtn">▶ <span id="audioImportSyncBtnText"></span></button>
+          <span class="audio-import-now-playing" id="audioImportNowPlaying" style="display:none;"></span>
+        </div>
+      </div>
+    </div>
     <div class="error-box" id="errorBox"></div>
   </section>
 
@@ -1053,8 +1226,9 @@
             <span class="sr-only" id="labelChordViewText">Affichage</span>
             <select id="chordViewSelect" class="seq-view-select">
               <option value="diagram" id="chordViewOptDiagram">Diagramme</option>
-              <option value="staff" id="chordViewOptStaff">Afficher la portée</option>
+              <option value="staff" id="chordViewOptStaff">Portée</option>
               <option value="scale" id="chordViewOptScale">Gammes</option>
+              <option value="arpeggio" id="chordViewOptArpeggio">Arpèges</option>
             </select>
           </label>
           <span class="instrument-tag" id="instrumentTag"></span>
@@ -1073,7 +1247,7 @@
       <div class="legend" id="legendOut"></div>
 
       <div class="scale-controls no-print" id="scaleControls" style="display:none;">
-        <label class="staff-toggle-inline" for="pentatonicToggle">
+        <label class="staff-toggle-inline" for="pentatonicToggle" id="pentatonicRow">
           <input type="checkbox" id="pentatonicToggle">
           <span id="pentatonicToggleText">Pentatonique</span>
         </label>
@@ -1111,8 +1285,9 @@
               <option value="cards" id="sequenceViewOptCards">Carte</option>
               <option value="jazz" id="sequenceViewOptJazz">Grille jazz</option>
               <option value="tab" id="sequenceViewOptTab">Tablature</option>
-              <option value="staff" id="sequenceViewOptStaff">Afficher la portée</option>
+              <option value="staff" id="sequenceViewOptStaff">Portée</option>
               <option value="scale" id="sequenceViewOptScale">Gammes</option>
+              <option value="arpeggio" id="sequenceViewOptArpeggio">Arpèges</option>
             </select>
           </label>
           <span class="instrument-tag" id="sequenceInstrumentTag"></span>
@@ -1126,7 +1301,7 @@
       <div class="sequence-scale-wrap" id="sequenceScaleWrap" style="display:none;"></div>
 
       <div class="scale-controls no-print" id="sequenceScaleControls" style="display:none;">
-        <label class="staff-toggle-inline" for="pentatonicToggleSeq">
+        <label class="staff-toggle-inline" for="pentatonicToggleSeq" id="pentatonicRowSeq">
           <input type="checkbox" id="pentatonicToggleSeq">
           <span id="pentatonicToggleSeqText">Pentatonique</span>
         </label>
@@ -1137,6 +1312,10 @@
         </div>
       </div>
 
+      <div class="audio-import-sync-row no-print" id="syncSequenceRow" style="display:none;justify-content:center;">
+        <button type="button" class="btn" id="syncSequenceBtn">▶ <span id="syncSequenceBtnText"></span></button>
+        <span class="audio-import-now-playing" id="syncSequenceNowPlaying" style="display:none;"></span>
+      </div>
       <div class="actions-row no-print">
         <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
         <button type="button" class="btn" id="playSequenceBtn">▶ <span id="playSequenceBtnText"></span></button>
@@ -1209,7 +1388,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.2.0';
+  var APP_VERSION = '1.3.0';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -1309,6 +1488,42 @@
     return { scaleKey: scaleKey, intervals: intervals, pitchClasses: pitchClasses };
   }
 
+  // Resolves a parsed chord to the "Arpèges" view's own info object, built
+  // the exact same {scaleKey, intervals, pitchClasses} shape as
+  // chordScaleInfo() above - on purpose, so every scale-rendering/playback
+  // helper downstream (scaleNeckPositions, scaleFretRange,
+  // renderNeckScaleSVG, buildChordScaleSchedule, etc.) works unchanged for
+  // arpeggios too, without knowing or caring which of the two produced the
+  // info it was handed. The difference is only the source of the pitch
+  // classes: the chord's OWN tones (INTERVALS[suffix]), not a full 7-note
+  // scale. Some qualities (e.g. '9', '69') list intervals beyond one octave
+  // (14, 21...) to spell out an extension - those collapse to the same
+  // pitch class mod 12 as a note already in the chord, so they're deduped
+  // here (first occurrence wins). INTERVALS always starts at 0 (the root),
+  // so pitchClasses[0] is always the root - exactly the invariant
+  // scaleNeckPositions relies on to decide which dot is "the" root.
+  function chordArpeggioInfo(p){
+    var intervals = INTERVALS[p.suffix] || INTERVALS.major;
+    var seenPc = {};
+    var uniqueIntervals = intervals.filter(function(iv){
+      var pc = ((p.rootSemitone + iv) % 12 + 12) % 12;
+      if(seenPc[pc]) return false;
+      seenPc[pc] = true;
+      return true;
+    });
+    var pitchClasses = uniqueIntervals.map(function(iv){ return ((p.rootSemitone + iv) % 12 + 12) % 12; });
+    return { scaleKey: 'arpeggio', intervals: uniqueIntervals, pitchClasses: pitchClasses };
+  }
+
+  // Single switch between the "Gammes" and "Arpèges" views' info objects,
+  // used by every function that needs to draw or play one or the other
+  // depending on which view is currently showing (mode is 'scale' or
+  // 'arpeggio', defaulting to 'scale' for any older call site that doesn't
+  // pass one).
+  function scaleOrArpeggioInfo(p, mode){
+    return mode === 'arpeggio' ? chordArpeggioInfo(p) : chordScaleInfo(p, state.usePentatonic);
+  }
+
   var LANG_DATA = {
     fr: {
       name:'Français',
@@ -1322,13 +1537,18 @@
       guitareLabel:'Guitare',
       ukuleleLabel:'Ukulélé (C6)',
       pianoLabel:'Piano',
-      showStaffLabel:'Afficher la portée',
+      showStaffLabel:'Portée',
       gammesLabel:'Gammes',
       scaleCaption:'Gamme : {scale}',
       legendScaleRoot:'Fondamentale',
       legendScaleNote:'Note de la gamme',
       scaleNeckAria:'Gamme sur tout le manche',
       scalePianoAria:'Gamme sur un octave',
+      arpegesLabel:'Arpèges',
+      arpeggioCaption:'Arpège : {chord}',
+      legendArpeggioNote:"Note de l'accord",
+      arpeggioNeckAria:'Arpège sur tout le manche',
+      arpeggioPianoAria:'Arpège sur un octave',
       staffAria:"Portée musicale de l'accord",
       printBtn:'Imprimer ce diagramme',
       helpSummary:'Aide & vocabulaire des accords',
@@ -1365,12 +1585,28 @@
       sequenceMeasures:'{n} mesures',
       playChord:'Écouter cet accord',
       playScale:'Écouter la gamme',
+      playArpeggio:"Écouter l'arpège",
+      audioImportBtn:'Analyser un fichier audio',
+      audioImportPlayerLabel:'Fichier importé :',
+      audioImportAnalyzing:'Analyse en cours…',
+      audioImportError:"Impossible d'analyser ce fichier audio.",
+      audioImportNoChords:'Aucun accord détecté dans ce fichier.',
+      audioImportNote:"Détection automatique approximative : écoutez et corrigez les accords avant de les utiliser.",
+      audioImportUseBtn:'Utiliser cette grille',
+      audioImportDismissBtn:'Ignorer',
+      audioImportSyncBtn:'Jouer en rythme avec le morceau',
+      audioImportNowPlayingLabel:'En cours :',
+      audioImportGranularityLabel:'Granularité :',
+      audioImportGranularityUnit:'s',
+      audioImportGranularityHint:"Durée de chaque tranche d'analyse : plus long est plus stable mais réagit moins vite aux changements rapides d'accords.",
       pentatonicToggleLabel:'Pentatonique',
       scaleSpeedLabel:'Vitesse',
       scaleSpeedDownAria:'Diminuer la vitesse',
       scaleSpeedUpAria:'Augmenter la vitesse',
       fretLimitToggleLabel:'5 cases',
       playAria:'Écouter',
+      muteChordAria:'Désactiver cet accord (ne sera pas joué)',
+      unmuteChordAria:'Réactiver cet accord',
       playSequenceBtn:'Écouter la suite',
       stopSequenceBtn:'Arrêter',
       backToSequence:'Retour à la suite',
@@ -1438,6 +1674,11 @@
       legendScaleNote:'Scale note',
       scaleNeckAria:'Full-neck scale',
       scalePianoAria:'One-octave scale',
+      arpegesLabel:'Arpeggios',
+      arpeggioCaption:'Arpeggio: {chord}',
+      legendArpeggioNote:'Chord tone',
+      arpeggioNeckAria:'Full-neck arpeggio',
+      arpeggioPianoAria:'One-octave arpeggio',
       staffAria:'Musical staff of the chord',
       printBtn:'Print this diagram',
       helpSummary:'Help & chord vocabulary',
@@ -1474,12 +1715,28 @@
       sequenceMeasures:'{n} bars',
       playChord:'Play this chord',
       playScale:'Play the scale',
+      playArpeggio:'Play the arpeggio',
+      audioImportBtn:'Analyze an audio file',
+      audioImportPlayerLabel:'Imported file:',
+      audioImportAnalyzing:'Analyzing…',
+      audioImportError:'Could not analyze this audio file.',
+      audioImportNoChords:'No chords detected in this file.',
+      audioImportNote:'Approximate automatic detection: listen and correct the chords before using them.',
+      audioImportUseBtn:'Use this progression',
+      audioImportDismissBtn:'Dismiss',
+      audioImportSyncBtn:'Play in sync with the song',
+      audioImportNowPlayingLabel:'Now playing:',
+      audioImportGranularityLabel:'Granularity:',
+      audioImportGranularityUnit:'s',
+      audioImportGranularityHint:'Length of each analysis slice: longer is steadier but reacts more slowly to fast chord changes.',
       pentatonicToggleLabel:'Pentatonic',
       scaleSpeedLabel:'Speed',
       scaleSpeedDownAria:'Decrease speed',
       scaleSpeedUpAria:'Increase speed',
       fretLimitToggleLabel:'5 frets',
       playAria:'Play',
+      muteChordAria:'Mute this chord (will not be played)',
+      unmuteChordAria:'Unmute this chord',
       playSequenceBtn:'Play progression',
       stopSequenceBtn:'Stop',
       backToSequence:'Back to progression',
@@ -1547,6 +1804,11 @@
       legendScaleNote:'Tonleiterton',
       scaleNeckAria:'Tonleiter über das ganze Griffbrett',
       scalePianoAria:'Tonleiter über eine Oktave',
+      arpegesLabel:'Arpeggien',
+      arpeggioCaption:'Arpeggio: {chord}',
+      legendArpeggioNote:'Akkordton',
+      arpeggioNeckAria:'Arpeggio über das ganze Griffbrett',
+      arpeggioPianoAria:'Arpeggio über eine Oktave',
       staffAria:'Notenlinie des Akkords',
       printBtn:'Dieses Diagramm drucken',
       helpSummary:'Hilfe & Akkord-Vokabular',
@@ -1583,12 +1845,28 @@
       sequenceMeasures:'{n} Takte',
       playChord:'Diesen Akkord abspielen',
       playScale:'Tonleiter abspielen',
+      playArpeggio:'Arpeggio abspielen',
+      audioImportBtn:'Audiodatei analysieren',
+      audioImportPlayerLabel:'Importierte Datei:',
+      audioImportAnalyzing:'Analyse läuft…',
+      audioImportError:'Diese Audiodatei konnte nicht analysiert werden.',
+      audioImportNoChords:'In dieser Datei wurden keine Akkorde erkannt.',
+      audioImportNote:'Ungefähre automatische Erkennung: Akkorde anhören und vor der Verwendung korrigieren.',
+      audioImportUseBtn:'Diese Folge verwenden',
+      audioImportDismissBtn:'Verwerfen',
+      audioImportSyncBtn:'Im Rhythmus des Songs abspielen',
+      audioImportNowPlayingLabel:'Gerade aktiv:',
+      audioImportGranularityLabel:'Granularität:',
+      audioImportGranularityUnit:'s',
+      audioImportGranularityHint:'Dauer jedes Analyseabschnitts: länger ist stabiler, reagiert aber langsamer auf schnelle Akkordwechsel.',
       pentatonicToggleLabel:'Pentatonik',
       scaleSpeedLabel:'Geschwindigkeit',
       scaleSpeedDownAria:'Geschwindigkeit verringern',
       scaleSpeedUpAria:'Geschwindigkeit erhöhen',
       fretLimitToggleLabel:'5 Bünde',
       playAria:'Abspielen',
+      muteChordAria:'Diesen Akkord stummschalten (wird nicht abgespielt)',
+      unmuteChordAria:'Diesen Akkord wieder aktivieren',
       playSequenceBtn:'Akkordfolge abspielen',
       stopSequenceBtn:'Stopp',
       backToSequence:'Zurück zur Akkordfolge',
@@ -1656,6 +1934,11 @@
       legendScaleNote:'Nota della scala',
       scaleNeckAria:'Scala su tutto il manico',
       scalePianoAria:"Scala su un'ottava",
+      arpegesLabel:'Arpeggi',
+      arpeggioCaption:'Arpeggio: {chord}',
+      legendArpeggioNote:"Nota dell'accordo",
+      arpeggioNeckAria:'Arpeggio su tutto il manico',
+      arpeggioPianoAria:"Arpeggio su un'ottava",
       staffAria:"Pentagramma musicale dell'accordo",
       printBtn:'Stampa questo diagramma',
       helpSummary:'Guida e vocabolario degli accordi',
@@ -1692,12 +1975,28 @@
       sequenceMeasures:'{n} battute',
       playChord:'Ascolta questo accordo',
       playScale:'Ascolta la scala',
+      playArpeggio:"Ascolta l'arpeggio",
+      audioImportBtn:'Analizza un file audio',
+      audioImportPlayerLabel:'File importato:',
+      audioImportAnalyzing:'Analisi in corso…',
+      audioImportError:'Impossibile analizzare questo file audio.',
+      audioImportNoChords:'Nessun accordo rilevato in questo file.',
+      audioImportNote:'Rilevamento automatico approssimativo: ascolta e correggi gli accordi prima di usarli.',
+      audioImportUseBtn:'Usa questa sequenza',
+      audioImportDismissBtn:'Ignora',
+      audioImportSyncBtn:'Suona in sincrono con il brano',
+      audioImportNowPlayingLabel:'In corso:',
+      audioImportGranularityLabel:'Granularità:',
+      audioImportGranularityUnit:'s',
+      audioImportGranularityHint:"Durata di ogni porzione di analisi: più lunga è più stabile ma reagisce più lentamente ai cambi rapidi di accordo.",
       pentatonicToggleLabel:'Pentatonica',
       scaleSpeedLabel:'Velocità',
       scaleSpeedDownAria:'Diminuisci velocità',
       scaleSpeedUpAria:'Aumenta velocità',
       fretLimitToggleLabel:'5 tasti',
       playAria:'Ascolta',
+      muteChordAria:'Disattiva questo accordo (non verrà suonato)',
+      unmuteChordAria:'Riattiva questo accordo',
       playSequenceBtn:'Ascolta la progressione',
       stopSequenceBtn:'Ferma',
       backToSequence:'Torna alla progressione',
@@ -1765,6 +2064,11 @@
       legendScaleNote:'Nota de la escala',
       scaleNeckAria:'Escala en todo el mástil',
       scalePianoAria:'Escala de una octava',
+      arpegesLabel:'Arpegios',
+      arpeggioCaption:'Arpegio: {chord}',
+      legendArpeggioNote:'Nota del acorde',
+      arpeggioNeckAria:'Arpegio en todo el mástil',
+      arpeggioPianoAria:'Arpegio de una octava',
       staffAria:'Pentagrama musical del acorde',
       printBtn:'Imprimir este diagrama',
       helpSummary:'Ayuda y vocabulario de acordes',
@@ -1801,12 +2105,28 @@
       sequenceMeasures:'{n} compases',
       playChord:'Escuchar este acorde',
       playScale:'Escuchar la escala',
+      playArpeggio:'Escuchar el arpegio',
+      audioImportBtn:'Analizar un archivo de audio',
+      audioImportPlayerLabel:'Archivo importado:',
+      audioImportAnalyzing:'Analizando…',
+      audioImportError:'No se pudo analizar este archivo de audio.',
+      audioImportNoChords:'No se detectaron acordes en este archivo.',
+      audioImportNote:'Detección automática aproximada: escuche y corrija los acordes antes de usarlos.',
+      audioImportUseBtn:'Usar esta progresión',
+      audioImportDismissBtn:'Descartar',
+      audioImportSyncBtn:'Reproducir al ritmo de la canción',
+      audioImportNowPlayingLabel:'Sonando ahora:',
+      audioImportGranularityLabel:'Granularidad:',
+      audioImportGranularityUnit:'s',
+      audioImportGranularityHint:'Duración de cada tramo de análisis: más largo es más estable pero reacciona más despacio a cambios de acorde rápidos.',
       pentatonicToggleLabel:'Pentatónica',
       scaleSpeedLabel:'Velocidad',
       scaleSpeedDownAria:'Disminuir velocidad',
       scaleSpeedUpAria:'Aumentar velocidad',
       fretLimitToggleLabel:'5 trastes',
       playAria:'Escuchar',
+      muteChordAria:'Silenciar este acorde (no se reproducirá)',
+      unmuteChordAria:'Reactivar este acorde',
       playSequenceBtn:'Escuchar la progresión',
       stopSequenceBtn:'Detener',
       backToSequence:'Volver a la progresión',
@@ -1874,6 +2194,11 @@
       legendScaleNote:'音阶音',
       scaleNeckAria:'整个指板音阶',
       scalePianoAria:'单八度音阶',
+      arpegesLabel:'琶音',
+      arpeggioCaption:'琶音：{chord}',
+      legendArpeggioNote:'和弦音',
+      arpeggioNeckAria:'整个指板琶音',
+      arpeggioPianoAria:'单八度琶音',
       staffAria:'和弦的五线谱',
       printBtn:'打印此图表',
       helpSummary:'帮助与和弦词汇',
@@ -1910,12 +2235,28 @@
       sequenceMeasures:'{n} 个小节',
       playChord:'播放此和弦',
       playScale:'播放音阶',
+      playArpeggio:'播放琶音',
+      audioImportBtn:'分析音频文件',
+      audioImportPlayerLabel:'已导入的文件：',
+      audioImportAnalyzing:'正在分析…',
+      audioImportError:'无法分析此音频文件。',
+      audioImportNoChords:'未在此文件中检测到和弦。',
+      audioImportNote:'自动检测结果为近似值：使用前请聆听并校正和弦。',
+      audioImportUseBtn:'使用此和弦进行',
+      audioImportDismissBtn:'忽略',
+      audioImportSyncBtn:'与歌曲同步播放',
+      audioImportNowPlayingLabel:'当前：',
+      audioImportGranularityLabel:'粒度：',
+      audioImportGranularityUnit:'秒',
+      audioImportGranularityHint:'每个分析片段的时长：越长越稳定，但对快速换和弦的反应越慢。',
       pentatonicToggleLabel:'五声音阶',
       scaleSpeedLabel:'速度',
       scaleSpeedDownAria:'降低速度',
       scaleSpeedUpAria:'提高速度',
       fretLimitToggleLabel:'限制5品',
       playAria:'播放',
+      muteChordAria:'静音此和弦（将不会播放）',
+      unmuteChordAria:'取消静音此和弦',
       playSequenceBtn:'播放和弦进行',
       stopSequenceBtn:'停止',
       backToSequence:'返回和弦进行',
@@ -2032,8 +2373,6 @@
    'madd9':'madd9','minadd9':'madd9',
    '5':'5'
   };
-
-  var EXAMPLES = ['C','G','Am','D7','Em7','Fmaj7','Cadd9','G/B','Bm7b5','A7#9','Dsus4','C6/9','F#m','Bb9'];
 
   function normalizeToken(s){
     return s
@@ -2276,7 +2615,17 @@
   // range, which Web Audio simply clips - a harsh, "degraded" digital
   // distortion. Routing everything through one shared limiter before the
   // real output avoids that, the way any real mixing chain would.
+  // masterGain sits between the compressor and the speakers purely so
+  // stopAllAudioNow() (below) has a single place to ramp volume to zero -
+  // every note of every instrument (plucked AudioBufferSourceNode or piano
+  // oscillator) passes through it, so one quick ramp silences everything
+  // currently ringing at once, regardless of each note's own, separately
+  // scheduled stop/decay time. Each call to getMasterBus() also cancels any
+  // in-progress ramp-down and reopens the gate to full volume: it runs
+  // exactly once per new note that's about to start, so the moment any new
+  // sound is scheduled after a Stop, the gate is guaranteed open again.
   var masterBus = null;
+  var masterGain = null;
   function getMasterBus(ctx){
     if(!masterBus){
       var comp = ctx.createDynamicsCompressor();
@@ -2285,10 +2634,34 @@
       comp.ratio.value = 10;
       comp.attack.value = 0.003;
       comp.release.value = 0.22;
-      comp.connect(ctx.destination);
+      masterGain = ctx.createGain();
+      masterGain.gain.value = 1;
+      comp.connect(masterGain);
+      masterGain.connect(ctx.destination);
       masterBus = comp;
     }
+    var now = ctx.currentTime;
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(1, now);
     return masterBus;
+  }
+
+  // Immediately silences every note currently ringing, no matter which
+  // instrument voice or how long each note was scheduled to keep sounding -
+  // used by the "Arrêter" command so pressing Stop mid-sequence actually
+  // cuts the sound right away instead of just cancelling the chords that
+  // hadn't started yet while the current one rings out on its own. A fast
+  // (30ms) linear ramp rather than an instant value change avoids an
+  // audible click. getMasterBus() reopens the gate the next time any new
+  // sound is scheduled, so this never silences future playback.
+  function stopAllAudioNow(){
+    if(!audioCtx || !masterGain) return;
+    try{
+      var now = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(0.0001, now + 0.03);
+    }catch(e){}
   }
 
   function noteFrequency(pc, octave){
@@ -2623,8 +2996,8 @@
   // never drift apart between the two playback modes. Returns
   // {events, duration}: duration is how long this chord's run takes before
   // the next one may safely start.
-  function buildChordScaleSchedule(p, inst, speed){
-    var info = chordScaleInfo(p, state.usePentatonic);
+  function buildChordScaleSchedule(p, inst, speed, mode){
+    var info = scaleOrArpeggioInfo(p, mode);
     var events = [];
     var duration;
     if(inst==='guitar' || inst==='ukulele'){
@@ -2636,12 +3009,12 @@
       // played/highlighted once), but the actual chosen position
       // (string+fret) is kept alongside it, not just the pitch, so
       // animateScaleNotes can light up that one exact dot instead of every
-      // dot that happens to share the same note name.
-      var seen = {};
-      var uniqueList = [];
-      positions.forEach(function(pos){
-        if(!seen[pos.abs]){ seen[pos.abs]=true; uniqueList.push(pos); }
-      });
+      // dot that happens to share the same note name. scaleNeckPlayedKeys
+      // is the same lookup renderNeckScaleSVG uses to dim the OTHER,
+      // unkept dots as "unplayed", so the diagram and this schedule always
+      // agree on exactly which dots sound.
+      var playedKeys = scaleNeckPlayedKeys(positions);
+      var uniqueList = positions.filter(function(pos){ return playedKeys[pos.string+'-'+pos.fret]; });
       uniqueList.sort(function(a,b){ return a.abs-b.abs; });
       var noteStep = 0.3/speed, noteDur = 0.64/speed; // base = half speed (was 0.15 / 0.32)
       uniqueList.forEach(function(pos, i){
@@ -2667,20 +3040,30 @@
     return { events: events, duration: duration };
   }
 
-  function playScaleSound(p){
+  // Turns a scale event's "abs" (real absolute pitch, octave*12+pc) into
+  // the {pc,octave,name} note object the instrument voices expect. Shared
+  // by playScaleSound (the whole-schedule run) and playSingleAbsNote (one
+  // clicked note) so both ALWAYS agree on exactly what a given "abs" value
+  // actually sounds like - the ukulele's +1 octave bump in particular is
+  // easy to get subtly wrong if duplicated by hand.
+  function absToVoicedNote(abs, inst){
+    var octave = Math.floor(abs/12);
+    var pc = ((abs%12)+12)%12;
+    var noteOctave = inst==='ukulele' ? octave+1 : octave;
+    return { pc:pc, octave:noteOctave, name: SEMI_TO_NAME[pc] };
+  }
+
+  function playScaleSound(p, mode){
     var ctx = getAudioCtx();
     if(!ctx || !p || !p.ok) return;
     var inst = instrument();
     var speed = state.scaleSpeed || 1;
-    var built = buildChordScaleSchedule(p, inst, speed);
+    var built = buildChordScaleSchedule(p, inst, speed, mode);
     var now = ctx.currentTime;
     if(inst==='guitar' || inst==='ukulele'){
       var opts = inst==='guitar' ? GUITAR_SYNTH_OPTS : UKULELE_SYNTH_OPTS;
       built.events.forEach(function(ev){
-        var octave = Math.floor(ev.abs/12);
-        var pc = ((ev.abs%12)+12)%12;
-        var noteOctave = inst==='ukulele' ? octave+1 : octave;
-        var note = { pc:pc, octave:noteOctave, name: SEMI_TO_NAME[pc] };
+        var note = absToVoicedNote(ev.abs, inst);
         playPluckedChord(ctx, {lh:note, rh:[]}, ev.dur, opts, ev.delay);
       });
     } else {
@@ -2691,6 +3074,520 @@
       });
     }
     animateScaleNotes(built.events);
+  }
+
+  // Plays exactly ONE note on demand - not a whole chord strum, not the
+  // full scale run - fired when the person clicks directly on a note
+  // dot/key in the Gammes view (see wireScaleNoteClickToPlay). Uses the
+  // very same pitch math as playScaleSound (absToVoicedNote) so a clicked
+  // note always sounds identical to what it would during an automatic
+  // playback run, including a dot marked "unplayed" (a unison the
+  // auto-play schedule skips, see scaleNeckPlayedKeys) - clicking is the
+  // only way to actually hear that one on its own.
+  function playSingleAbsNote(abs, inst){
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var note = absToVoicedNote(abs, inst);
+    if(inst==='guitar' || inst==='ukulele'){
+      var opts = inst==='guitar' ? GUITAR_SYNTH_OPTS : UKULELE_SYNTH_OPTS;
+      playPluckedChord(ctx, {lh:note, rh:[]}, 1.1, opts, 0.01);
+    } else {
+      playPianoTone(ctx, noteFrequency(note.pc, note.octave), ctx.currentTime+0.01, 0.9, 0.18);
+    }
+  }
+
+  // ---------- "Analyser un fichier audio": chord detection from a file ----------
+  // A from-scratch, dependency-free chord-recognition pipeline: decode the
+  // user's audio file via the Web Audio API, reduce it to mono at a lower
+  // sample rate, compute a 12-bin chroma (pitch-class) profile for each
+  // short time segment via FFT, match each profile against a bank of
+  // chord templates built from the app's own INTERVALS/SUFFIX_DISPLAY/
+  // SEMI_TO_NAME tables (so every detected token is one parseChordName()
+  // already understands elsewhere in the app), then despike and collapse
+  // the result into one ordered chord sequence. This is a simplified,
+  // "best effort" version of the classic chroma + template-matching
+  // method used by real chord-recognition tools - it will make real
+  // mistakes on anything but simple, clearly-accompanied recordings (see
+  // the audioImportNote disclaimer shown with the result), but it runs
+  // entirely client-side with no server and no external library.
+
+  // In-place iterative radix-2 Cooley-Tukey FFT. re/im are same-length
+  // Float64Arrays whose length is a power of two; re holds the windowed
+  // time-domain samples on input, and on return re[k]/im[k] are the
+  // real/imaginary parts of frequency bin k.
+  function fftInPlace(re, im){
+    var n = re.length;
+    for(var i=1, j=0; i<n; i++){
+      var bit = n >> 1;
+      for(; j & bit; bit >>= 1){ j ^= bit; }
+      j ^= bit;
+      if(i < j){
+        var tr=re[i]; re[i]=re[j]; re[j]=tr;
+        var ti=im[i]; im[i]=im[j]; im[j]=ti;
+      }
+    }
+    for(var len=2; len<=n; len <<= 1){
+      var ang = -2*Math.PI/len;
+      var wr = Math.cos(ang), wi = Math.sin(ang);
+      for(var start=0; start<n; start+=len){
+        var curWr=1, curWi=0;
+        var half = len/2;
+        for(var k=0; k<half; k++){
+          var ur=re[start+k], ui=im[start+k];
+          var vr = re[start+k+half]*curWr - im[start+k+half]*curWi;
+          var vi = re[start+k+half]*curWi + im[start+k+half]*curWr;
+          re[start+k]=ur+vr; im[start+k]=ui+vi;
+          re[start+k+half]=ur-vr; im[start+k+half]=ui-vi;
+          var nwr = curWr*wr - curWi*wi;
+          var nwi = curWr*wi + curWi*wr;
+          curWr=nwr; curWi=nwi;
+        }
+      }
+    }
+  }
+
+  var hannWindowCache = {};
+  function hannWindow(n){
+    if(hannWindowCache[n]) return hannWindowCache[n];
+    var w = new Float64Array(n);
+    for(var i=0;i<n;i++){ w[i] = 0.5 - 0.5*Math.cos(2*Math.PI*i/(n-1)); }
+    hannWindowCache[n] = w;
+    return w;
+  }
+
+  // A small, practical chord vocabulary for detection - deliberately
+  // narrower than the app's full INTERVALS table (which also covers many
+  // close variants, like 9/11/13 extensions or b5/#5 alterations, that
+  // are very hard to tell apart reliably from audio alone): major/minor
+  // triads plus the handful of seventh/sus qualities common enough in
+  // real songs to be worth the extra templates. More qualities means more
+  // chances for the matcher to pick a near-miss on a noisy signal, so
+  // this list stays short on purpose.
+  var AUDIO_DETECT_QUALITIES = ['major','minor','7','maj7','m7','dim','sus4'];
+  var CHORD_TEMPLATES = null;
+  function buildChordTemplates(){
+    if(CHORD_TEMPLATES) return CHORD_TEMPLATES;
+    var templates = [];
+    AUDIO_DETECT_QUALITIES.forEach(function(quality){
+      var intervals = INTERVALS[quality];
+      for(var root=0; root<12; root++){
+        var vec = new Float64Array(12);
+        intervals.forEach(function(iv){ vec[(root+iv)%12] = 1; });
+        templates.push({ root:root, quality:quality, vec:vec });
+      }
+    });
+    CHORD_TEMPLATES = templates;
+    return templates;
+  }
+  function cosineSim(a, b){
+    var dot=0, na=0, nb=0;
+    for(var i=0;i<a.length;i++){ dot += a[i]*b[i]; na += a[i]*a[i]; nb += b[i]*b[i]; }
+    if(na===0 || nb===0) return 0;
+    return dot/Math.sqrt(na*nb);
+  }
+  function matchChordTemplate(chroma){
+    var templates = buildChordTemplates();
+    var best=null, bestScore=-Infinity;
+    for(var i=0;i<templates.length;i++){
+      var score = cosineSim(chroma, templates[i].vec);
+      if(score > bestScore){ bestScore=score; best=templates[i]; }
+    }
+    return { root:best.root, quality:best.quality, score:bestScore };
+  }
+  function sameChord(a, b){ return a.root===b.root && a.quality===b.quality; }
+
+  // Downmixes every channel of a decoded AudioBuffer into one mono
+  // Float64Array (simple average - good enough for chord analysis, which
+  // only cares about which pitches are present, not stereo placement).
+  function audioBufferToMono(buffer){
+    var n = buffer.length;
+    var mono = new Float64Array(n);
+    var channels = buffer.numberOfChannels;
+    for(var c=0; c<channels; c++){
+      var data = buffer.getChannelData(c);
+      for(var i=0;i<n;i++){ mono[i] += data[i]/channels; }
+    }
+    return mono;
+  }
+
+  // Crude box-car decimation (average every `factor` consecutive samples
+  // into one) - not a properly anti-aliased resampler, but more than good
+  // enough here: chroma analysis only cares about frequencies up to a few
+  // kHz (musical fundamentals and their early harmonics), and this is a
+  // cheap, dependency-free way to cut the FFT workload by roughly
+  // `factor` so a multi-minute song analyzes in a second or two.
+  function decimateAverage(samples, factor){
+    var outLen = Math.floor(samples.length/factor);
+    var out = new Float64Array(outLen);
+    for(var i=0;i<outLen;i++){
+      var sum=0, base=i*factor;
+      for(var k=0;k<factor;k++){ sum += samples[base+k]; }
+      out[i] = sum/factor;
+    }
+    return out;
+  }
+
+  // A chord's root is the note the BASS plays, not necessarily the note
+  // with the most overall energy - a guitar or piano voicing often states
+  // the 3rd or 5th louder than the root up top. Weighting every bin in the
+  // 55Hz-2.1kHz band equally (as a plain chroma does) lets that upper
+  // energy outvote the bass when two templates fit the overall pitch
+  // content almost equally well, which is the single most common way this
+  // detector picks the wrong root on real recordings. BASS_BOOST_MAX_FREQ/
+  // BASS_BOOST_WEIGHT fix that by counting energy in the bass register
+  // several times over before the chroma is normalized, so the bass note
+  // dominates the final pitch-class profile much more than its raw energy
+  // alone would - the same "bass-weighted chroma"/"bass pitch-class
+  // profile" idea real chord-recognition systems use to pick the
+  // musically-correct root instead of whichever pitch class merely has the
+  // most energy.
+  var BASS_BOOST_MAX_FREQ = 250; // up to roughly B3 - covers a bass/low guitar string's fundamental
+  var BASS_BOOST_WEIGHT = 3;     // how many times over bass-register energy counts, vs. the rest of the band
+
+  // Separating a busy drum/percussion groove from real chords turned out
+  // to need more than a per-frame heuristic. Spectral flatness (an earlier
+  // version of this code) assumes a drum hit is broadband noise, which
+  // catches a snare or hi-hat but completely misses tuned, resonant hand
+  // percussion (congas, bongos, surdo and the like) - their energy is
+  // just as concentrated in frequency as a real note's, so flatness reads
+  // them as "tonal". A within-frame decay check (also tried) only catches
+  // an ISOLATED hit with silence on both sides; a real percussion groove's
+  // hits overlap too closely for that. What actually tells them apart is
+  // TIME, not any one frame in isolation: a real chord's energy at a given
+  // pitch sits there for as long as the chord is held, while even a
+  // resonant drum hit's energy at its own frequency rises and falls within
+  // a beat or two. medianFilterSlice + the harmonic/percussive mask below
+  // are a simplified version of the median-filtering HPSS (harmonic-
+  // percussive source separation) technique audio tools like librosa use
+  // for exactly this: for every (frame, frequency bin) cell, compare how
+  // steady that bin's energy is across nearby TIME (its "harmonic"
+  // estimate) against how steady it is across nearby FREQUENCY at that
+  // same instant (its "percussive" estimate, since a drum hit lights up a
+  // broad swath of bins all at once) - whichever is larger wins. Only
+  // bins that come out "harmonic" feed the chroma profile, so a resonant
+  // percussion hit - tonal-LOOKING in any single frame, but transient in
+  // time - gets masked out, while a real held note or chord, steady over
+  // several frames, passes through.
+  var HPSS_TIME_WIN = 7;   // frames either side considered for the time-median (~3.3s of context at the default frame size)
+  var HPSS_FREQ_WIN = 17;  // bins either side considered for the frequency-median
+  var PERCUSSIVE_FLATNESS_MIN = 0.5; // frame-level: >= this is treated as broadband-noise percussion (snare/hi-hat/claps)
+  var PERCUSSIVE_GATE_MIN = 0.40; // segments whose energy-weighted average harmonic-mask ratio falls below this are treated as percussion-only (no chord), not just reweighted
+
+  // In-place-free median of the first `n` entries of `arr` (a scratch
+  // buffer the caller reuses across cells, since this runs once per
+  // (frame, bin) pair - allocating a fresh array each call would be far
+  // too slow for a multi-minute song). n is always small (HPSS_TIME_WIN or
+  // HPSS_FREQ_WIN, or fewer at the edges), so a plain insertion sort beats
+  // the overhead of a general-purpose sort.
+  function medianOfSlice(arr, n){
+    for(var i=1;i<n;i++){
+      var v = arr[i], j = i-1;
+      while(j>=0 && arr[j]>v){ arr[j+1]=arr[j]; j--; }
+      arr[j+1]=v;
+    }
+    return (n%2) ? arr[n>>1] : (arr[(n>>1)-1]+arr[n>>1])/2;
+  }
+
+  var AUDIO_DETECT_TARGET_RATE = 11025;     // analysis rate we downsample TOWARD, whatever the source rate is
+  var AUDIO_DETECT_FRAME = 4096;            // ~370 ms per frame at ~11 kHz
+  var AUDIO_DETECT_FRAMES_PER_SEGMENT = 2;  // ~0.74 s per chord guess, unless overridden (see detectChordsFromAudioBuffer's framesPerSegment param)
+  var AUDIO_DETECT_SEG_CHOICES = [1,2,4,6]; // selectable granularities, in AUDIO_DETECT_FRAME units - see audioImportGranularitySelect
+  var AUDIO_DETECT_MIN_SCORE = 0.5;         // below this, treat the segment as silence/no clear chord
+  var AUDIO_DETECT_YIELD_EVERY = 40;        // frames between UI-thread yields
+
+  // Runs the whole pipeline on a decoded AudioBuffer and resolves to
+  // {chords, timeline}: chords is the ordered array of chord label strings
+  // (e.g. ["C","G","Am","F"]) the file-import UI shows and lets the person
+  // edit, exactly as before; timeline is the same chords but with their
+  // actual start/duration in the ORIGINAL file, in seconds
+  // ({token,startSec,durSec}[]) - used by "Jouer en rythme avec le
+  // morceau" to schedule each chord's synthesized sound at the moment it
+  // really occurs while the uploaded file plays. onProgress(fraction), if
+  // given, is called periodically (0..1) so the caller can show a live
+  // readout; the frame loop yields back to the browser every
+  // AUDIO_DETECT_YIELD_EVERY frames so a multi-minute song doesn't freeze
+  // the page while it's being analyzed. framesPerSegment overrides how many
+  // AUDIO_DETECT_FRAME-sized frames are pooled into one "chord guess" (see
+  // AUDIO_DETECT_SEG_CHOICES / audioImportGranularitySelect) - a shorter
+  // segment catches faster chord changes but is more easily thrown off by a
+  // single noisy/transient frame; a longer one is steadier but can blur
+  // together two real, quick changes. Defaults to AUDIO_DETECT_FRAMES_PER_SEGMENT
+  // when omitted.
+  async function detectChordsFromAudioBuffer(buffer, onProgress, framesPerSegment){
+    var FRAMES_PER_SEGMENT = framesPerSegment || AUDIO_DETECT_FRAMES_PER_SEGMENT;
+    var mono = audioBufferToMono(buffer);
+    var downsampleFactor = Math.max(1, Math.round(buffer.sampleRate / AUDIO_DETECT_TARGET_RATE));
+    var down = decimateAverage(mono, downsampleFactor);
+    var sampleRate = buffer.sampleRate / downsampleFactor;
+    var frameSize = AUDIO_DETECT_FRAME;
+    var window = hannWindow(frameSize);
+    var frameCount = Math.max(0, Math.floor(down.length/frameSize));
+    if(frameCount < 2) return { chords: [], timeline: [] };
+    // Real-world duration of one segment - decimateAverage only averages
+    // amplitude within each window, it never speeds up or skips time, so
+    // segment index i always corresponds to real time [i*segDur,
+    // (i+1)*segDur) in the ORIGINAL (not downsampled) file.
+    var segDur = (frameSize * FRAMES_PER_SEGMENT) / sampleRate;
+
+    var minBin = Math.max(1, Math.round(55*frameSize/sampleRate));
+    var maxBin = Math.min((frameSize>>1)-1, Math.round(2100*frameSize/sampleRate));
+    var numBins = maxBin-minBin+1;
+    var bassMaxBin = Math.min(maxBin, Math.round(BASS_BOOST_MAX_FREQ*frameSize/sampleRate));
+
+    // Pass 1/3: the full magnitude spectrogram, restricted to the same
+    // ~55Hz-2.1kHz band the chroma profile is built from - needed up
+    // front because the harmonic/percussive mask below has to look both
+    // forward and backward in TIME from every frame, not just at frames
+    // already seen.
+    var mags = new Float32Array(frameCount*numBins);
+    for(var f=0; f<frameCount; f++){
+      var frame = down.subarray(f*frameSize, (f+1)*frameSize);
+      var re = new Float64Array(frameSize), im = new Float64Array(frameSize);
+      for(var i=0;i<frameSize;i++){ re[i] = frame[i]*window[i]; }
+      fftInPlace(re, im);
+      for(var b=0;b<numBins;b++){
+        var k = minBin+b;
+        mags[f*numBins+b] = Math.sqrt(re[k]*re[k] + im[k]*im[k]);
+      }
+      if(onProgress && f % AUDIO_DETECT_YIELD_EVERY === 0){
+        onProgress(0.45*f/frameCount);
+        await new Promise(function(resolve){ setTimeout(resolve, 0); });
+      }
+    }
+
+    // Pass 2/3: the harmonic/percussive mask (see HPSS_TIME_WIN/HPSS_FREQ_WIN
+    // above) - 1 where a cell's energy is better explained by holding
+    // steady over time (harmonic) than by spiking across frequency at
+    // that instant (percussive), 0 otherwise.
+    var harmMask = new Float32Array(frameCount*numBins);
+    var timeHalf = HPSS_TIME_WIN>>1, freqHalf = HPSS_FREQ_WIN>>1;
+    var scratch = new Float32Array(Math.max(HPSS_TIME_WIN, HPSS_FREQ_WIN));
+    for(var f=0; f<frameCount; f++){
+      var tStart = Math.max(0, f-timeHalf), tEnd = Math.min(frameCount-1, f+timeHalf);
+      for(var b=0;b<numBins;b++){
+        var tn=0;
+        for(var ff=tStart; ff<=tEnd; ff++){ scratch[tn++] = mags[ff*numBins+b]; }
+        var harmEst = medianOfSlice(scratch, tn);
+        var bStart = Math.max(0,b-freqHalf), bEnd = Math.min(numBins-1,b+freqHalf);
+        var bn=0;
+        for(var bb=bStart; bb<=bEnd; bb++){ scratch[bn++] = mags[f*numBins+bb]; }
+        var percEst = medianOfSlice(scratch, bn);
+        harmMask[f*numBins+b] = harmEst/(harmEst+percEst+1e-12);
+      }
+      if(onProgress && f % AUDIO_DETECT_YIELD_EVERY === 0){
+        onProgress(0.45 + 0.4*f/frameCount);
+        await new Promise(function(resolve){ setTimeout(resolve, 0); });
+      }
+    }
+
+    // Pass 3/3: build each frame's bass-weighted chroma from ONLY the
+    // harmonic-masked bins (a bin the mask rejected contributes nothing,
+    // the same treatment a silent bin already got), pool into segments,
+    // and match each completed segment against the chord templates -
+    // unchanged from before this rewrite.
+    var segChroma = new Float64Array(12);
+    var segCount = 0;
+    var segMaskedEnergy = 0, segTotalEnergy = 0;
+    var rawLabels = []; // one entry per completed segment: {root,quality,score} or null
+    for(var f=0; f<frameCount; f++){
+      // Frame-level spectral-flatness check (Wiener entropy: geometric
+      // mean / arithmetic mean of this frame's magnitude spectrum, over
+      // the same band the chroma is built from) - catches broadband-noise
+      // percussion (snare/hi-hat/claps) whose energy is spread evenly
+      // across frequency, which the time/frequency-median HPSS mask below
+      // does NOT reliably catch (uncorrelated noise has no clean "steady
+      // over time" vs "spikes across frequency" signature - both medians
+      // land close together). The HPSS mask below instead catches dense,
+      // continuous, tonally-resonant percussion (hand drums etc.) that
+      // IS concentrated in frequency and so looks tonal to flatness alone.
+      // The two checks are complementary, not redundant.
+      var logSum=0, linSum=0;
+      for(var bf=0; bf<numBins; bf++){ var magf = mags[f*numBins+bf]+1e-12; logSum += Math.log(magf); linSum += magf; }
+      var flatness = Math.exp(logSum/numBins) / Math.max(linSum/numBins, 1e-12);
+      if(flatness >= PERCUSSIVE_FLATNESS_MIN){
+        segCount++;
+        if(segCount >= FRAMES_PER_SEGMENT || f === frameCount-1){
+          var maskRatioF = segTotalEnergy > 1e-6 ? (segMaskedEnergy/segTotalEnergy) : 0;
+          if(maskRatioF < PERCUSSIVE_GATE_MIN){ rawLabels.push(null); }
+          else {
+            var sumF=0;
+            for(var qf=0;qf<12;qf++){ sumF += segChroma[qf]; }
+            if(sumF > 1e-9){
+              var matchF = matchChordTemplate(segChroma);
+              rawLabels.push(matchF.score >= AUDIO_DETECT_MIN_SCORE ? matchF : null);
+            } else { rawLabels.push(null); }
+          }
+          segChroma = new Float64Array(12);
+          segCount = 0;
+          segMaskedEnergy = 0; segTotalEnergy = 0;
+        }
+        if(onProgress && f % AUDIO_DETECT_YIELD_EVERY === 0){
+          onProgress(0.85 + 0.15*f/frameCount);
+          await new Promise(function(resolve){ setTimeout(resolve, 0); });
+        }
+        continue;
+      }
+      var frameChromaVec = new Float64Array(12);
+      var frameTotal = 0;
+      for(var b2=0;b2<numBins;b2++){
+        var maskW = harmMask[f*numBins+b2];
+        var magRaw = mags[f*numBins+b2];
+        segTotalEnergy += magRaw;
+        segMaskedEnergy += magRaw*maskW;
+        if(maskW <= 1e-6) continue;
+        var k2 = minBin+b2;
+        var mag2 = magRaw*maskW;
+        var freq2 = k2*sampleRate/frameSize;
+        var pitch2 = 12*Math.log(freq2/440)/Math.LN2 + 69;
+        var pc2 = ((Math.round(pitch2) % 12) + 12) % 12;
+        var weight2 = (k2 <= bassMaxBin) ? BASS_BOOST_WEIGHT : 1;
+        frameChromaVec[pc2] += mag2*weight2;
+        frameTotal += mag2*weight2;
+      }
+      if(frameTotal > 1e-9){
+        for(var p=0;p<12;p++){ segChroma[p] += frameChromaVec[p]/frameTotal; }
+      }
+      segCount++;
+      if(segCount >= FRAMES_PER_SEGMENT || f === frameCount-1){
+        // A segment dominated by percussive energy (most of its magnitude
+        // explained by instantaneous frequency-spikes rather than anything
+        // held steady over time) is gated out entirely, rather than just
+        // letting the harmonic mask reweight its chroma - a dense,
+        // continuous percussion groove (hand drums, etc.) still leaves
+        // enough residual tonal-looking energy after reweighting alone to
+        // produce a confident (wrong) chord match; this gate catches that.
+        var maskRatio = segTotalEnergy > 1e-6 ? (segMaskedEnergy/segTotalEnergy) : 0;
+        if(maskRatio < PERCUSSIVE_GATE_MIN){
+          rawLabels.push(null);
+        } else {
+          var sum=0;
+          for(var q=0;q<12;q++){ sum += segChroma[q]; }
+          if(sum > 1e-9){
+            var match = matchChordTemplate(segChroma);
+            rawLabels.push(match.score >= AUDIO_DETECT_MIN_SCORE ? match : null);
+          } else {
+            rawLabels.push(null);
+          }
+        }
+        segChroma = new Float64Array(12);
+        segCount = 0;
+        segMaskedEnergy = 0; segTotalEnergy = 0;
+      }
+      if(onProgress && f % AUDIO_DETECT_YIELD_EVERY === 0){
+        onProgress(0.85 + 0.15*f/frameCount);
+        await new Promise(function(resolve){ setTimeout(resolve, 0); });
+      }
+    }
+    if(onProgress) onProgress(1);
+
+    // Group consecutive identical-chord segments into runs (each keeping
+    // its segment count, summed match score, and the index of the segment
+    // it starts at - startSeg*segDur is this run's real start time, and
+    // count*segDur its real duration), with nulls (silence / no clear
+    // chord) left as their own 1-segment gap entries rather than merged
+    // into runs - a gap is simply left out of the timeline below, which is
+    // correct: nothing should be sounded where no clear chord was heard.
+    var runs = [];
+    var segCursor = 0;
+    rawLabels.forEach(function(lab){
+      if(!lab){ runs.push({ gap:true, startSeg:segCursor }); segCursor++; return; }
+      var last = runs[runs.length-1];
+      if(last && !last.gap && sameChord(last, lab)){ last.count++; last.scoreSum += lab.score; }
+      else { runs.push({ root:lab.root, quality:lab.quality, count:1, scoreSum:lab.score, startSeg:segCursor }); }
+      segCursor++;
+    });
+    // Keep each surviving chord run's index into the full `runs` array
+    // (gaps included) alongside it, so the timeline-collapsing step below
+    // can tell a TRUE silence/gap apart from a merely-dropped blip run
+    // between two same-chord runs - they look identical once `runs` is
+    // filtered down to chordRuns alone.
+    var chordRuns = [];
+    runs.forEach(function(r, ri){ if(!r.gap){ r.runsIndex = ri; chordRuns.push(r); } });
+
+    // A one-segment run flanked by two DIFFERENT chord runs is usually
+    // the brief chroma blend heard exactly at the moment the real chord
+    // changes, not a chord of its own - its match score is reliably
+    // weaker than a genuine, stable chord's, so this compares it against
+    // its own neighbors' average score rather than an absolute cutoff
+    // (which would have to be re-tuned for every recording's own noise
+    // level). Dropping it here, rather than overwriting it with a
+    // neighbor's label the way a plain median filter would, still lets a
+    // real back-to-back one-segment chord change through: a genuine
+    // brief chord scores just as confidently as its neighbors and is
+    // kept.
+    var RELATIVE_DROP_FACTOR = 0.95;
+    var keep = chordRuns.map(function(){ return true; });
+    for(var ri=1; ri<chordRuns.length-1; ri++){
+      var prevR=chordRuns[ri-1], curR=chordRuns[ri], nextR=chordRuns[ri+1];
+      if(curR.count!==1) continue;
+      if(sameChord(prevR,curR) || sameChord(curR,nextR)) continue;
+      var neighborAvg = Math.min(prevR.scoreSum/prevR.count, nextR.scoreSum/nextR.count);
+      var curScore = curR.scoreSum/curR.count;
+      if(curScore < neighborAvg*RELATIVE_DROP_FACTOR) keep[ri]=false;
+    }
+
+    // A run can also be too SHORT to be a real chord change rather than too
+    // WEAK a match - even a confidently-matched one-segment blip (a passing
+    // tone, a brief arpeggiated note, pick noise) sandwiched between the
+    // SAME chord on both sides usually isn't a chord of its own, it just
+    // hasn't been confirmed long enough to trust - the filter above only
+    // catches it when its score happens to be weaker than its neighbors',
+    // which isn't always true. This only drops a short run when its two
+    // neighbors agree with EACH OTHER (prev===next): that's the signature
+    // of a genuine glitch (stable chord, blip, same stable chord again),
+    // never of a real fast progression, where consecutive chords normally
+    // differ from each other too - so a song with real, fast chord changes
+    // (prev !== next) is never gutted by this, only actual blips are.
+    var MIN_CONFIRM_SEGS = 2;
+    for(var rj=1; rj<chordRuns.length-1; rj++){
+      if(!keep[rj]) continue;
+      var prevJ=chordRuns[rj-1], curJ=chordRuns[rj], nextJ=chordRuns[rj+1];
+      if(curJ.count>=MIN_CONFIRM_SEGS) continue;
+      if(!sameChord(prevJ,nextJ)) continue;
+      if(sameChord(prevJ,curJ)) continue;
+      keep[rj]=false;
+    }
+
+    // Collapse the surviving runs into one ordered token sequence - built
+    // from SEMI_TO_NAME/SUFFIX_DISPLAY, the exact same tables
+    // parseChordName() and displayName() use, so every token is
+    // guaranteed to be one the rest of the app already accepts. `out` (the
+    // displayed/editable chord text) and `timeline` (the per-segment
+    // playback schedule) are built from the exact same merge decision, so
+    // they always stay the same length and index 1:1 - this matters
+    // beyond just the text: everything downstream that zips them back
+    // together positionally (playAudioImportSync's edited/seg.token
+    // pairing, and sequenceHasAudioSync/sequenceMatchesAudioImportSync's
+    // length check that decides whether the sequence cards can be
+    // highlighted at all) silently breaks the moment the two diverge.
+    // Two kept runs only ever share one token (in both out and timeline)
+    // when nothing but DROPPED same-token blip runs lies between them in
+    // the original `runs` sequence - never across a true gap (silence / a
+    // percussion-gated segment): that must surface as the chord genuinely
+    // recurring after a pause (two separate entries in both arrays), not
+    // be silently re-inflated into one long sustained chord or silently
+    // dropped from the displayed text.
+    var out = [];
+    var timeline = [];
+    var lastKeptRunsIndex = -1;
+    chordRuns.forEach(function(r, idx){
+      if(!keep[idx]) return;
+      var token = SEMI_TO_NAME[r.root] + SUFFIX_DISPLAY[r.quality];
+      var startSec = r.startSeg*segDur;
+      var durSec = r.count*segDur;
+      var lastEntry = timeline[timeline.length-1];
+      var trueGapBetween = false;
+      for(var gi=lastKeptRunsIndex+1; gi<r.runsIndex; gi++){ if(runs[gi].gap){ trueGapBetween = true; break; } }
+      var mergeWithPrevious = lastEntry && lastEntry.token === token && !trueGapBetween;
+      if(mergeWithPrevious){
+        lastEntry.durSec = (startSec+durSec) - lastEntry.startSec;
+      } else {
+        timeline.push({ token: token, startSec: startSec, durSec: durSec });
+        out.push(token);
+      }
+      lastKeptRunsIndex = r.runsIndex;
+    });
+    return { chords: out, timeline: timeline };
   }
 
   // Drives the .playing highlight class on the scale diagram in sync with
@@ -2992,7 +3889,31 @@
     return positions;
   }
 
-  function renderNeckScaleSVG(scaleInfo, config, range){
+  // Within a scaleNeckPositions() list, several string/fret dots can share
+  // the exact same real absolute pitch (a unison - the same note reachable
+  // at more than one spot in the window). The audio schedule
+  // (buildChordScaleSchedule) only ever plays ONE of them per unique pitch,
+  // so the rest, although legitimately drawn on the diagram, are never
+  // actually sounded during "Écouter la gamme". Returns the set of
+  // "string-fret" keys that ARE the one kept/played position for their
+  // pitch - built by walking the positions in order and keeping the FIRST
+  // occurrence of each abs, exactly like buildChordScaleSchedule's own
+  // dedup, so the two never disagree about which dot is "the" played one.
+  // Shared by both, so renderNeckScaleSVG can dim every dot NOT in this
+  // set (see the "unplayed" class) and buildChordScaleSchedule can build
+  // its note-by-note schedule from the same kept positions.
+  function scaleNeckPlayedKeys(positions){
+    var seenAbs = {}, playedKeys = {};
+    positions.forEach(function(pos){
+      if(!seenAbs[pos.abs]){
+        seenAbs[pos.abs] = true;
+        playedKeys[pos.string+'-'+pos.fret] = true;
+      }
+    });
+    return playedKeys;
+  }
+
+  function renderNeckScaleSVG(scaleInfo, config, range, mode){
     // Vertical layout - strings as columns (left to right, low to high),
     // frets as rows top to bottom - matching how renderFretboardSVG draws
     // the ordinary "Diagramme" chord neck. String names sit at the HEAD of
@@ -3021,7 +3942,8 @@
     var H = padTop+padBottom+frets*fretGap;
     var dotR = Math.min(stringGap,fretGap)*0.33;
     var positions = scaleNeckPositions(scaleInfo, config, range.start, range.end);
-    var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t('scaleNeckAria')+'">';
+    var playedKeys = scaleNeckPlayedKeys(positions);
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t(mode==='arpeggio' ? 'arpeggioNeckAria' : 'scaleNeckAria')+'">';
     config.labels.forEach(function(l,i){
       var lx = padL+i*stringGap;
       svg += '<text x="'+lx+'" y="14" text-anchor="middle" style="fill:var(--ink-soft);font:600 11px var(--font-mono)">'+l+'</text>';
@@ -3055,11 +3977,19 @@
       var y2 = padTop+(p.fret-range.start+0.5)*fretGap;
       var fill = p.isRoot ? 'var(--accent)' : 'var(--accent2)';
       var textFill = p.isRoot ? 'var(--accent-ink)' : 'var(--accent2-ink)';
+      // A dot not in playedKeys is a unison: the very same pitch is already
+      // covered by another dot earlier in the window, so "Écouter la
+      // gamme" never actually sounds this one (see scaleNeckPlayedKeys) -
+      // dim it with the "unplayed" class so it reads as shown-but-silent
+      // rather than implying every dot on screen gets played. It's still
+      // a real, correct scale tone, and still clickable (see
+      // wireScaleNoteClickToPlay) to hear it on its own.
+      var isPlayed = !!playedKeys[p.string+'-'+p.fret];
       // data-pos uniquely identifies THIS string/fret dot (unlike data-abs,
       // which several dots can share when the same pitch recurs at
       // different neck positions) - see playScaleSound/animateScaleNotes,
       // which highlight only the one dot actually being played.
-      svg += '<g class="scale-note" data-abs="'+p.abs+'" data-pos="'+p.string+'-'+p.fret+'">';
+      svg += '<g class="scale-note'+(isPlayed?'':' unplayed')+'" data-abs="'+p.abs+'" data-pos="'+p.string+'-'+p.fret+'">';
       svg += '<circle cx="'+x2+'" cy="'+y2+'" r="'+dotR+'" style="fill:'+fill+'"/>';
       svg += '<text x="'+x2+'" y="'+(y2+3)+'" text-anchor="middle" style="fill:'+textFill+';font:700 7.8px var(--font-mono)">'+SEMI_TO_NAME[p.pc]+'</text>';
       if(showFingers){
@@ -3073,7 +4003,7 @@
     return svg;
   }
 
-  function renderPianoScaleSVG(scaleInfo){
+  function renderPianoScaleSVG(scaleInfo, mode){
     var whiteW=34, whiteH=132, blackW=20, blackH=82, topPad=32;
     var pcSet = {};
     scaleInfo.pitchClasses.forEach(function(pc){ pcSet[pc]=true; });
@@ -3106,7 +4036,7 @@
     var shift = -minX+3;
     var W = (maxX-minX)+6;
     var H = whiteH+topPad+18;
-    var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t('scalePianoAria')+'">';
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t(mode==='arpeggio' ? 'arpeggioPianoAria' : 'scalePianoAria')+'">';
     keys.filter(function(k){ return !k.isBlack; }).forEach(function(k){
       var inScale = pcSet[k.pc];
       var fill = !inScale ? 'var(--surface)' : (k.isRoot ? 'var(--accent)' : 'var(--accent2)');
@@ -3557,12 +4487,15 @@
         bars[bi].forEach(function(flatIdx, idxInBar){
           var it = items[flatIdx];
           var noteX = x + slotW/2;
+          var noteMuted = !!(state.sequenceMuted && state.sequenceMuted[flatIdx]);
+          if(noteMuted) svgBody += '<g style="opacity:.32">';
           if(it.ok){
             svgBody += drawStaffNotes(it.laid, noteX, yOf, ink, durations[idxInBar]);
           } else {
             svgBody += '<text x="'+noteX+'" y="'+(staffBottomY-half)+'" text-anchor="middle" style="font-family:var(--font-mono);font-size:18px;fill:var(--ink-soft)">?</text>';
           }
-          svgBody += jazzChordLabel(noteX, staffTopY-12, it.label, 14, it.ok);
+          if(noteMuted) svgBody += '</g>';
+          svgBody += jazzChordLabel(noteX, staffTopY-12, it.label, 14, it.ok, noteMuted);
           svgBody += '<rect data-seq="'+flatIdx+'" tabindex="0" role="button" aria-label="'+escapeHtml(it.label)+'" class="staff-measure-hit" x="'+x+'" y="'+(staffTopY-24)+'" width="'+slotW+'" height="'+(staffBottomY-staffTopY+40)+'"></rect>';
           x += slotW;
         });
@@ -3659,13 +4592,16 @@
         bars[bi].forEach(function(flatIdx, idxInBar){
           var it = items[flatIdx];
           var noteX = x + slotW/2;
+          var noteMuted = !!(state.sequenceMuted && state.sequenceMuted[flatIdx]);
+          if(noteMuted) svgBody += '<g style="opacity:.32">';
           if(it.ok){
             svgBody += drawStaffNotes(it.trebleLaid, noteX, yOfTreble, ink, durations[idxInBar]);
             svgBody += drawStaffNotes(it.bassLaid, noteX, yOfBass, ink, durations[idxInBar]);
           } else {
             svgBody += '<text x="'+noteX+'" y="'+((trebleBottomY+bassTopY)/2)+'" text-anchor="middle" style="font-family:var(--font-mono);font-size:18px;fill:var(--ink-soft)">?</text>';
           }
-          svgBody += jazzChordLabel(noteX, trebleTopY-12, it.label, 14, it.ok);
+          if(noteMuted) svgBody += '</g>';
+          svgBody += jazzChordLabel(noteX, trebleTopY-12, it.label, 14, it.ok, noteMuted);
           svgBody += '<rect data-seq="'+flatIdx+'" tabindex="0" role="button" aria-label="'+escapeHtml(it.label)+'" class="staff-measure-hit" x="'+x+'" y="'+(trebleTopY-24)+'" width="'+slotW+'" height="'+(bassBottomY-trebleTopY+44)+'"></rect>';
           x += slotW;
         });
@@ -3771,13 +4707,16 @@
         bars[bi].forEach(function(flatIdx){
           var it = items[flatIdx];
           var noteX = x + slotW/2;
-          svgBody += jazzChordLabel(noteX, y0-10, it.label, 13, it.ok);
+          var noteMuted = !!(state.sequenceMuted && state.sequenceMuted[flatIdx]);
+          svgBody += jazzChordLabel(noteX, y0-10, it.label, 13, it.ok, noteMuted);
           if(it.ok && it.cells){
             order.forEach(function(realIdx, pos){
               var y = yOf(pos);
               var val = it.cells[realIdx];
-              svgBody += '<rect x="'+(noteX-8)+'" y="'+(y-5.5)+'" width="16" height="11" style="fill:var(--surface)"/>';
-              svgBody += '<text x="'+noteX+'" y="'+(y+3.2)+'" text-anchor="middle" style="font-family:var(--font-mono);font-weight:700;font-size:10px;fill:var(--ink)">'+val+'</text>';
+              var cellStyle = noteMuted ? 'fill:var(--surface);opacity:.4;' : 'fill:var(--surface);';
+              var textStyle = noteMuted ? 'font-family:var(--font-mono);font-weight:700;font-size:10px;fill:var(--ink);opacity:.4;' : 'font-family:var(--font-mono);font-weight:700;font-size:10px;fill:var(--ink);';
+              svgBody += '<rect x="'+(noteX-8)+'" y="'+(y-5.5)+'" width="16" height="11" style="'+cellStyle+'"/>';
+              svgBody += '<text x="'+noteX+'" y="'+(y+3.2)+'" text-anchor="middle" style="'+textStyle+'">'+val+'</text>';
             });
           } else {
             svgBody += '<text x="'+noteX+'" y="'+(yOf((strings-1)/2)+4)+'" text-anchor="middle" style="font-family:var(--font-mono);font-size:14px;fill:var(--ink-soft)">?</text>';
@@ -3808,7 +4747,6 @@
   var instGuitar = document.getElementById('instGuitar');
   var instUkulele = document.getElementById('instUkulele');
   var instPiano = document.getElementById('instPiano');
-  var chipRow = document.getElementById('chipRow');
   var errorBox = document.getElementById('errorBox');
   var resultSection = document.getElementById('resultSection');
   var chordNameOut = document.getElementById('chordNameOut');
@@ -3824,6 +4762,7 @@
   var legendOut = document.getElementById('legendOut');
   var scaleControls = document.getElementById('scaleControls');
   var pentatonicToggle = document.getElementById('pentatonicToggle');
+  var pentatonicRow = document.getElementById('pentatonicRow');
   var scalePosNav = document.getElementById('scalePosNav');
   var scalePosInfo = document.getElementById('scalePosInfo');
   var scalePosPrev = document.getElementById('scalePosPrev');
@@ -3845,12 +4784,16 @@
   var printSequenceBtn = document.getElementById('printSequenceBtn');
   var playSequenceBtn = document.getElementById('playSequenceBtn');
   var shareSeqBtn = document.getElementById('shareSeqBtn');
+  var syncSequenceRow = document.getElementById('syncSequenceRow');
+  var syncSequenceBtnEl = document.getElementById('syncSequenceBtn');
+  var syncSequenceNowPlayingEl = document.getElementById('syncSequenceNowPlaying');
   var jazzGrid = document.getElementById('jazzGrid');
   var tabGrid = document.getElementById('tabGrid');
   var staffWrap = document.getElementById('staffWrap');
   var sequenceScaleWrap = document.getElementById('sequenceScaleWrap');
   var sequenceScaleControls = document.getElementById('sequenceScaleControls');
   var pentatonicToggleSeq = document.getElementById('pentatonicToggleSeq');
+  var pentatonicRowSeq = document.getElementById('pentatonicRowSeq');
   var scalePosNavSeq = document.getElementById('scalePosNavSeq');
   var scalePosInfoSeq = document.getElementById('scalePosInfoSeq');
   var scalePosPrevSeq = document.getElementById('scalePosPrevSeq');
@@ -3862,7 +4805,7 @@
   var STATIC_TEXT_IDS = {
     eyebrowText:'eyebrow', introText:'intro', labelChordNameText:'labelChordName',
     labelInstrumentText:'labelInstrument', labelInstGuitarText:'guitareLabel', labelInstUkuleleText:'ukuleleLabel', labelInstPianoText:'pianoLabel',
-    labelChordViewText:'seqViewLabel', chordViewOptDiagram:'chordViewDiagram', chordViewOptStaff:'showStaffLabel', chordViewOptScale:'gammesLabel',
+    labelChordViewText:'seqViewLabel', chordViewOptDiagram:'chordViewDiagram', chordViewOptStaff:'showStaffLabel', chordViewOptScale:'gammesLabel', chordViewOptArpeggio:'arpegesLabel',
     printBtnText:'printBtn', helpSummaryText:'helpSummary', helpNotesTitleText:'helpNotesTitle',
     helpNotesIntroText:'helpNotesIntro', helpTypesTitleText:'helpTypesTitle',
     gTitleBasicText:'gBasic', gTitleSeventhsText:'gSevenths', gTitleExtendedText:'gExtended',
@@ -3872,10 +4815,14 @@
     printSequenceBtnText:'printSequenceBtn', shareSeqBtnText:'shareBtn',
     playBtnText:'playChord', playSequenceBtnText:'playSequenceBtn',
     labelSequenceViewText:'seqViewLabel', sequenceViewOptCards:'seqViewCards',
-    sequenceViewOptJazz:'jazzGridBtn', sequenceViewOptTab:'tabGridBtn', sequenceViewOptStaff:'showStaffLabel', sequenceViewOptScale:'gammesLabel',
+    sequenceViewOptJazz:'jazzGridBtn', sequenceViewOptTab:'tabGridBtn', sequenceViewOptStaff:'showStaffLabel', sequenceViewOptScale:'gammesLabel', sequenceViewOptArpeggio:'arpegesLabel',
     chordBuilderLabelText:'pickerHeading',
     pentatonicToggleText:'pentatonicToggleLabel', pentatonicToggleSeqText:'pentatonicToggleLabel',
-    scaleSpeedLabelText:'scaleSpeedLabel'
+    scaleSpeedLabelText:'scaleSpeedLabel',
+    audioImportBtnText:'audioImportBtn', audioImportUseBtn:'audioImportUseBtn', audioImportDismissBtn:'audioImportDismissBtn',
+    audioImportNoteText:'audioImportNote', audioImportPlayerLabelText:'audioImportPlayerLabel',
+    audioImportSyncBtnText:'audioImportSyncBtn', audioImportGranularityLabelText:'audioImportGranularityLabel',
+    syncSequenceBtnText:'audioImportSyncBtn'
   };
   var STATIC_HTML_IDS = { helpFingersTextP:'helpFingersText' };
 
@@ -3917,6 +4864,7 @@
     syncViewControls();
     refreshBuilderTexts();
     updateChordNameLabel();
+    populateAudioImportGranularityOptions();
   }
 
   // Both view dropdowns (single chord: diagram/staff/scale; sequence:
@@ -3926,6 +4874,7 @@
   function currentSequenceViewMode(){
     if(state.sequenceViewMode === 'staff') return 'staff';
     if(state.sequenceViewMode === 'scale') return 'scale';
+    if(state.sequenceViewMode === 'arpeggio') return 'arpeggio';
     if(state.sequenceViewMode === 'jazz') return 'jazz';
     if(state.sequenceViewMode === 'tab') return 'tab';
     return 'cards';
@@ -3936,13 +4885,16 @@
     updatePlayButtonLabel();
   }
 
-  // "Écouter cet accord" becomes "Écouter la gamme" (and its translations)
-  // while the Gammes view is showing, since the button then plays the
-  // scale rather than the chord itself - see the playBtn click handler.
+  // "Écouter cet accord" becomes "Écouter la gamme" (or "Écouter l'arpège")
+  // while the Gammes/Arpèges view is showing, since the button then plays
+  // the scale/arpeggio rather than the chord itself - see the playBtn
+  // click handler.
   function updatePlayButtonLabel(){
     var el = document.getElementById('playBtnText');
     if(!el) return;
-    el.textContent = t(state.chordViewMode === 'scale' ? 'playScale' : 'playChord');
+    var key = state.chordViewMode === 'scale' ? 'playScale'
+      : state.chordViewMode === 'arpeggio' ? 'playArpeggio' : 'playChord';
+    el.textContent = t(key);
   }
 
   // Keeps the pentatonic checkbox(es) and the speed +/- control in sync
@@ -3954,9 +4906,15 @@
   // the position count for whichever chord(s) are on screen, so their text
   // and prev/next disabled state are set directly in renderScaleForChord /
   // renderSequenceScaleBlocks instead, right where that count is known.
+  // Pentatonic doesn't apply to the Arpèges view (an arpeggio is already
+  // just the chord's own tones, nothing to narrow down further), so its
+  // row is hidden there - the position nav and speed control stay visible
+  // since both still make sense for arpeggios.
   function syncScaleControlsUI(){
     if(pentatonicToggle) pentatonicToggle.checked = !!state.usePentatonic;
     if(pentatonicToggleSeq) pentatonicToggleSeq.checked = !!state.usePentatonic;
+    if(pentatonicRow) pentatonicRow.style.display = state.chordViewMode === 'arpeggio' ? 'none' : '';
+    if(pentatonicRowSeq) pentatonicRowSeq.style.display = currentSequenceViewMode() === 'arpeggio' ? 'none' : '';
     if(scaleSpeedValue) scaleSpeedValue.textContent = '×' + state.scaleSpeed;
     var idx = SCALE_SPEED_LEVELS.indexOf(state.scaleSpeed);
     if(scaleSpeedDown) scaleSpeedDown.disabled = idx <= 0;
@@ -4072,14 +5030,7 @@
     });
   }
 
-  EXAMPLES.forEach(function(ex){
-    var chip = document.createElement('button');
-    chip.type='button'; chip.className='chip'; chip.textContent=ex;
-    chip.addEventListener('click', function(){ chordInput.value=ex; render(); });
-    chipRow.appendChild(chip);
-  });
-
-  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, sequenceFlatTokens:[], currentChord:null, sequencePlaying:false, sequenceViewMode:'cards', instrumentKind:'guitar', chordViewMode:'diagram', usePentatonic:false, scaleSpeed:1, scalePosIndex:0 };
+  var state = { positions: [], posIndex: 0, generated:false, sequenceInput:null, sequenceFlatTokens:[], sequenceMuted:[], sequenceMutedKey:null, currentChord:null, sequencePlaying:false, sequenceViewMode:'cards', instrumentKind:'guitar', chordViewMode:'diagram', usePentatonic:false, scaleSpeed:1, scalePosIndex:0 };
   var SCALE_SPEED_LEVELS = [0.25, 0.5, 1, 2, 4];
   var sequencePlaybackToken = 0;
   // Pending setTimeout ids driving playSequenceScaleSound's per-note
@@ -4112,9 +5063,14 @@
     });
   }
 
-  function jazzChordLabel(x, y, text, size, valid){
+  function jazzChordLabel(x, y, text, size, valid, muted){
     var fill = valid ? 'var(--ink)' : 'var(--ink-soft)';
     var style = valid ? '' : 'font-style:italic;';
+    // Same "very faint" treatment as a muted .chord-mini-card's own name -
+    // this is the only visible content for a muted chord in a multi-chord
+    // jazz cell (the triangle regions have no fill of their own at rest),
+    // so dimming the label alone is enough to read as disabled there.
+    if(muted) style += 'opacity:.32;';
     return '<text x="'+x+'" y="'+y+'" text-anchor="middle" style="fill:'+fill+';'+style+'font:700 '+size+'px var(--font-display)">'+escapeHtml(text)+'</text>';
   }
 
@@ -4145,25 +5101,32 @@
       var x1 = x0+cellW, y1 = y0+cellH;
       var W = cellW, H = cellH;
 
-      svg += '<rect x="'+x0+'" y="'+y0+'" width="'+W+'" height="'+H+'" rx="8" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1.5"/>';
-
       var parsed = measure.map(function(token){ return parseChordName(token); });
       var labels = parsed.map(function(p,i){ return p.ok ? displayName(p) : measure[i]; });
       var n = measure.length;
 
       var cx = (x0+x1)/2, cy = (y0+y1)/2;
       var baseIdx = seqIdx;
+      var mutedArr = state.sequenceMuted || [];
+      function isMuted(i){ return !!mutedArr[i]; }
+
+      // Single-chord cells can dim this shared background directly, since the
+      // whole cell belongs to that one chord; multi-chord cells leave it at
+      // full strength and dim only the per-chord label/region below instead.
+      var bgMuted = (n <= 1) && isMuted(baseIdx);
+      svg += '<rect x="'+x0+'" y="'+y0+'" width="'+W+'" height="'+H+'" rx="8" style="fill:var(--surface-2);stroke:var(--line);'+(bgMuted?'opacity:.5;':'')+'" stroke-width="1.5"/>';
 
       if(n <= 1){
-        svg += '<rect x="'+x0+'" y="'+y0+'" width="'+W+'" height="'+H+'" rx="8" class="jazz-region" data-seq="'+baseIdx+'"/>';
-        svg += jazzChordLabel(x0+W/2, y0+H/2+5, labels[0]||'', 16, parsed[0] ? parsed[0].ok : true);
+        var muted0 = isMuted(baseIdx);
+        svg += '<rect x="'+x0+'" y="'+y0+'" width="'+W+'" height="'+H+'" rx="8" class="jazz-region'+(muted0?' muted':'')+'" data-seq="'+baseIdx+'"/>';
+        svg += jazzChordLabel(x0+W/2, y0+H/2+5, labels[0]||'', 16, parsed[0] ? parsed[0].ok : true, muted0);
       } else if(n === 2){
         // Single diagonal, bottom-left to top-right: chord 1 upper-left, chord 2 lower-right.
         svg += jazzRegionPoly(x0+','+y0+' '+x1+','+y0+' '+x0+','+y1, baseIdx);
         svg += jazzRegionPoly(x1+','+y0+' '+x1+','+y1+' '+x0+','+y1, baseIdx+1);
         svg += '<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y0+'" style="stroke:var(--line)" stroke-width="1.5"/>';
-        svg += jazzChordLabel(x0+W*0.28, y0+H*0.32, labels[0], 12.5, parsed[0].ok);
-        svg += jazzChordLabel(x0+W*0.72, y0+H*0.74, labels[1], 12.5, parsed[1].ok);
+        svg += jazzChordLabel(x0+W*0.28, y0+H*0.32, labels[0], 12.5, parsed[0].ok, isMuted(baseIdx));
+        svg += jazzChordLabel(x0+W*0.72, y0+H*0.74, labels[1], 12.5, parsed[1].ok, isMuted(baseIdx+1));
       } else if(n === 3){
         // Main diagonal top-left to bottom-right, plus a half-line from the center to the
         // bottom-left corner: this yields a left triangle, a bottom triangle, and a merged
@@ -4173,9 +5136,9 @@
         svg += jazzRegionPoly(x0+','+y0+' '+x1+','+y0+' '+x1+','+y1, baseIdx+2);
         svg += '<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'" style="stroke:var(--line)" stroke-width="1.5"/>';
         svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x0+'" y2="'+y1+'" style="stroke:var(--line)" stroke-width="1.5"/>';
-        svg += jazzChordLabel((2*x0+cx)/3, (y0+y1+cy)/3, labels[0], 10.5, parsed[0].ok);
-        svg += jazzChordLabel((x0+x1+cx)/3, (2*y1+cy)/3, labels[1], 10.5, parsed[1].ok);
-        svg += jazzChordLabel((x0+2*x1)/3, (2*y0+y1)/3, labels[2], 10.5, parsed[2].ok);
+        svg += jazzChordLabel((2*x0+cx)/3, (y0+y1+cy)/3, labels[0], 10.5, parsed[0].ok, isMuted(baseIdx));
+        svg += jazzChordLabel((x0+x1+cx)/3, (2*y1+cy)/3, labels[1], 10.5, parsed[1].ok, isMuted(baseIdx+1));
+        svg += jazzChordLabel((x0+2*x1)/3, (2*y0+y1)/3, labels[2], 10.5, parsed[2].ok, isMuted(baseIdx+2));
       } else if(n === 4){
         // Both diagonals (an "X"), splitting the bar into 4 triangles based on the 4 edges —
         // chords in order: left, bottom, top, right.
@@ -4185,17 +5148,18 @@
         svg += jazzRegionPoly(x1+','+y0+' '+x1+','+y1+' '+cx+','+cy, baseIdx+3);
         svg += '<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y1+'" style="stroke:var(--line)" stroke-width="1.5"/>';
         svg += '<line x1="'+x0+'" y1="'+y1+'" x2="'+x1+'" y2="'+y0+'" style="stroke:var(--line)" stroke-width="1.5"/>';
-        svg += jazzChordLabel((2*x0+cx)/3, (y0+y1+cy)/3, labels[0], 9.5, parsed[0].ok);
-        svg += jazzChordLabel((x0+x1+cx)/3, (2*y1+cy)/3, labels[1], 9.5, parsed[1].ok);
-        svg += jazzChordLabel((x0+x1+cx)/3, (2*y0+cy)/3, labels[2], 9.5, parsed[2].ok);
-        svg += jazzChordLabel((2*x1+cx)/3, (y0+y1+cy)/3, labels[3], 9.5, parsed[3].ok);
+        svg += jazzChordLabel((2*x0+cx)/3, (y0+y1+cy)/3, labels[0], 9.5, parsed[0].ok, isMuted(baseIdx));
+        svg += jazzChordLabel((x0+x1+cx)/3, (2*y1+cy)/3, labels[1], 9.5, parsed[1].ok, isMuted(baseIdx+1));
+        svg += jazzChordLabel((x0+x1+cx)/3, (2*y0+cy)/3, labels[2], 9.5, parsed[2].ok, isMuted(baseIdx+2));
+        svg += jazzChordLabel((2*x1+cx)/3, (y0+y1+cy)/3, labels[3], 9.5, parsed[3].ok, isMuted(baseIdx+3));
       } else {
         var stepY = H/(n+1);
         labels.forEach(function(lbl, i){
-          svg += '<rect x="'+x0+'" y="'+(y0+stepY*i)+'" width="'+W+'" height="'+stepY+'" class="jazz-region" data-seq="'+(baseIdx+i)+'"/>';
+          var mi = isMuted(baseIdx+i);
+          svg += '<rect x="'+x0+'" y="'+(y0+stepY*i)+'" width="'+W+'" height="'+stepY+'" class="jazz-region'+(mi?' muted':'')+'" data-seq="'+(baseIdx+i)+'"/>';
         });
         labels.forEach(function(lbl, i){
-          svg += jazzChordLabel(x0+W/2, y0+stepY*(i+1)+3, lbl, 9.5, parsed[i].ok);
+          svg += jazzChordLabel(x0+W/2, y0+stepY*(i+1)+3, lbl, 9.5, parsed[i].ok, isMuted(baseIdx+i));
         });
       }
 
@@ -4326,13 +5290,15 @@
     legendOut.innerHTML = '';
   }
 
-  // Renders the "Gammes" (scale) view directly into diagramWrap, in place
-  // of the usual fretboard/keyboard diagram: every position of the chord's
-  // whole scale (see chordScaleInfo()), one hand-position box at a time for
-  // guitar/ukulele (see scalePositionWindows) or one full octave for piano
-  // - not just the chord's own notes. A caption names the scale, and the
-  // legend distinguishes the root note from the rest of the scale.
-  function renderScaleForChord(p, inst){
+  // Renders the "Gammes" (scale) or "Arpèges" (arpeggio) view directly
+  // into diagramWrap, in place of the usual fretboard/keyboard diagram:
+  // every position of the chord's whole scale, OR just its own arpeggiated
+  // tones (see scaleOrArpeggioInfo()), one hand-position box at a time for
+  // guitar/ukulele (see scalePositionWindows) or one full octave for piano.
+  // A caption names the scale (or names the chord, for an arpeggio), and
+  // the legend distinguishes the root note from the rest.
+  function renderScaleForChord(p, inst, mode){
+    mode = mode || 'scale';
     stopScalePlaybackAnimation();
     var isFretted = inst==='guitar' || inst==='ukulele';
     // "fretted" narrows and centers the vertical neck diagram (see the
@@ -4340,9 +5306,14 @@
     // ordinary "Diagramme" chord neck instead of stretching edge to edge
     // like the piano keyboard does.
     diagramWrap.className = 'diagram-wrap scale' + (isFretted ? ' fretted' : '');
-    var info = chordScaleInfo(p, state.usePentatonic);
-    var scaleName = (LANG_DATA[currentLang].scales && LANG_DATA[currentLang].scales[info.scaleKey]) || info.scaleKey;
-    var caption = '<p class="scale-caption">'+t('scaleCaption',{scale:scaleName})+'</p>';
+    var info = scaleOrArpeggioInfo(p, mode);
+    var caption;
+    if(mode === 'arpeggio'){
+      caption = '<p class="scale-caption">'+t('arpeggioCaption',{chord:displayName(p)})+'</p>';
+    } else {
+      var scaleName = (LANG_DATA[currentLang].scales && LANG_DATA[currentLang].scales[info.scaleKey]) || info.scaleKey;
+      caption = '<p class="scale-caption">'+t('scaleCaption',{scale:scaleName})+'</p>';
+    }
     if(isFretted){
       var config = FRETTED_CONFIGS[inst];
       var range = scaleFretRange(info, config, state.scalePosIndex);
@@ -4351,20 +5322,20 @@
       // last-selected index), so a later prev/next click starts from the
       // position really on screen instead of a stale, out-of-range index.
       state.scalePosIndex = range.index;
-      diagramWrap.innerHTML = caption + renderNeckScaleSVG(info, config, range);
+      diagramWrap.innerHTML = caption + renderNeckScaleSVG(info, config, range, mode);
       if(scalePosNav) scalePosNav.style.display = 'flex';
       if(scalePosInfo) scalePosInfo.textContent = t('posWord')+' '+range.index+' / '+range.count;
       if(scalePosPrev) scalePosPrev.disabled = range.index===0;
       if(scalePosNext) scalePosNext.disabled = range.index===range.count;
     } else {
-      diagramWrap.innerHTML = caption + renderPianoScaleSVG(info);
+      diagramWrap.innerHTML = caption + renderPianoScaleSVG(info, mode);
       if(scalePosNav) scalePosNav.style.display = 'none';
     }
     posNav.style.display='none';
     noteGenerated.style.display='none';
     legendOut.innerHTML =
       '<span><span class="dot" style="background:var(--accent)"></span>'+t('legendScaleRoot')+'</span>' +
-      '<span><span class="dot" style="background:var(--accent2)"></span>'+t('legendScaleNote')+'</span>';
+      '<span><span class="dot" style="background:var(--accent2)"></span>'+t(mode==='arpeggio' ? 'legendArpeggioNote' : 'legendScaleNote')+'</span>';
     if(scaleControls) scaleControls.style.display='flex';
     syncScaleControlsUI();
   }
@@ -4374,10 +5345,11 @@
     if(shareFallbackWrap) shareFallbackWrap.style.display = 'none';
   }
 
-  function buildMiniCard(token){
+  function buildMiniCard(token, idx){
     var p = parseChordName(token);
+    var muted = typeof idx === 'number' && !!(state.sequenceMuted && state.sequenceMuted[idx]);
     var card = document.createElement('div');
-    card.className = 'chord-mini-card' + (p.ok ? '' : ' invalid');
+    card.className = 'chord-mini-card' + (p.ok ? '' : ' invalid') + (muted ? ' muted' : '');
     card.tabIndex = 0;
     card.setAttribute('role','button');
     card.setAttribute('aria-label', p.ok ? displayName(p) : token);
@@ -4430,7 +5402,40 @@
       card.appendChild(playMini);
     }
 
+    // Lets a wrongly-detected chord be silenced without removing it from
+    // the sequence: the card stays in place (so the rest of the grid keeps
+    // its real positions/timing) but is shown very faint, and playback
+    // (playSequenceSound / the audio-import sync tick) skips sounding it
+    // while still advancing through its slot normally - see
+    // toggleSequenceMute below.
+    if(typeof idx === 'number'){
+      var muteMini = document.createElement('button');
+      muteMini.type = 'button';
+      muteMini.className = 'mini-mute no-print';
+      muteMini.setAttribute('aria-label', t(muted ? 'unmuteChordAria' : 'muteChordAria'));
+      muteMini.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      muteMini.textContent = muted ? '🔇' : '🔈';
+      muteMini.addEventListener('click', function(e){
+        e.stopPropagation();
+        toggleSequenceMute(idx);
+      });
+      card.appendChild(muteMini);
+    }
+
     function open(){
+      // Clicking a chord while either playback mode is running stops that
+      // playback instead of navigating to the chord's own big view - the
+      // small "Arrêter" button can be hard to spot again once scrolled away
+      // mid-song, so any chord doubles as an always-reachable stop control.
+      // The click is "consumed" by stopping rather than also opening the
+      // single-chord view, matching how a first click dismisses an active
+      // mode elsewhere in the app; a second click (now nothing is playing)
+      // opens it normally.
+      if(isSequencePlaybackActive()){
+        stopSequencePlayback();
+        stopAudioImportSync();
+        return;
+      }
       chordInput.value = token;
       render();
       resultSection.scrollIntoView({behavior:'smooth', block:'start'});
@@ -4443,13 +5448,84 @@
     return card;
   }
 
-  function stopSequencePlayback(){
-    sequencePlaybackToken++;
-    state.sequencePlaying = false;
+  // Flips one chord's mute flag and updates just that one card in place
+  // (not a full renderSequence rebuild, which would needlessly redraw
+  // every fretboard/keyboard SVG in a long sequence for a single click).
+  // playSequenceSound and the audio-import sync tick both consult
+  // state.sequenceMuted directly, so the effect is immediate the next time
+  // either one reaches this chord's position - no replay needed to "apply"
+  // a mute.
+  function toggleSequenceMute(idx){
+    if(!state.sequenceMuted) return;
+    var next = !state.sequenceMuted[idx];
+    state.sequenceMuted[idx] = next;
+    var card = sequenceGrid.querySelectorAll('.chord-mini-card')[idx];
+    if(!card) return;
+    card.classList.toggle('muted', next);
+    var btn = card.querySelector('.mini-mute');
+    if(btn){
+      btn.textContent = next ? '🔇' : '🔈';
+      btn.setAttribute('aria-label', t(next ? 'unmuteChordAria' : 'muteChordAria'));
+      btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+    }
+  }
+
+  // Highlights whichever chord of the currently rendered sequence (cards,
+  // staff, jazz grid, tab grid - whichever of these exist for the current
+  // view) is sounding right now, by its flat index. Shared by
+  // playSequenceSound ("Écouter la suite") and playAudioImportSync ("Jouer
+  // en rythme avec le morceau") below, so a chord lights up exactly the
+  // same way no matter which of the two is driving playback - the person
+  // sees the same card highlight whether the rhythm comes from the app's
+  // own synth-only playback or from following their own uploaded song.
+  function clearSequenceHighlights(){
     sequenceGrid.querySelectorAll('.chord-mini-card.playing').forEach(function(c){ c.classList.remove('playing'); });
     if(staffWrap) staffWrap.querySelectorAll('.staff-measure-hit.playing').forEach(function(c){ c.classList.remove('playing'); });
     if(jazzGrid) jazzGrid.querySelectorAll('.jazz-region.playing').forEach(function(r){ r.classList.remove('playing'); });
     if(tabGrid) tabGrid.querySelectorAll('.staff-measure-hit.playing').forEach(function(c){ c.classList.remove('playing'); });
+  }
+  function highlightSequenceIndex(i){
+    clearSequenceHighlights();
+    var cards = sequenceGrid.querySelectorAll('.chord-mini-card');
+    var card = cards[i];
+    if(card) card.classList.add('playing');
+    var hit = null, region = null, tabHit = null;
+    if(staffWrap){
+      hit = staffWrap.querySelector('.staff-measure-hit[data-seq="'+i+'"]');
+      if(hit) hit.classList.add('playing');
+    }
+    if(jazzGrid){
+      region = jazzGrid.querySelector('.jazz-region[data-seq="'+i+'"]');
+      if(region) region.classList.add('playing');
+    }
+    if(tabGrid){
+      tabHit = tabGrid.querySelector('.staff-measure-hit[data-seq="'+i+'"]');
+      if(tabHit) tabHit.classList.add('playing');
+    }
+    // Keep the chord that's actually sounding in view as playback moves
+    // through a long sequence, rather than leaving the person to scroll and
+    // hunt for it - only the element belonging to whichever view is
+    // actually on screen is scrolled (the other three stay untouched,
+    // hidden behind display:none). "nearest" only moves the page when the
+    // target isn't already fully visible, so it doesn't re-center/jump on
+    // every single chord once the view has caught up. Instant ("auto"),
+    // not "smooth": consecutive chords can be a fraction of a second apart,
+    // and a smooth scroll still mid-animation when the NEXT chord lights up
+    // only fights itself - it can even end up motionless on a chord that's
+    // actually off-screen. Instant scrolling always lands exactly on the
+    // currently-playing chord by the time this function returns.
+    var mode = currentSequenceViewMode();
+    var target = mode==='jazz' ? region : mode==='tab' ? tabHit : mode==='staff' ? hit : card;
+    if(target && target.scrollIntoView){
+      target.scrollIntoView({behavior:'auto', block:'nearest', inline:'nearest'});
+    }
+  }
+
+  function stopSequencePlayback(){
+    sequencePlaybackToken++;
+    state.sequencePlaying = false;
+    stopAllAudioNow();
+    clearSequenceHighlights();
     // Cancel any pending playSequenceScaleSound() timers and clear whatever
     // highlight (block header + note dots) they'd already turned on -
     // otherwise stopping (or switching away from) a mid-playback scale
@@ -4465,6 +5541,28 @@
       var lbl = document.getElementById('playSequenceBtnText');
       if(lbl) lbl.textContent = t('playSequenceBtn');
     }
+    updateSequencePlaybackLock();
+  }
+
+  // True while either playback mode that walks through the sequence is
+  // running - "Écouter la suite" / the Gammes-Arpèges run (state.sequencePlaying)
+  // or "Jouer en rythme avec le morceau" (audioImportSyncTimer, set by
+  // playAudioImportSync and cleared by stopAudioImportSync). Used to block
+  // clicking a chord open into its own big single-chord view while either
+  // is active: that navigation hides the whole sequence section (see
+  // render()'s single-token branch), and although a small "‹ Retour" button
+  // (backToSequenceBtn) can bring the grid back, playback itself has
+  // already been stopped by then and the person loses their place - easier
+  // to simply not let the accidental click navigate away in the first
+  // place. The mini "play this chord" (🔊) and mute (🔇) buttons on each
+  // card stay active regardless - stopPropagation keeps those clicks from
+  // ever reaching the card's own open() handler, so they were never part of
+  // this problem.
+  function isSequencePlaybackActive(){
+    return !!state.sequencePlaying || !!audioImportSyncTimer;
+  }
+  function updateSequencePlaybackLock(){
+    if(sequenceSection) sequenceSection.classList.toggle('playback-lock', isSequencePlaybackActive());
   }
 
   var SEQUENCE_BEAT_MS = 700; // duration of one "temps" (beat), assuming a 4-beat (4/4) measure
@@ -4481,6 +5579,7 @@
 
   function playSequenceSound(){
     stopSequencePlayback();
+    stopAudioImportSync(); // don't let "Jouer en rythme avec le morceau" keep playing underneath
     var ctx = getAudioCtx();
     if(!ctx) return;
     var flatTokens = state.sequenceFlatTokens || [];
@@ -4496,10 +5595,10 @@
     var linearBars = state.sequenceLinearBars || flatTokens.map(function(tok, i){ return [i]; });
     var myToken = ++sequencePlaybackToken;
     state.sequencePlaying = true;
+    updateSequencePlaybackLock();
     playSequenceBtn.firstChild.textContent = '⏹ ';
     document.getElementById('playSequenceBtnText').textContent = t('stopSequenceBtn');
 
-    var cards = sequenceGrid.querySelectorAll('.chord-mini-card');
     var durationsMs = new Array(flatTokens.length);
     linearBars.forEach(function(barIdxs){
       var beats = sequenceBeatCounts(barIdxs);
@@ -4512,27 +5611,11 @@
     flatTokens.forEach(function(token, i){
       setTimeout(function(){
         if(myToken !== sequencePlaybackToken) return;
-        sequenceGrid.querySelectorAll('.chord-mini-card.playing').forEach(function(c){ c.classList.remove('playing'); });
-        var card = cards[i];
-        if(card) card.classList.add('playing');
-        if(staffWrap){
-          staffWrap.querySelectorAll('.staff-measure-hit.playing').forEach(function(c){ c.classList.remove('playing'); });
-          var hit = staffWrap.querySelector('.staff-measure-hit[data-seq="'+i+'"]');
-          if(hit) hit.classList.add('playing');
-        }
-        if(jazzGrid){
-          jazzGrid.querySelectorAll('.jazz-region.playing').forEach(function(r){ r.classList.remove('playing'); });
-          var region = jazzGrid.querySelector('.jazz-region[data-seq="'+i+'"]');
-          if(region) region.classList.add('playing');
-        }
-        if(tabGrid){
-          tabGrid.querySelectorAll('.staff-measure-hit.playing').forEach(function(r){ r.classList.remove('playing'); });
-          var tabHit = tabGrid.querySelector('.staff-measure-hit[data-seq="'+i+'"]');
-          if(tabHit) tabHit.classList.add('playing');
-        }
+        highlightSequenceIndex(i);
         var p = parseChordName(token);
         var ringSeconds = Math.max(0.3, (durationsMs[i]-100)/1000);
-        if(p.ok) playChordSound(p, ringSeconds);
+        var muted = !!(state.sequenceMuted && state.sequenceMuted[i]);
+        if(p.ok && !muted) playChordSound(p, ringSeconds);
         if(i === flatTokens.length - 1){
           setTimeout(function(){ if(myToken === sequencePlaybackToken) stopSequencePlayback(); }, durationsMs[i]);
         }
@@ -4553,7 +5636,8 @@
   // (via its data-idx, set in renderSequenceScaleBlocks) so two chords that
   // happen to share a neck position never light up each other's dots.
   var SEQUENCE_SCALE_GAP = 0.35; // seconds of silence between one chord's scale and the next
-  function playSequenceScaleSound(){
+  function playSequenceScaleSound(mode){
+    mode = mode || 'scale';
     stopSequencePlayback();
     var ctx = getAudioCtx();
     if(!ctx) return;
@@ -4564,6 +5648,7 @@
     var opts = inst==='guitar' ? GUITAR_SYNTH_OPTS : (inst==='ukulele' ? UKULELE_SYNTH_OPTS : null);
     var myToken = ++sequencePlaybackToken;
     state.sequencePlaying = true;
+    updateSequencePlaybackLock();
     playSequenceBtn.firstChild.textContent = '⏹ ';
     document.getElementById('playSequenceBtnText').textContent = t('stopSequenceBtn');
 
@@ -4573,7 +5658,7 @@
     flatTokens.forEach(function(token, idx){
       var p = parseChordName(token);
       if(!p.ok) return;
-      var built = buildChordScaleSchedule(p, inst, speed);
+      var built = buildChordScaleSchedule(p, inst, speed, mode);
       var chordStart = cursor;
       built.events.forEach(function(ev){
         var octave = Math.floor(ev.abs/12);
@@ -4630,8 +5715,9 @@
   // "Carte" view. Each block is clickable (via the same staff-measure-hit
   // wiring used by the staff/tablature sequence views) to jump to that
   // chord's own enlarged single-chord view.
-  function renderSequenceScaleBlocks(flatTokens, inst){
+  function renderSequenceScaleBlocks(flatTokens, inst, mode){
     if(!sequenceScaleWrap) return;
+    mode = mode || 'scale';
     var html = '';
     var isFretted = inst==='guitar' || inst==='ukulele';
     // The fret range is computed PER CHORD, inside the loop below, rather
@@ -4654,20 +5740,24 @@
       html += '<div class="staff-measure-hit" data-seq="'+idx+'" tabindex="0" role="button" aria-label="'+(p.ok?displayName(p):token)+'">';
       html += '<span class="sequence-scale-name">'+(p.ok?displayName(p):token)+'</span>';
       if(p.ok){
-        var info = chordScaleInfo(p, state.usePentatonic);
-        var scaleName = (LANG_DATA[currentLang].scales && LANG_DATA[currentLang].scales[info.scaleKey]) || info.scaleKey;
-        html += '<span class="sequence-scale-caption">'+t('scaleCaption',{scale:scaleName})+'</span>';
+        var info = scaleOrArpeggioInfo(p, mode);
+        if(mode === 'arpeggio'){
+          html += '<span class="sequence-scale-caption">'+t('arpeggioCaption',{chord:displayName(p)})+'</span>';
+        } else {
+          var scaleName = (LANG_DATA[currentLang].scales && LANG_DATA[currentLang].scales[info.scaleKey]) || info.scaleKey;
+          html += '<span class="sequence-scale-caption">'+t('scaleCaption',{scale:scaleName})+'</span>';
+        }
       }
       html += '</div>';
       if(p.ok){
-        var info2 = chordScaleInfo(p, state.usePentatonic);
+        var info2 = scaleOrArpeggioInfo(p, mode);
         if(isFretted){
           var config = FRETTED_CONFIGS[inst];
           var range = scaleFretRange(info2, config, state.scalePosIndex);
           if(range.count > maxCount) maxCount = range.count;
-          html += renderNeckScaleSVG(info2, config, range);
+          html += renderNeckScaleSVG(info2, config, range, mode);
         } else {
-          html += renderPianoScaleSVG(info2);
+          html += renderPianoScaleSVG(info2, mode);
         }
       } else {
         html += '<p style="font-size:13px;color:var(--ink-soft);text-align:center;">'+t('noFingering')+'</p>';
@@ -4690,6 +5780,17 @@
     var flatTokens = [].concat.apply([], measures);
     state.sequenceInput = measures.map(function(m){ return m.join(' '); }).join(' | ');
     state.sequenceFlatTokens = flatTokens;
+    // One mute flag per chord, aligned to flatTokens by position - reset to
+    // all-unmuted only when the sequence's actual chords changed, never on
+    // a re-render triggered by something else (switching view mode calls
+    // render()/renderSequence() too, same as every chordInput keystroke),
+    // so toggling a chord off and then, say, switching to "Grille jazz"
+    // doesn't silently turn it back on.
+    var flatKey = flatTokens.join('\u0001');
+    if(state.sequenceMutedKey !== flatKey){
+      state.sequenceMuted = flatTokens.map(function(){ return false; });
+      state.sequenceMutedKey = flatKey;
+    }
     state.scalePosIndex = 0;
     hideError();
     resultSection.classList.remove('visible');
@@ -4719,11 +5820,13 @@
     // measureCardsGridHeight / alignSequenceSectionHeight below).
     sequenceGrid.className = 'sequence-grid';
     sequenceGrid.innerHTML = '';
+    var cardFlatIdx = 0;
     measures.forEach(function(measure){
       var group = document.createElement('div');
       group.className = 'measure-group';
       measure.forEach(function(token){
-        group.appendChild(buildMiniCard(token));
+        group.appendChild(buildMiniCard(token, cardFlatIdx));
+        cardFlatIdx++;
       });
       sequenceGrid.appendChild(group);
     });
@@ -4732,15 +5835,35 @@
         ? renderSequenceStaffGrandSVG(linearBars, flatTokens)
         : renderSequenceStaffSingleSVG(linearBars, flatTokens, inst);
     }
-    if(jazzGrid) jazzGrid.innerHTML = renderJazzGridSVG(measures);
+    if(jazzGrid){
+      // Group by linearBars (the same real bar boundaries the staff/tab
+      // views already use above), NOT the raw `measures` coming straight
+      // out of splitChordSequence: without any "|" in the input - always
+      // true for audio-import-detected chords, and for any sequence long
+      // enough to matter typed without bars - splitChordSequence returns
+      // the WHOLE sequence as one giant single measure. A real-book cell
+      // only has layouts for up to 4 chords; past that it falls back to
+      // cramming every chord into one ever-shorter horizontal strip of a
+      // single tiny box, which for a few dozen detected chords collapses
+      // into an illegible, overlapping smear of text. Using linearBars
+      // instead gives each chord its own one-chord cell (same as the
+      // staff/tab views already do) whenever there's no explicit "|",
+      // which is both readable and consistent with how those two views
+      // already treat a bar-less sequence.
+      var jazzMeasures = linearBars.map(function(barIdxs){
+        return barIdxs.map(function(fi){ return flatTokens[fi]; });
+      });
+      jazzGrid.innerHTML = renderJazzGridSVG(jazzMeasures);
+    }
     if(tabGrid){
       tabGrid.innerHTML = (inst==='guitar' || inst==='ukulele')
         ? renderSequenceTabSVG(linearBars, flatTokens, inst)
         : '<p style="text-align:center;font-size:12.5px;color:var(--ink-soft);padding:24px 12px;">'+t('tabPianoNote')+'</p>';
     }
-    renderSequenceScaleBlocks(flatTokens, inst);
+    renderSequenceScaleBlocks(flatTokens, inst, currentSequenceViewMode());
     applySequenceViewMode();
     hideShareFeedback();
+    updateSyncSequenceBtnVisibility();
   }
 
   // Measures the height the card grid naturally takes for the sequence
@@ -4784,7 +5907,10 @@
     var isJazz = mode === 'jazz';
     var isTab = mode === 'tab';
     var isStaff = mode === 'staff';
-    var isScale = mode === 'scale';
+    // "Gammes" and "Arpèges" share the exact same wrap/controls elements
+    // and layout - only the info object (scale vs. chord tones) feeding
+    // them differs, see renderSequenceScaleBlocks.
+    var isScale = mode === 'scale' || mode === 'arpeggio';
     sequenceGrid.style.display = (isJazz || isTab || isStaff || isScale) ? 'none' : 'flex';
     jazzGrid.style.display = isJazz ? 'flex' : 'none';
     if(tabGrid) tabGrid.style.display = isTab ? 'flex' : 'none';
@@ -4797,6 +5923,13 @@
   }
 
   function openSequenceChordAt(idx){
+    // See buildMiniCard's open() above for why a click during playback
+    // stops it instead of navigating.
+    if(isSequencePlaybackActive()){
+      stopSequencePlayback();
+      stopAudioImportSync();
+      return;
+    }
     var token = (state.sequenceFlatTokens || [])[idx];
     if(!token) return;
     chordInput.value = token;
@@ -4822,6 +5955,36 @@
   if(staffWrap) wireSequenceHitTargets(staffWrap);
   if(tabGrid) wireSequenceHitTargets(tabGrid);
   if(sequenceScaleWrap) wireSequenceHitTargets(sequenceScaleWrap);
+
+  // Click-to-audition a single note in the Gammes view: any note
+  // dot/key (.scale-note on the guitar/ukulele neck, .scale-key on the
+  // piano) can be clicked directly to hear just that one note, including
+  // a dot dimmed as "unplayed" (see scaleNeckPlayedKeys) that the
+  // automatic "Écouter la gamme" run skips as a unison - clicking it is
+  // the only way to hear it on its own. Delegated on the container so it
+  // keeps working across re-renders (position changes, chord switches)
+  // without rewiring. stopPropagation keeps a click on a note inside a
+  // sequence block from also bubbling up into wireSequenceHitTargets'
+  // own .staff-measure-hit handler above (they sit on the same
+  // container but target different elements, so this is just future-
+  // proofing against that ever overlapping). The brief .playing flash
+  // reuses the exact same highlight styling as automatic playback, so a
+  // clicked note looks and sounds consistent with the real thing.
+  function wireScaleNoteClickToPlay(container){
+    if(!container) return;
+    container.addEventListener('click', function(e){
+      var dot = e.target.closest ? e.target.closest('.scale-note, .scale-key') : null;
+      if(!dot) return;
+      e.stopPropagation();
+      var abs = parseInt(dot.getAttribute('data-abs'), 10);
+      if(isNaN(abs)) return;
+      playSingleAbsNote(abs, instrument());
+      dot.classList.add('playing');
+      setTimeout(function(){ dot.classList.remove('playing'); }, 260);
+    });
+  }
+  if(diagramWrap) wireScaleNoteClickToPlay(diagramWrap);
+  if(sequenceScaleWrap) wireScaleNoteClickToPlay(sequenceScaleWrap);
 
   function render(){
     var raw = chordInput.value;
@@ -4855,11 +6018,11 @@
     qualityLabelOut.textContent = (LANG_DATA[currentLang].qualities[p.suffix]) || '';
     instrumentTag.textContent = t(instrumentTagKey());
     var inst = instrument();
-    if(state.chordViewMode !== 'scale' && scaleControls) scaleControls.style.display='none';
+    if(state.chordViewMode !== 'scale' && state.chordViewMode !== 'arpeggio' && scaleControls) scaleControls.style.display='none';
     if(state.chordViewMode === 'staff'){
       renderStaffForChord(p, inst);
-    } else if(state.chordViewMode === 'scale'){
-      renderScaleForChord(p, inst);
+    } else if(state.chordViewMode === 'scale' || state.chordViewMode === 'arpeggio'){
+      renderScaleForChord(p, inst, state.chordViewMode);
     } else if(inst==='guitar'){ renderGuitar(p); } else if(inst==='ukulele'){ renderUkulele(p); } else { renderPiano(p); }
   }
 
@@ -4877,6 +6040,351 @@
       builderCollapseToStep1();
       render();
       chordInput.focus();
+    });
+  }
+
+  // "Analyser un fichier audio": lets the chord-detection pipeline above
+  // (detectChordsFromAudioBuffer) fill the chord input from a user-chosen
+  // file instead of typing. The detected sequence always lands in its own
+  // editable field first, next to a disclaimer and a "use" button, rather
+  // than overwriting chordInput directly - automated chord detection WILL
+  // make mistakes (see the function's own comments), so the person gets a
+  // chance to read/correct it before it drives any diagram.
+  var audioImportBtn = document.getElementById('audioImportBtn');
+  var audioFileInput = document.getElementById('audioFileInput');
+  var audioImportStatus = document.getElementById('audioImportStatus');
+  var audioImportResult = document.getElementById('audioImportResult');
+  var audioImportChordsInput = document.getElementById('audioImportChords');
+  var audioImportUseBtnEl = document.getElementById('audioImportUseBtn');
+  var audioImportDismissBtnEl = document.getElementById('audioImportDismissBtn');
+  var audioImportPlayerWrap = document.getElementById('audioImportPlayerWrap');
+  var audioImportPlayerEl = document.getElementById('audioImportPlayer');
+  var audioImportSyncBtnEl = document.getElementById('audioImportSyncBtn');
+  var audioImportNowPlayingEl = document.getElementById('audioImportNowPlaying');
+  var audioImportGranularitySelect = document.getElementById('audioImportGranularitySelect');
+  // Tracks the blob: URL handed to <audio id="audioImportPlayer">, purely so
+  // it can be revoked - freeing the decoded copy of the PREVIOUS file -
+  // right before a new one replaces it. Without this, picking several
+  // files one after another in the same session would leak one blob URL
+  // (and its underlying memory) per file for as long as the page stays open.
+  var audioImportObjectUrl = null;
+  // The last detection's {token,startSec,durSec}[] (see
+  // detectChordsFromAudioBuffer) - the real timing "Jouer en rythme avec le
+  // morceau" schedules chord sounds against, in the ORIGINAL file's own
+  // timeline. Cleared whenever a new file is picked.
+  var audioImportTimeline = [];
+  // The last successfully decoded AudioBuffer, kept around purely so
+  // changing the analysis granularity (audioImportGranularitySelect) can
+  // re-run detection on it without asking the person to re-pick the file.
+  // Cleared whenever a new file is chosen.
+  var audioImportLastBuffer = null;
+  // How many AUDIO_DETECT_FRAME-sized frames get pooled into one "chord
+  // guess" - see AUDIO_DETECT_SEG_CHOICES. Restored from the person's last
+  // choice, same pattern as the saved language preference below.
+  var audioImportFramesPerSegment = AUDIO_DETECT_FRAMES_PER_SEGMENT;
+  try{
+    var savedSeg = parseInt(localStorage.getItem('vcd_audio_seg'), 10);
+    if(AUDIO_DETECT_SEG_CHOICES.indexOf(savedSeg) !== -1) audioImportFramesPerSegment = savedSeg;
+  }catch(e){}
+  if(audioImportGranularitySelect) audioImportGranularitySelect.value = String(audioImportFramesPerSegment);
+
+  // Fills in the granularity <select>'s option labels (computed from the
+  // real constants, so they always reflect the truth, and a localized unit
+  // suffix - see applyStaticTranslations, which calls this on every
+  // language change too).
+  function populateAudioImportGranularityOptions(){
+    if(!audioImportGranularitySelect) return;
+    var opts = audioImportGranularitySelect.options;
+    for(var i=0;i<opts.length;i++){
+      var frames = parseInt(opts[i].value, 10);
+      var secs = (AUDIO_DETECT_FRAME*frames)/AUDIO_DETECT_TARGET_RATE;
+      opts[i].textContent = '~'+secs.toFixed(1)+t('audioImportGranularityUnit');
+    }
+    audioImportGranularitySelect.title = t('audioImportGranularityHint');
+  }
+
+  function setAudioImportStatus(text, isError, showSpinner){
+    if(!audioImportStatus) return;
+    if(!text){ audioImportStatus.style.display='none'; audioImportStatus.innerHTML=''; return; }
+    audioImportStatus.style.display='flex';
+    audioImportStatus.classList.toggle('error', !!isError);
+    audioImportStatus.innerHTML = (showSpinner ? '<span class="audio-import-spinner" aria-hidden="true"></span>' : '') + '<span>'+text+'</span>';
+  }
+
+  // "Jouer en rythme avec le morceau": plays the person's own uploaded file
+  // while, in parallel, sounding each detected chord (via the app's own
+  // synth, same as everywhere else) at the exact moment it actually occurs
+  // in that file - letting the person verify the detection by ear against
+  // the real song instead of a generic, assumed rhythm. Driven by polling
+  // audioImportPlayerEl.currentTime (rather than pre-scheduling setTimeouts
+  // from the moment Play is pressed) so it never drifts out of sync over a
+  // multi-minute song and self-corrects immediately if the person scrubs
+  // the player's own seek bar.
+  var audioImportSyncTimer = null;
+  var audioImportSyncToken = 0;
+  var audioImportSyncLastIdx = -1;
+  var audioImportSyncActiveTimeline = [];
+
+  function stopAudioImportSync(){
+    audioImportSyncToken++;
+    if(audioImportSyncTimer){ clearInterval(audioImportSyncTimer); audioImportSyncTimer = null; }
+    updateSequencePlaybackLock();
+    audioImportSyncLastIdx = -1;
+    stopAllAudioNow();
+    if(audioImportPlayerEl){
+      audioImportPlayerEl.pause();
+      audioImportPlayerEl.volume = 1;
+    }
+    if(audioImportSyncBtnEl){
+      audioImportSyncBtnEl.firstChild.textContent = '▶ ';
+      var lbl = document.getElementById('audioImportSyncBtnText');
+      if(lbl) lbl.textContent = t('audioImportSyncBtn');
+    }
+    if(audioImportNowPlayingEl) audioImportNowPlayingEl.style.display = 'none';
+    // Mirrors the button/label above into the duplicate sync control living
+    // in the sequence section itself (see syncSequenceBtnEl) - the two are
+    // two faces of the exact same playback state, see playAudioImportSync.
+    if(syncSequenceBtnEl){
+      syncSequenceBtnEl.firstChild.textContent = '▶ ';
+      var lbl2 = document.getElementById('syncSequenceBtnText');
+      if(lbl2) lbl2.textContent = t('audioImportSyncBtn');
+    }
+    if(syncSequenceNowPlayingEl) syncSequenceNowPlayingEl.style.display = 'none';
+    clearSequenceHighlights();
+  }
+
+  // Whether the currently rendered sequence cards/staff/jazz-grid/tab-grid
+  // are plausibly the SAME chords as the active sync timeline, so
+  // highlighting index i in one means the same chord in the other - true
+  // when the person has already pressed "Utiliser cette grille" for this
+  // exact detection and the card view is still showing it (re-opening the
+  // file picker for the same song re-shows the sync controls above without
+  // touching the sequence section below, see audioImportBtn/audioFileInput
+  // wiring). A length mismatch means the sequence on screen is unrelated
+  // (never transferred, edited since, or from a different song/import) -
+  // in that case the sync still plays and announces each chord by name,
+  // it just doesn't light up a card that wouldn't actually correspond.
+  function sequenceMatchesAudioImportSync(){
+    var flatTokens = state.sequenceFlatTokens || [];
+    return flatTokens.length > 0 && flatTokens.length === audioImportSyncActiveTimeline.length;
+  }
+
+  // Whether the sequence currently shown as cards (transferred via
+  // "Utiliser cette grille", or typed/edited to the same length since) can
+  // be synced against the LAST analyzed audio file, regardless of whether
+  // sync playback is active right now - used only to decide whether to show
+  // the "Jouer en rythme avec le morceau" control inside the sequence
+  // section (syncSequenceRow), so that control stays reachable there even
+  // after the audio-import panel above has been hidden (see
+  // audioImportUseBtnEl's click handler). audioImportTimeline is the result
+  // of the most recent detection, independent of audioImportSyncActiveTimeline
+  // which only exists while a sync playback is actually running.
+  function sequenceHasAudioSync(){
+    var flatTokens = state.sequenceFlatTokens || [];
+    return flatTokens.length > 0 && !!audioImportTimeline && audioImportTimeline.length === flatTokens.length
+      && !!audioImportPlayerEl && !!audioImportPlayerEl.src;
+  }
+  function updateSyncSequenceBtnVisibility(){
+    if(!syncSequenceRow) return;
+    var show = sequenceHasAudioSync();
+    syncSequenceRow.style.display = show ? 'flex' : 'none';
+    if(!show && syncSequenceNowPlayingEl) syncSequenceNowPlayingEl.style.display = 'none';
+  }
+
+  function audioImportSyncTick(myToken){
+    if(myToken !== audioImportSyncToken) return;
+    if(!audioImportPlayerEl || audioImportPlayerEl.paused || audioImportPlayerEl.ended){
+      if(audioImportPlayerEl && audioImportPlayerEl.ended) stopAudioImportSync();
+      return;
+    }
+    var cur = audioImportPlayerEl.currentTime;
+    var idx = -1;
+    for(var i=0;i<audioImportSyncActiveTimeline.length;i++){
+      var seg = audioImportSyncActiveTimeline[i];
+      if(cur >= seg.startSec && cur < seg.startSec+seg.durSec){ idx = i; break; }
+    }
+    if(idx === audioImportSyncLastIdx) return;
+    audioImportSyncLastIdx = idx;
+    if(idx < 0){
+      if(audioImportNowPlayingEl) audioImportNowPlayingEl.style.display = 'none';
+      if(syncSequenceNowPlayingEl) syncSequenceNowPlayingEl.style.display = 'none';
+      clearSequenceHighlights();
+      return;
+    }
+    var seg = audioImportSyncActiveTimeline[idx];
+    var p = parseChordName(seg.displayToken);
+    // Muting lives on the card index (state.sequenceMuted), so it only
+    // ever applies here when this sync timeline and the on-screen cards
+    // are known to be the same sequence, position for position - the same
+    // guard already used just below to decide whether to highlight a card
+    // at all for this idx.
+    var muted = sequenceMatchesAudioImportSync() && !!(state.sequenceMuted && state.sequenceMuted[idx]);
+    if(p.ok && !muted) playChordSound(p, Math.max(0.3, seg.durSec));
+    var nowPlayingText = t('audioImportNowPlayingLabel')+' '+seg.displayToken;
+    if(audioImportNowPlayingEl){
+      audioImportNowPlayingEl.style.display = 'inline';
+      audioImportNowPlayingEl.textContent = nowPlayingText;
+    }
+    if(syncSequenceNowPlayingEl){
+      syncSequenceNowPlayingEl.style.display = 'inline';
+      syncSequenceNowPlayingEl.textContent = nowPlayingText;
+    }
+    if(sequenceMatchesAudioImportSync()) highlightSequenceIndex(idx);
+    else clearSequenceHighlights();
+  }
+
+  function playAudioImportSync(){
+    if(!audioImportPlayerEl || !audioImportTimeline.length) return;
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    stopSequencePlayback(); // don't let "Écouter la suite" keep playing underneath
+    stopAudioImportSync();
+    // Re-zip the CURRENT (possibly hand-corrected) chord text with the
+    // ORIGINAL detection's timing, position by position - editing a wrong
+    // chord name keeps the real timing it was heard at; adding or removing
+    // tokens just leaves the extra slots on whichever side is longer using
+    // the original detected name.
+    var edited = (audioImportChordsInput.value || '').trim().split(/\s+/).filter(Boolean);
+    audioImportSyncActiveTimeline = audioImportTimeline.map(function(seg, i){
+      return { startSec: seg.startSec, durSec: seg.durSec, displayToken: edited[i] || seg.token };
+    });
+    var myToken = ++audioImportSyncToken;
+    audioImportSyncLastIdx = -1;
+    audioImportPlayerEl.currentTime = 0;
+    audioImportPlayerEl.volume = 0.6; // ducked so the synthesized chord stands out on top of the song
+    var playPromise = audioImportPlayerEl.play();
+    if(playPromise && playPromise.catch) playPromise.catch(function(){});
+    if(audioImportSyncBtnEl){
+      audioImportSyncBtnEl.firstChild.textContent = '⏹ ';
+      var lbl = document.getElementById('audioImportSyncBtnText');
+      if(lbl) lbl.textContent = t('stopSequenceBtn');
+    }
+    if(syncSequenceBtnEl){
+      syncSequenceBtnEl.firstChild.textContent = '⏹ ';
+      var lbl2 = document.getElementById('syncSequenceBtnText');
+      if(lbl2) lbl2.textContent = t('stopSequenceBtn');
+    }
+    audioImportSyncTimer = setInterval(function(){ audioImportSyncTick(myToken); }, 120);
+    updateSequencePlaybackLock();
+  }
+
+  if(audioImportSyncBtnEl){
+    audioImportSyncBtnEl.addEventListener('click', function(){
+      if(audioImportSyncTimer){ stopAudioImportSync(); }
+      else { playAudioImportSync(); }
+    });
+  }
+  // Duplicate of the sync button above, living inside the sequence section
+  // itself (see syncSequenceRow) so "Jouer en rythme avec le morceau" stays
+  // reachable right next to the chord cards even once "Utiliser cette
+  // grille" has hidden the audio-import panel above - same underlying
+  // playAudioImportSync/stopAudioImportSync state either button drives.
+  if(syncSequenceBtnEl){
+    syncSequenceBtnEl.addEventListener('click', function(){
+      if(audioImportSyncTimer){ stopAudioImportSync(); }
+      else { playAudioImportSync(); }
+    });
+  }
+
+  // Runs detection on an already-decoded buffer and applies the result to
+  // the UI - shared by the initial file-pick handler and by the
+  // granularity <select>'s change handler, so switching granularity can
+  // re-analyze the SAME file without asking the person to re-pick it.
+  // Deliberately has no catch of its own: callers wrap it in their own
+  // try/catch-equivalent (.catch) so a decode failure and a detection
+  // failure both land on the same "couldn't analyze" message.
+  function runAudioImportDetection(buffer){
+    setAudioImportStatus(t('audioImportAnalyzing'), false, true);
+    return detectChordsFromAudioBuffer(buffer, function(frac){
+      setAudioImportStatus(t('audioImportAnalyzing')+' '+Math.round(frac*100)+'%', false, true);
+    }, audioImportFramesPerSegment).then(function(result){
+      var chords = result.chords;
+      if(!chords.length){
+        setAudioImportStatus(t('audioImportNoChords'), true, false);
+        return;
+      }
+      audioImportTimeline = result.timeline;
+      setAudioImportStatus('', false, false);
+      if(audioImportChordsInput) audioImportChordsInput.value = chords.join(' ');
+      if(audioImportResult) audioImportResult.style.display='block';
+      // In case the sequence section is still showing an earlier (or now
+      // length-matching) detection, keep the "Jouer en rythme avec le
+      // morceau" control inside it up to date with this new timeline too.
+      updateSyncSequenceBtnVisibility();
+    });
+  }
+
+  if(audioImportGranularitySelect){
+    audioImportGranularitySelect.addEventListener('change', function(){
+      var val = parseInt(audioImportGranularitySelect.value, 10);
+      if(AUDIO_DETECT_SEG_CHOICES.indexOf(val) === -1) val = AUDIO_DETECT_FRAMES_PER_SEGMENT;
+      audioImportFramesPerSegment = val;
+      try{ localStorage.setItem('vcd_audio_seg', String(val)); }catch(e){}
+      if(!audioImportLastBuffer) return; // nothing analyzed yet - just remembers the choice for next time
+      stopAudioImportSync();
+      if(audioImportResult) audioImportResult.style.display='none';
+      runAudioImportDetection(audioImportLastBuffer).catch(function(err){
+        setAudioImportStatus(t('audioImportError'), true, false);
+      });
+    });
+  }
+
+  if(audioImportBtn && audioFileInput){
+    audioImportBtn.addEventListener('click', function(){
+      audioFileInput.value = '';
+      audioFileInput.click();
+    });
+    audioFileInput.addEventListener('change', function(){
+      var file = audioFileInput.files && audioFileInput.files[0];
+      if(!file) return;
+      stopAudioImportSync();
+      audioImportTimeline = [];
+      audioImportLastBuffer = null;
+      if(audioImportResult) audioImportResult.style.display='none';
+      updateSyncSequenceBtnVisibility(); // this song's detection is gone until the new one finishes
+      // Let the person listen to their own original file - independent of
+      // (and not blocked on) the chord-detection pipeline below, which
+      // reads the same File object separately via arrayBuffer(); File/Blob
+      // reads don't consume the file, so both can use it freely.
+      if(audioImportPlayerEl && audioImportPlayerWrap){
+        if(audioImportObjectUrl){ URL.revokeObjectURL(audioImportObjectUrl); }
+        audioImportObjectUrl = URL.createObjectURL(file);
+        audioImportPlayerEl.src = audioImportObjectUrl;
+        audioImportPlayerEl.load();
+        audioImportPlayerWrap.style.display = 'block';
+        var fileNameEl = document.getElementById('audioImportFileNameText');
+        if(fileNameEl) fileNameEl.textContent = file.name || '';
+      }
+      setAudioImportStatus(t('audioImportAnalyzing'), false, true);
+      var ctx = getAudioCtx();
+      if(!ctx){ setAudioImportStatus(t('audioImportError'), true, false); return; }
+      file.arrayBuffer().then(function(buf){
+        return ctx.decodeAudioData(buf);
+      }).then(function(audioBuffer){
+        audioImportLastBuffer = audioBuffer;
+        return runAudioImportDetection(audioBuffer);
+      }).catch(function(err){
+        setAudioImportStatus(t('audioImportError'), true, false);
+      });
+    });
+  }
+  if(audioImportUseBtnEl){
+    audioImportUseBtnEl.addEventListener('click', function(){
+      if(!audioImportChordsInput) return;
+      var val = audioImportChordsInput.value.trim();
+      if(!val) return;
+      stopAudioImportSync();
+      chordInput.value = val;
+      render();
+      if(audioImportResult) audioImportResult.style.display='none';
+      var target = sequenceSection.classList.contains('visible') ? sequenceSection : resultSection;
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+  if(audioImportDismissBtnEl){
+    audioImportDismissBtnEl.addEventListener('click', function(){
+      stopAudioImportSync();
+      if(audioImportResult) audioImportResult.style.display='none';
     });
   }
   function setChordViewMode(mode){
@@ -4898,8 +6406,8 @@
   printSequenceBtn.addEventListener('click', function(){ window.print(); });
   playBtn.addEventListener('click', function(){
     if(!state.currentChord) return;
-    if(state.chordViewMode === 'scale'){
-      playScaleSound(state.currentChord);
+    if(state.chordViewMode === 'scale' || state.chordViewMode === 'arpeggio'){
+      playScaleSound(state.currentChord, state.chordViewMode);
     } else {
       playChordSound(state.currentChord, 1.1);
     }
@@ -4911,11 +6419,14 @@
   function onPentatonicToggleChange(checked){
     state.usePentatonic = checked;
     syncScaleControlsUI();
+    // Pentatonic has no effect in the Arpèges view (its toggle row is
+    // hidden there, see syncScaleControlsUI), so these two checks
+    // deliberately stay scoped to 'scale' only.
     if(state.chordViewMode === 'scale' && state.currentChord){
-      renderScaleForChord(state.currentChord, instrument());
+      renderScaleForChord(state.currentChord, instrument(), 'scale');
     }
     if(currentSequenceViewMode() === 'scale' && state.sequenceFlatTokens && state.sequenceFlatTokens.length){
-      renderSequenceScaleBlocks(state.sequenceFlatTokens, instrument());
+      renderSequenceScaleBlocks(state.sequenceFlatTokens, instrument(), 'scale');
     }
   }
   if(pentatonicToggle){
@@ -4938,11 +6449,12 @@
   // continues from what's really displayed rather than a stale index.
   function stepScalePosition(dir){
     state.scalePosIndex = Math.max(0, (state.scalePosIndex||0) + dir);
-    if(state.chordViewMode === 'scale' && state.currentChord){
-      renderScaleForChord(state.currentChord, instrument());
+    if((state.chordViewMode === 'scale' || state.chordViewMode === 'arpeggio') && state.currentChord){
+      renderScaleForChord(state.currentChord, instrument(), state.chordViewMode);
     }
-    if(currentSequenceViewMode() === 'scale' && state.sequenceFlatTokens && state.sequenceFlatTokens.length){
-      renderSequenceScaleBlocks(state.sequenceFlatTokens, instrument());
+    var seqMode = currentSequenceViewMode();
+    if((seqMode === 'scale' || seqMode === 'arpeggio') && state.sequenceFlatTokens && state.sequenceFlatTokens.length){
+      renderSequenceScaleBlocks(state.sequenceFlatTokens, instrument(), seqMode);
     }
   }
   if(scalePosPrev) scalePosPrev.addEventListener('click', function(){ stepScalePosition(-1); });
@@ -4963,10 +6475,11 @@
   if(scaleSpeedDown) scaleSpeedDown.addEventListener('click', function(){ stepScaleSpeed(-1); });
   if(scaleSpeedUp) scaleSpeedUp.addEventListener('click', function(){ stepScaleSpeed(1); });
   playSequenceBtn.addEventListener('click', function(){
+    var seqMode = currentSequenceViewMode();
     if(state.sequencePlaying){
       stopSequencePlayback();
-    } else if(currentSequenceViewMode() === 'scale'){
-      playSequenceScaleSound();
+    } else if(seqMode === 'scale' || seqMode === 'arpeggio'){
+      playSequenceScaleSound(seqMode);
     } else {
       playSequenceSound();
     }
