@@ -760,7 +760,8 @@
     border:1px solid var(--line);
     background:var(--surface);
     color:var(--ink-soft);
-    font-size:11px;
+    font-size:13px;
+    font-weight:700;
     line-height:1;
     display:flex;
     align-items:center;
@@ -1406,7 +1407,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.3.2';
+  var APP_VERSION = '1.3.3';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -5432,7 +5433,7 @@
       muteMini.className = 'mini-mute no-print';
       muteMini.setAttribute('aria-label', t(muted ? 'unmuteChordAria' : 'muteChordAria'));
       muteMini.setAttribute('aria-pressed', muted ? 'true' : 'false');
-      muteMini.textContent = muted ? '🔇' : '🔈';
+      muteMini.textContent = muted ? '↺' : '⊘';
       muteMini.addEventListener('click', function(e){
         e.stopPropagation();
         toggleSequenceMute(idx);
@@ -5482,7 +5483,7 @@
     card.classList.toggle('muted', next);
     var btn = card.querySelector('.mini-mute');
     if(btn){
-      btn.textContent = next ? '🔇' : '🔈';
+      btn.textContent = next ? '↺' : '⊘';
       btn.setAttribute('aria-label', t(next ? 'unmuteChordAria' : 'muteChordAria'));
       btn.setAttribute('aria-pressed', next ? 'true' : 'false');
     }
@@ -5572,7 +5573,7 @@
   // (backToSequenceBtn) can bring the grid back, playback itself has
   // already been stopped by then and the person loses their place - easier
   // to simply not let the accidental click navigate away in the first
-  // place. The mini "play this chord" (🔊) and mute (🔇) buttons on each
+  // place. The mini "play this chord" (🔊) and mute (⊘/↺) buttons on each
   // card stay active regardless - stopPropagation keeps those clicks from
   // ever reaching the card's own open() handler, so they were never part of
   // this problem.
