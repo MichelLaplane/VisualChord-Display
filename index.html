@@ -1302,6 +1302,30 @@
         </div>
       </div>
 
+      <!-- Playback/print/share controls live here, right under the header
+           and above the grid itself, rather than after it - a detected
+           sequence can run to well over a hundred chords, and a control
+           placed after that much content effectively disappears below the
+           fold (the person has to scroll the whole grid first to find it),
+           which is exactly what made "Jouer en rythme avec le morceau" hard
+           to find once "Utiliser cette grille" brought the grid itself into
+           view. Keeping every control above the content means it's visible
+           the instant the sequence section appears, no matter how long the
+           sequence is. -->
+      <div class="audio-import-sync-row no-print" id="syncSequenceRow" style="display:none;justify-content:center;">
+        <button type="button" class="btn" id="syncSequenceBtn">▶ <span id="syncSequenceBtnText"></span></button>
+        <span class="audio-import-now-playing" id="syncSequenceNowPlaying" style="display:none;"></span>
+      </div>
+      <div class="actions-row no-print">
+        <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
+        <button type="button" class="btn" id="playSequenceBtn">▶ <span id="playSequenceBtnText"></span></button>
+        <button type="button" class="btn" id="shareSeqBtn">🔗 <span id="shareSeqBtnText"></span></button>
+      </div>
+      <p class="note-generated no-print" id="shareStatus" style="display:none;"></p>
+      <div class="no-print" id="shareFallbackWrap" style="display:none;margin-top:10px;text-align:center;">
+        <input type="text" id="shareFallbackInput" readonly style="width:100%;max-width:420px;font-family:var(--font-mono);font-size:12px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);">
+      </div>
+
       <div class="sequence-grid" id="sequenceGrid"></div>
       <div class="jazz-grid" id="jazzGrid" style="display:none;"></div>
       <div class="tab-grid" id="tabGrid" style="display:none;"></div>
@@ -1318,20 +1342,6 @@
           <span class="pos-info" id="scalePosInfoSeq"></span>
           <button type="button" id="scalePosNextSeq" aria-label="Position suivante">›</button>
         </div>
-      </div>
-
-      <div class="audio-import-sync-row no-print" id="syncSequenceRow" style="display:none;justify-content:center;">
-        <button type="button" class="btn" id="syncSequenceBtn">▶ <span id="syncSequenceBtnText"></span></button>
-        <span class="audio-import-now-playing" id="syncSequenceNowPlaying" style="display:none;"></span>
-      </div>
-      <div class="actions-row no-print">
-        <button type="button" class="btn primary" id="printSequenceBtn">🖨 <span id="printSequenceBtnText"></span></button>
-        <button type="button" class="btn" id="playSequenceBtn">▶ <span id="playSequenceBtnText"></span></button>
-        <button type="button" class="btn" id="shareSeqBtn">🔗 <span id="shareSeqBtnText"></span></button>
-      </div>
-      <p class="note-generated no-print" id="shareStatus" style="display:none;"></p>
-      <div class="no-print" id="shareFallbackWrap" style="display:none;margin-top:10px;text-align:center;">
-        <input type="text" id="shareFallbackInput" readonly style="width:100%;max-width:420px;font-family:var(--font-mono);font-size:12px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);">
       </div>
     </div>
   </section>
@@ -1396,7 +1406,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.3.1';
+  var APP_VERSION = '1.3.2';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
