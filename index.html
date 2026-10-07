@@ -1181,7 +1181,15 @@
     <div class="audio-import no-print" id="audioImportBlock">
       <div class="audio-import-btn-row">
         <button type="button" class="btn" id="audioImportBtn">🎵 <span id="audioImportBtnText">Analyser un fichier audio</span></button>
-        <input type="file" id="audioFileInput" accept="audio/*" style="display:none;">
+        <!-- accept lists explicit extensions/MIME types alongside "audio/*": a
+             long-standing WebKit bug (bugs.webkit.org #242110) makes iOS
+             Safari treat a bare "audio/*" like "video/*" in the Files/Photos
+             picker, so .mp4 videos are selectable but real audio files
+             (.mp3 especially) silently aren't - tapping one does nothing.
+             Listing extensions works around it since iOS resolves those
+             directly instead of relying on the broken audio/video UTI
+             mapping. -->
+        <input type="file" id="audioFileInput" accept="audio/*,.mp3,.m4a,.wav,.aac,.flac,.ogg,.oga,.wma,.caf,.aiff,.opus,audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/x-wav,audio/aac,audio/flac,audio/ogg,audio/opus" style="display:none;">
         <label style="display:flex;align-items:center;gap:6px;">
           <span class="scale-speed-label" id="audioImportGranularityLabelText"></span>
           <select id="audioImportGranularitySelect" class="seq-view-select">
@@ -1388,7 +1396,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.3.0';
+  var APP_VERSION = '1.3.1';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
