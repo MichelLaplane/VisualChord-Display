@@ -1142,7 +1142,10 @@
           <option value="de">Deutsch</option>
           <option value="it">Italiano</option>
           <option value="es">Español</option>
-          <option value="zh">中文</option>
+          <option value="zh">中文 (Chinois)</option>
+          <option value="ja">日本語 (Japonais)</option>
+          <option value="ru">Русский (Russe)</option>
+          <option value="he">עברית (Hébreu)</option>
         </select>
       </div>
     </div>
@@ -1254,6 +1257,18 @@
       <p class="note-generated" id="noteGenerated" style="display:none;"></p>
 
       <div class="legend" id="legendOut"></div>
+
+      <div class="legend no-print" id="pianoHandRow" style="display:none;flex-direction:column;align-items:center;gap:8px;">
+        <span id="labelPianoHandText">Affichage du piano</span>
+        <div class="segmented" id="pianoHandSwitch">
+          <input type="radio" name="pianoHand" id="handBoth" value="both" checked>
+          <label for="handBoth" id="labelHandBothText">Les deux mains</label>
+          <input type="radio" name="pianoHand" id="handLHOnly" value="lh">
+          <label for="handLHOnly" id="labelHandLHOnlyText">Main gauche</label>
+          <input type="radio" name="pianoHand" id="handRHOnly" value="rh">
+          <label for="handRHOnly" id="labelHandRHOnlyText">Main droite</label>
+        </div>
+      </div>
 
       <div class="scale-controls no-print" id="scaleControls" style="display:none;">
         <label class="staff-toggle-inline" for="pentatonicToggle" id="pentatonicRow">
@@ -1396,6 +1411,26 @@
           Lorsqu'un accord rare n'existe pas dans la base de doigtés de guitare, un doigté est généré automatiquement à partir des notes de l'accord (mention « généré »).
         </p>
       </div>
+      <div>
+        <h3 id="helpInstrumentsTitleText">Instruments et positions</h3>
+        <p id="helpInstrumentsTextP" style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.6;"></p>
+      </div>
+      <div>
+        <h3 id="helpScalesTitleText">Gammes et arpèges</h3>
+        <p id="helpScalesTextP" style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.6;"></p>
+      </div>
+      <div>
+        <h3 id="helpSequencesTitleText">Suites d'accords</h3>
+        <p id="helpSequencesTextP" style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.6;"></p>
+      </div>
+      <div>
+        <h3 id="helpToolsTitleText">Assistant de saisie, audio et partage</h3>
+        <p id="helpToolsTextP" style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.6;"></p>
+      </div>
+      <div>
+        <h3 id="helpMoreTitleText">Pour aller plus loin</h3>
+        <p id="helpMoreTextP" style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.6;"></p>
+      </div>
     </div>
   </details>
 
@@ -1407,7 +1442,7 @@
   "use strict";
 
   // Numéro de version de l'application — seul endroit à modifier lors d'une nouvelle version.
-  var APP_VERSION = '1.3.3';
+  var APP_VERSION = '1.3.4';
 
   var NOTE_TO_SEMITONE = {
     'C':0,'B#':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'E#':5,'F':5,
@@ -1546,6 +1581,10 @@
   var LANG_DATA = {
     fr: {
       name:'Français',
+      langNameZh:'Chinois',
+      langNameJa:'Japonais',
+      langNameRu:'Russe',
+      langNameHe:'Hébreu',
       eyebrow:'Guitare, Ukulélé & Piano',
       intro:"Saisissez le nom d'un accord, choisissez l'instrument : le manche de guitare, celui de l'ukulélé, ou le clavier (main gauche / main droite) s'affiche instantanément, prêt à imprimer.",
       labelChordName:"Nom de l'accord",
@@ -1556,6 +1595,10 @@
       guitareLabel:'Guitare',
       ukuleleLabel:'Ukulélé (C6)',
       pianoLabel:'Piano',
+      pianoHandLabel:'Affichage du piano',
+      pianoHandBothLabel:'Les deux mains',
+      pianoHandLHLabel:'Main gauche',
+      pianoHandRHLabel:'Main droite',
       showStaffLabel:'Portée',
       gammesLabel:'Gammes',
       scaleCaption:'Gamme : {scale}',
@@ -1577,6 +1620,16 @@
       gBasic:'De base', gSevenths:'Septièmes', gExtended:'Étendus (9, 11, 13)', gAddSixth:'Ajouts & sixtes', gSlash:'Accords de basse (renversements)',
       helpFingersTitle:'Doigtés',
       helpFingersText:"Guitare — chiffres 1 à 4 : 1=index, 2=majeur, 3=annulaire, 4=auriculaire. ✕ = corde étouffée, ○ = corde à vide. Piano — les touches dorées indiquent la <strong>main gauche</strong> (note de basse), les touches vertes la <strong>main droite</strong> (accord complet). Répartition pédagogique standard, libre à vous de l'adapter. Lorsqu'un accord rare n'existe pas dans la base de doigtés de guitare, un doigté est généré automatiquement à partir des notes de l'accord (mention « généré »).",
+      helpInstrumentsTitle:'Instruments et positions',
+      helpInstrumentsText:"Choisissez l'instrument (Guitare, Ukulélé C6 ou Piano) dans le sélecteur dédié. Pour la guitare et l'ukulélé, lorsque plusieurs doigtés existent pour un même accord, les flèches ‹ › permettent de parcourir les différentes positions sur le manche (position ouverte, barrés). Pour le piano, les deux mains sont affichées ensemble sur un même clavier, repérées par couleur et par les étiquettes « MG » / « MD » (main gauche = note de basse, main droite = accord complet) ; le sélecteur « Affichage du piano » permet de n'afficher que la main gauche, que la main droite, ou les deux.",
+      helpScalesTitle:'Gammes et arpèges',
+      helpScalesText:"Les onglets « Gammes » et « Arpèges » affichent, pour l'accord saisi, la gamme associée (sur tout le manche, ou sur une octave au piano) ou les notes de l'accord jouées une à une. L'option « Pentatonique » simplifie la gamme à cinq notes, et le réglage « Vitesse » contrôle le tempo de lecture.",
+      helpSequencesTitle:"Suites d'accords",
+      helpSequencesText:"Saisissez plusieurs accords séparés par des espaces (ex. « C G Am F ») pour afficher une suite complète, et utilisez « | » pour délimiter les mesures (ex. « C G | Am F »). La suite peut être affichée en cartes, en grille jazz, en tablature, en portée ou en gamme/arpège via le menu « Affichage ». Chaque accord peut être désactivé individuellement (icône ⊘) pour l'exclure de la lecture sans le retirer de la suite. Les boutons « Écouter la suite » / « Arrêter » lancent ou interrompent la lecture audio de toute la suite.",
+      helpToolsTitle:"Assistant de saisie, audio et partage",
+      helpToolsText:"L'assistant de saisie permet de construire un accord en touchant des notes, sans avoir à taper son nom. Le bouton « Analyser un fichier audio » détecte automatiquement les accords d'un morceau importé (grille approximative, à corriger si besoin) et peut synchroniser leur lecture avec le fichier original ; la « Granularité » ajuste la précision de cette détection. Les icônes d'impression génèrent une version prête à imprimer du diagramme ou de la suite, et « Partager le lien » copie une URL reproduisant l'état actuel de l'application.",
+      helpMoreTitle:"Pour aller plus loin",
+      helpMoreText:"Une version plus complète, iVisualChord, disponible sur l'App Store et le Play Store, permet notamment de générer une partition complète avec les paroles.",
       footerNote:'Base de doigtés de guitare : chords-db (open source). Positions main gauche/droite calculées par théorie musicale.',
       errorRoot:'Note de départ non reconnue. Utilisez les lettres A à G (ex. C, F#, Bb).',
       errorQuality:"Type d'accord non reconnu (« {q} »). Essayez maj7, m7, sus4, add9, 9, 13… (voir Aide ci-dessous).",
@@ -1676,6 +1729,10 @@
     },
     en: {
       name:'English',
+      langNameZh:'Chinese',
+      langNameJa:'Japanese',
+      langNameRu:'Russian',
+      langNameHe:'Hebrew',
       eyebrow:'Guitar, Ukulele & Piano',
       intro:'Enter a chord name and choose an instrument: the guitar fretboard, the ukulele fretboard, or the keyboard (left hand / right hand) appears instantly, ready to print.',
       labelChordName:'Chord name',
@@ -1686,6 +1743,10 @@
       guitareLabel:'Guitar',
       ukuleleLabel:'Ukulele (C6)',
       pianoLabel:'Piano',
+      pianoHandLabel:'Piano display',
+      pianoHandBothLabel:'Both hands',
+      pianoHandLHLabel:'Left hand',
+      pianoHandRHLabel:'Right hand',
       showStaffLabel:'Show staff notation',
       gammesLabel:'Scales',
       scaleCaption:'Scale: {scale}',
@@ -1707,6 +1768,16 @@
       gBasic:'Basic', gSevenths:'Sevenths', gExtended:'Extended (9, 11, 13)', gAddSixth:'Added notes & sixths', gSlash:'Slash chords (inversions)',
       helpFingersTitle:'Fingering',
       helpFingersText:'Guitar — numbers 1 to 4: 1=index, 2=middle, 3=ring, 4=little finger. ✕ = muted string, ○ = open string. Piano — golden keys show the <strong>left hand</strong> (bass note), green keys the <strong>right hand</strong> (full chord). Standard teaching layout — feel free to adapt it. When a rare chord isn’t in the guitar fingering database, a fingering is generated automatically from the chord’s notes (marked “generated”).',
+      helpInstrumentsTitle:'Instruments and positions',
+      helpInstrumentsText:'Choose the instrument (Guitar, Ukulele C6 or Piano) from the dedicated selector. For guitar and ukulele, when several fingerings exist for the same chord, the ‹ › arrows let you browse the different positions on the neck (open position, barre chords). For piano, both hands are shown together on one keyboard, color-coded and labeled "LH" / "RH" (left hand = bass note, right hand = full chord); the "Piano display" selector lets you show only the left hand, only the right hand, or both.',
+      helpScalesTitle:'Scales and arpeggios',
+      helpScalesText:'The "Scales" and "Arpeggios" tabs show, for the entered chord, its associated scale (across the whole neck, or over one octave on piano) or the chord\'s own notes played one by one. The "Pentatonic" option simplifies the scale to five notes, and the "Speed" control sets the playback tempo.',
+      helpSequencesTitle:'Chord sequences',
+      helpSequencesText:'Enter several chords separated by spaces (e.g. "C G Am F") to display a full sequence, and use "|" to mark off bars (e.g. "C G | Am F"). The sequence can be shown as cards, a jazz grid, tablature, staff notation, or a scale/arpeggio view via the "View" menu. Each chord can be muted individually (⊘ icon) to leave it out of playback without removing it from the sequence. The "Play sequence" / "Stop" buttons start or stop audio playback of the whole sequence.',
+      helpToolsTitle:'Input assistant, audio and sharing',
+      helpToolsText:'The input assistant lets you build a chord by tapping notes, without typing its name. The "Analyze an audio file" button automatically detects the chords in an imported track (an approximate guess - check and correct it if needed) and can sync playback with the original file; "Granularity" adjusts how precise that detection is. The print icons generate a print-ready version of the diagram or the sequence, and "Share link" copies a URL that reproduces the app\'s current state.',
+      helpMoreTitle:'Going further',
+      helpMoreText:'A more complete version, iVisualChord, available on the App Store and Play Store, can generate a full music score complete with lyrics.',
       footerNote:'Guitar fingering database: chords-db (open source). Left-/right-hand positions calculated using music theory.',
       errorRoot:'Starting note not recognized. Use the letters A to G (e.g. C, F#, Bb).',
       errorQuality:'Chord type not recognized (“{q}”). Try maj7, m7, sus4, add9, 9, 13… (see Help below).',
@@ -1806,6 +1877,10 @@
     },
     de: {
       name:'Deutsch',
+      langNameZh:'Chinesisch',
+      langNameJa:'Japanisch',
+      langNameRu:'Russisch',
+      langNameHe:'Hebräisch',
       eyebrow:'Gitarre, Ukulele & Klavier',
       intro:'Geben Sie einen Akkordnamen ein und wählen Sie ein Instrument: Das Gitarrengriffbrett, das Ukulele-Griffbrett oder die Klaviatur (linke / rechte Hand) erscheint sofort, druckbereit.',
       labelChordName:'Akkordname',
@@ -1816,6 +1891,10 @@
       guitareLabel:'Gitarre',
       ukuleleLabel:'Ukulele (C6)',
       pianoLabel:'Klavier',
+      pianoHandLabel:'Klavieranzeige',
+      pianoHandBothLabel:'Beide Hände',
+      pianoHandLHLabel:'Linke Hand',
+      pianoHandRHLabel:'Rechte Hand',
       showStaffLabel:'Notenlinien anzeigen',
       gammesLabel:'Tonleitern',
       scaleCaption:'Tonleiter: {scale}',
@@ -1837,6 +1916,16 @@
       gBasic:'Grundlegend', gSevenths:'Septakkorde', gExtended:'Erweitert (9, 11, 13)', gAddSixth:'Zusätze & Sexten', gSlash:'Bassakkorde (Umkehrungen)',
       helpFingersTitle:'Fingersätze',
       helpFingersText:'Gitarre — Zahlen 1 bis 4: 1=Zeigefinger, 2=Mittelfinger, 3=Ringfinger, 4=kleiner Finger. ✕ = abgedämpfte Saite, ○ = leere Saite. Klavier — goldene Tasten zeigen die <strong>linke Hand</strong> (Basston), grüne Tasten die <strong>rechte Hand</strong> (vollständiger Akkord). Übliche pädagogische Aufteilung, die Sie frei anpassen können. Existiert für einen seltenen Akkord kein Eintrag in der Gitarren-Datenbank, wird automatisch ein Fingersatz aus den Akkordtönen erzeugt (Hinweis „generiert”).',
+      helpInstrumentsTitle:'Instrumente und Positionen',
+      helpInstrumentsText:'Wählen Sie das Instrument (Gitarre, Ukulele C6 oder Klavier) im entsprechenden Auswahlfeld. Bei Gitarre und Ukulele können Sie mit den Pfeilen ‹ › zwischen den verschiedenen Griffpositionen auf dem Hals wechseln, wenn mehrere Fingersätze für denselben Akkord existieren (offene Lage, Barrégriffe). Beim Klavier werden beide Hände zusammen auf einer Tastatur angezeigt, farblich und mit den Kürzeln „LH" / „RH" gekennzeichnet (linke Hand = Basston, rechte Hand = vollständiger Akkord); mit der Auswahl „Klavieranzeige" lässt sich nur die linke, nur die rechte oder beide Hände anzeigen.',
+      helpScalesTitle:'Tonleitern und Arpeggios',
+      helpScalesText:'Die Reiter „Tonleitern" und „Arpeggios" zeigen für den eingegebenen Akkord die zugehörige Tonleiter (über den ganzen Hals, bzw. über eine Oktave beim Klavier) oder die Akkordtöne einzeln nacheinander gespielt. Die Option „Pentatonik" vereinfacht die Tonleiter auf fünf Töne, und der Regler „Geschwindigkeit" bestimmt das Wiedergabetempo.',
+      helpSequencesTitle:'Akkordfolgen',
+      helpSequencesText:'Geben Sie mehrere durch Leerzeichen getrennte Akkorde ein (z. B. „C G Am F"), um eine ganze Akkordfolge anzuzeigen, und verwenden Sie „|", um Takte abzugrenzen (z. B. „C G | Am F"). Die Folge kann über das Menü „Ansicht" als Karten, Jazz-Raster, Tabulatur, Notenlinien oder Tonleiter/Arpeggio angezeigt werden. Jeder Akkord lässt sich einzeln stummschalten (Symbol ⊘), um ihn von der Wiedergabe auszuschließen, ohne ihn aus der Folge zu entfernen. Die Schaltflächen „Folge abspielen" / „Stopp" starten oder beenden die Audiowiedergabe der gesamten Folge.',
+      helpToolsTitle:'Eingabehilfe, Audio und Teilen',
+      helpToolsText:'Mit der Eingabehilfe lässt sich ein Akkord durch Antippen von Noten aufbauen, ohne seinen Namen eingeben zu müssen. Die Schaltfläche „Audiodatei analysieren" erkennt automatisch die Akkorde eines importierten Titels (ungefähre Schätzung — bei Bedarf prüfen und korrigieren) und kann ihre Wiedergabe mit der Originaldatei synchronisieren; „Granularität" passt die Genauigkeit dieser Erkennung an. Die Drucksymbole erzeugen eine druckfertige Version des Diagramms oder der Folge, und „Link teilen" kopiert eine URL, die den aktuellen Zustand der Anwendung wiedergibt.',
+      helpMoreTitle:'Weitere Möglichkeiten',
+      helpMoreText:'Eine umfassendere Version, iVisualChord, im App Store und bei Google Play erhältlich, ermöglicht unter anderem die Erstellung einer vollständigen Partitur mit Liedtext.',
       footerNote:'Gitarren-Fingersatz-Datenbank: chords-db (Open Source). Positionen für linke/rechte Hand nach Musiktheorie berechnet.',
       errorRoot:'Grundton nicht erkannt. Verwenden Sie die Buchstaben A bis G (z. B. C, F#, Bb).',
       errorQuality:'Akkordtyp nicht erkannt („{q}“). Versuchen Sie maj7, m7, sus4, add9, 9, 13… (siehe Hilfe unten).',
@@ -1936,6 +2025,10 @@
     },
     it: {
       name:'Italiano',
+      langNameZh:'Cinese',
+      langNameJa:'Giapponese',
+      langNameRu:'Russo',
+      langNameHe:'Ebraico',
       eyebrow:'Chitarra, Ukulele e Pianoforte',
       intro:'Digita il nome di un accordo e scegli lo strumento: il manico della chitarra, quello dell’ukulele, o la tastiera del pianoforte (mano sinistra / destra) appare all’istante, pronto per la stampa.',
       labelChordName:"Nome dell'accordo",
@@ -1946,6 +2039,10 @@
       guitareLabel:'Chitarra',
       ukuleleLabel:'Ukulele (C6)',
       pianoLabel:'Pianoforte',
+      pianoHandLabel:'Visualizzazione piano',
+      pianoHandBothLabel:'Entrambe le mani',
+      pianoHandLHLabel:'Mano sinistra',
+      pianoHandRHLabel:'Mano destra',
       showStaffLabel:'Mostra il pentagramma',
       gammesLabel:'Scale',
       scaleCaption:'Scala: {scale}',
@@ -1967,6 +2064,16 @@
       gBasic:'Di base', gSevenths:'Di settima', gExtended:'Estesi (9, 11, 13)', gAddSixth:'Aggiunte e seste', gSlash:'Accordi con basso alternativo (rivolti)',
       helpFingersTitle:'Diteggiature',
       helpFingersText:'Chitarra — numeri da 1 a 4: 1=indice, 2=medio, 3=anulare, 4=mignolo. ✕ = corda muta, ○ = corda a vuoto. Pianoforte — i tasti dorati indicano la <strong>mano sinistra</strong> (nota di basso), i tasti verdi la <strong>mano destra</strong> (accordo completo). Ripartizione didattica standard, libera da adattare. Quando un accordo raro non è presente nel database delle diteggiature per chitarra, viene generata automaticamente una diteggiatura a partire dalle note dell’accordo (indicazione «generato»).',
+      helpInstrumentsTitle:'Strumenti e posizioni',
+      helpInstrumentsText:'Scegli lo strumento (Chitarra, Ukulele C6 o Pianoforte) dal selettore dedicato. Per chitarra e ukulele, quando esistono più diteggiature per lo stesso accordo, le freccette ‹ › permettono di scorrere le diverse posizioni sul manico (posizione aperta, accordi con barré). Per il pianoforte, le due mani sono mostrate insieme su un\'unica tastiera, distinte per colore e dalle etichette «MS» / «MD» (mano sinistra = nota di basso, mano destra = accordo completo); il selettore «Visualizzazione piano» permette di mostrare solo la mano sinistra, solo la destra, oppure entrambe.',
+      helpScalesTitle:'Scale e arpeggi',
+      helpScalesText:'Le schede «Scale» e «Arpeggi» mostrano, per l\'accordo inserito, la scala associata (su tutto il manico, oppure su un\'ottava al pianoforte) oppure le note dell\'accordo suonate una per una. L\'opzione «Pentatonica» semplifica la scala a cinque note, e il comando «Velocità» regola il tempo di riproduzione.',
+      helpSequencesTitle:'Sequenze di accordi',
+      helpSequencesText:'Inserisci più accordi separati da spazi (es. «C G Am F») per visualizzare una sequenza completa, e usa «|» per separare le battute (es. «C G | Am F»). La sequenza può essere mostrata come carte, griglia jazz, tablatura, pentagramma oppure scala/arpeggio tramite il menu «Visualizzazione». Ogni accordo può essere disattivato singolarmente (icona ⊘) per escluderlo dalla riproduzione senza rimuoverlo dalla sequenza. I pulsanti «Riproduci la sequenza» / «Ferma» avviano o interrompono la riproduzione audio di tutta la sequenza.',
+      helpToolsTitle:'Assistente alla digitazione, audio e condivisione',
+      helpToolsText:'L\'assistente alla digitazione permette di costruire un accordo toccando le note, senza doverne digitare il nome. Il pulsante «Analizza un file audio» rileva automaticamente gli accordi di un brano importato (stima approssimativa — da verificare e correggere se necessario) e può sincronizzarne la riproduzione con il file originale; la «Granularità» regola la precisione di questo rilevamento. Le icone di stampa generano una versione pronta per la stampa del diagramma o della sequenza, e «Condividi il link» copia un URL che riproduce lo stato attuale dell\'applicazione.',
+      helpMoreTitle:'Per saperne di più',
+      helpMoreText:'Una versione più completa, iVisualChord, disponibile su App Store e Play Store, permette tra l\'altro di generare uno spartito completo con il testo delle canzoni.',
       footerNote:'Database delle diteggiature per chitarra: chords-db (open source). Posizioni mano sinistra/destra calcolate secondo la teoria musicale.',
       errorRoot:'Nota di partenza non riconosciuta. Usa le lettere da A a G (es. C, F#, Bb).',
       errorQuality:'Tipo di accordo non riconosciuto («{q}»). Prova maj7, m7, sus4, add9, 9, 13… (vedi Guida qui sotto).',
@@ -2066,6 +2173,10 @@
     },
     es: {
       name:'Español',
+      langNameZh:'Chino',
+      langNameJa:'Japonés',
+      langNameRu:'Ruso',
+      langNameHe:'Hebreo',
       eyebrow:'Guitarra, Ukelele y Piano',
       intro:'Escriba el nombre de un acorde y elija el instrumento: el mástil de la guitarra, el del ukelele, o el teclado (mano izquierda / derecha) aparece al instante, listo para imprimir.',
       labelChordName:'Nombre del acorde',
@@ -2076,6 +2187,10 @@
       guitareLabel:'Guitarra',
       ukuleleLabel:'Ukelele (C6)',
       pianoLabel:'Piano',
+      pianoHandLabel:'Visualización del piano',
+      pianoHandBothLabel:'Ambas manos',
+      pianoHandLHLabel:'Mano izquierda',
+      pianoHandRHLabel:'Mano derecha',
       showStaffLabel:'Mostrar el pentagrama',
       gammesLabel:'Escalas',
       scaleCaption:'Escala: {scale}',
@@ -2097,6 +2212,16 @@
       gBasic:'Básicos', gSevenths:'Séptimas', gExtended:'Extendidos (9, 11, 13)', gAddSixth:'Añadidos y sextas', gSlash:'Acordes con bajo alternativo (inversiones)',
       helpFingersTitle:'Digitaciones',
       helpFingersText:'Guitarra — números del 1 al 4: 1=índice, 2=medio, 3=anular, 4=meñique. ✕ = cuerda apagada, ○ = cuerda al aire. Piano — las teclas doradas indican la <strong>mano izquierda</strong> (nota de bajo), las teclas verdes la <strong>mano derecha</strong> (acorde completo). Reparto pedagógico estándar, libre de adaptar. Cuando un acorde poco común no está en la base de datos de digitaciones de guitarra, se genera automáticamente una digitación a partir de las notas del acorde (indicación «generado»).',
+      helpInstrumentsTitle:'Instrumentos y posiciones',
+      helpInstrumentsText:'Elija el instrumento (Guitarra, Ukelele C6 o Piano) en el selector correspondiente. En guitarra y ukelele, cuando existen varias digitaciones para un mismo acorde, las flechas ‹ › permiten recorrer las distintas posiciones en el mástil (posición abierta, acordes con cejilla). En el piano, ambas manos se muestran juntas en un mismo teclado, diferenciadas por color y por las etiquetas «MI» / «MD» (mano izquierda = nota de bajo, mano derecha = acorde completo); el selector «Visualización del piano» permite mostrar solo la mano izquierda, solo la derecha, o ambas.',
+      helpScalesTitle:'Escalas y arpegios',
+      helpScalesText:'Las pestañas «Escalas» y «Arpegios» muestran, para el acorde escrito, la escala asociada (en todo el mástil, o en una octava en el piano) o las notas del acorde tocadas una a una. La opción «Pentatónica» simplifica la escala a cinco notas, y el control «Velocidad» regula el tempo de reproducción.',
+      helpSequencesTitle:'Progresiones de acordes',
+      helpSequencesText:'Escriba varios acordes separados por espacios (ej. «C G Am F») para mostrar una progresión completa, y use «|» para delimitar los compases (ej. «C G | Am F»). La progresión puede mostrarse en tarjetas, cuadrícula de jazz, tablatura, pentagrama o escala/arpegio a través del menú «Visualización». Cada acorde puede silenciarse individualmente (icono ⊘) para excluirlo de la reproducción sin quitarlo de la progresión. Los botones «Reproducir la progresión» / «Detener» inician o detienen la reproducción de audio de toda la progresión.',
+      helpToolsTitle:'Asistente de entrada, audio y compartir',
+      helpToolsText:'El asistente de entrada permite construir un acorde tocando notas, sin necesidad de escribir su nombre. El botón «Analizar un archivo de audio» detecta automáticamente los acordes de una pista importada (una estimación aproximada: revísela y corríjala si es necesario) y puede sincronizar su reproducción con el archivo original; la «Granularidad» ajusta la precisión de esa detección. Los iconos de impresión generan una versión lista para imprimir del diagrama o de la progresión, y «Compartir el enlace» copia una URL que reproduce el estado actual de la aplicación.',
+      helpMoreTitle:'Para ir más allá',
+      helpMoreText:'Una versión más completa, iVisualChord, disponible en App Store y Play Store, permite entre otras cosas generar una partitura completa con la letra de las canciones.',
       footerNote:'Base de datos de digitaciones de guitarra: chords-db (código abierto). Posiciones de mano izquierda/derecha calculadas mediante teoría musical.',
       errorRoot:'Nota inicial no reconocida. Use las letras de A a G (ej. C, F#, Bb).',
       errorQuality:'Tipo de acorde no reconocido («{q}»). Pruebe maj7, m7, sus4, add9, 9, 13… (vea la Ayuda abajo).',
@@ -2195,7 +2320,7 @@
       }
     },
     zh: {
-      name:'中文',
+      name:'中文 (Chinois)',
       eyebrow:'吉他、尤克里里与钢琴',
       intro:'输入和弦名称并选择乐器：吉他指板、尤克里里指板或钢琴键盘（左手/右手）会立即显示，可直接打印。',
       labelChordName:'和弦名称',
@@ -2206,6 +2331,10 @@
       guitareLabel:'吉他',
       ukuleleLabel:'尤克里里 (C6)',
       pianoLabel:'钢琴',
+      pianoHandLabel:'钢琴显示',
+      pianoHandBothLabel:'双手',
+      pianoHandLHLabel:'左手',
+      pianoHandRHLabel:'右手',
       showStaffLabel:'显示五线谱',
       gammesLabel:'音阶',
       scaleCaption:'音阶：{scale}',
@@ -2227,6 +2356,16 @@
       gBasic:'基础', gSevenths:'七和弦', gExtended:'延伸和弦 (9, 11, 13)', gAddSixth:'加音与六和弦', gSlash:'低音和弦（转位）',
       helpFingersTitle:'指法',
       helpFingersText:'吉他 — 数字 1 至 4：1=食指，2=中指，3=无名指，4=小指。✕ = 闷音弦，○ = 空弦。钢琴 — 金色键表示<strong>左手</strong>（低音），绿色键表示<strong>右手</strong>（完整和弦）。这是标准教学分配方式，您可自行调整。当罕见和弦不在吉他指法数据库中时，系统会根据和弦音符自动生成指法（标注”自动生成”）。',
+      helpInstrumentsTitle:'乐器与指位',
+      helpInstrumentsText:'在专用选择器中选择乐器（吉他、尤克里里 C6 或钢琴）。对于吉他和尤克里里，当同一和弦存在多种指法时，‹ › 箭头可用于浏览指板上的不同位置（开放位置、横按）。钢琴方面，两只手会一起显示在同一个键盘上，并以颜色和"左"/"右"标签区分（左手=低音音符，右手=完整和弦）；"钢琴显示"选择器可让您只显示左手、只显示右手，或同时显示两者。',
+      helpScalesTitle:'音阶与琶音',
+      helpScalesText:'"音阶"和"琶音"标签页会显示所输入和弦对应的音阶（整个指板，或钢琴上的一个八度）或该和弦的音符逐一演奏。"五声音阶"选项将音阶简化为五个音，"速度"控制播放的节奏。',
+      helpSequencesTitle:'和弦进行',
+      helpSequencesText:'输入多个用空格分隔的和弦（例如"C G Am F"）即可显示完整的和弦进行，使用"|"分隔小节（例如"C G | Am F"）。可以通过"显示"菜单将该进行显示为卡片、爵士网格、指法谱、五线谱，或音阶/琶音视图。每个和弦都可以单独静音（⊘ 图标），使其不参与播放而不必从进行中删除。"播放进行" / "停止"按钮可启动或停止整个进行的音频播放。',
+      helpToolsTitle:'输入助手、音频与分享',
+      helpToolsText:'输入助手允许您通过点按音符来构建和弦，而不必输入其名称。"分析音频文件"按钮会自动检测导入曲目中的和弦（这是一个近似结果——如有需要请检查并更正），并可将播放与原始文件同步；"粒度"用于调整检测的精细程度。打印图标会生成图表或该进行的可打印版本，"分享链接"会复制一个还原应用当前状态的网址。',
+      helpMoreTitle:'了解更多',
+      helpMoreText:'更完整的版本 iVisualChord（可在 App Store 和 Play Store 下载）还支持生成带歌词的完整乐谱。',
       footerNote:'吉他指法数据库：chords-db（开源）。左右手位置根据乐理计算得出。',
       errorRoot:'无法识别起始音符。请使用字母 A 到 G（例如 C、F#、Bb）。',
       errorQuality:'无法识别和弦类型（“{q}”）。请尝试 maj7、m7、sus4、add9、9、13…（见下方帮助）。',
@@ -2323,10 +2462,442 @@
         majorPentatonic:'大调五声音阶',
         minorPentatonic:'小调五声音阶'
       }
+    },
+    ja: {
+      name:'日本語 (Japonais)',
+      eyebrow:'ギター、ウクレレ ＆ ピアノ',
+      intro:'コードネームを入力し、楽器を選んでください。ギターのネック、ウクレレのネック、またはピアノの鍵盤（左手／右手）が即座に表示され、そのまま印刷できます。',
+      labelChordName:'コード名',
+      labelChordNamePlural:'コード名（複数）',
+      clearInputAria:'コードをリセット',
+      placeholder:'例：Cmaj7, Am, F#m7b5, G/B…',
+      labelInstrument:'楽器',
+      guitareLabel:'ギター',
+      ukuleleLabel:'ウクレレ（C6）',
+      pianoLabel:'ピアノ',
+      pianoHandLabel:'ピアノの表示',
+      pianoHandBothLabel:'両手',
+      pianoHandLHLabel:'左手',
+      pianoHandRHLabel:'右手',
+      showStaffLabel:'譜表',
+      gammesLabel:'スケール',
+      scaleCaption:'スケール：{scale}',
+      legendScaleRoot:'主音',
+      legendScaleNote:'スケールの音',
+      scaleNeckAria:'ネック全体のスケール',
+      scalePianoAria:'1オクターブのスケール',
+      arpegesLabel:'アルペジオ',
+      arpeggioCaption:'アルペジオ：{chord}',
+      legendArpeggioNote:'コードの構成音',
+      arpeggioNeckAria:'ネック全体のアルペジオ',
+      arpeggioPianoAria:'1オクターブのアルペジオ',
+      staffAria:'コードの譜表',
+      printBtn:'この図を印刷',
+      helpSummary:'コードの基礎知識・用語',
+      helpNotesTitle:'英語式の音名表記',
+      helpNotesIntro:'コードは A〜G の文字（シャープ # またはフラット b）で入力します：',
+      helpTypesTitle:'対応しているコードの種類',
+      gBasic:'基本', gSevenths:'セブンス', gExtended:'テンションコード（9, 11, 13）', gAddSixth:'アド・シックス系', gSlash:'分数コード（転回形）',
+      helpFingersTitle:'運指',
+      helpFingersText:'ギター — 1〜4の数字：1＝人差し指、2＝中指、3＝薬指、4＝小指。✕ ＝ミュート弦、○ ＝開放弦。ピアノ — 金色のキーが<strong>左手</strong>（ベース音）、緑色のキーが<strong>右手</strong>（コード全体）を示します。あくまで基本的な運指例ですので、ご自由にアレンジしてください。ギターの運指データベースにない珍しいコードは、構成音から自動的に運指を生成します（「自動生成」と表示）。',
+      helpInstrumentsTitle:'楽器とポジション',
+      helpInstrumentsText:'専用のセレクターで楽器（ギター、ウクレレC6、またはピアノ）を選択します。ギターとウクレレでは、同じコードに複数の運指がある場合、‹ › の矢印でネック上の異なるポジション（開放ポジション、セーハ）を切り替えられます。ピアノでは両手が同じキーボード上にまとめて表示され、色と「左」/「右」の表示で区別されます（左手＝ベース音、右手＝コード全体）。「ピアノの表示」セレクターで、左手のみ、右手のみ、または両手を表示できます。',
+      helpScalesTitle:'スケールとアルペジオ',
+      helpScalesText:'「スケール」と「アルペジオ」のタブでは、入力したコードに対応するスケール（ネック全体、またはピアノでは1オクターブ）や、コードの構成音を一音ずつ演奏した様子が表示されます。「ペンタトニック」オプションでスケールを5音に簡略化でき、「速度」で再生テンポを調整できます。',
+      helpSequencesTitle:'コード進行',
+      helpSequencesText:'複数のコードをスペースで区切って入力すると（例：「C G Am F」）、コード進行全体を表示できます。「|」で小節を区切れます（例：「C G | Am F」）。進行は「表示」メニューから、カード、ジャズグリッド、タブ譜、譜表、またはスケール/アルペジオとして表示できます。各コードは個別にミュート（⊘アイコン）でき、進行から削除せずに再生から除外できます。「進行を再生」/「停止」ボタンで、進行全体の音声再生を開始・停止できます。',
+      helpToolsTitle:'入力アシスタント、音声、共有',
+      helpToolsText:'入力アシスタントでは、コード名を入力せずに音符をタップしてコードを組み立てられます。「音声ファイルを解析」ボタンは、取り込んだ音源のコードを自動的に検出します（あくまで近似値です。必要に応じて確認・修正してください）。元のファイルに合わせて再生を同期させることもでき、「粒度」で検出の精度を調整できます。印刷アイコンは、図またはコード進行の印刷用バージョンを生成し、「リンクを共有」はアプリの現在の状態を再現するURLをコピーします。',
+      helpMoreTitle:'さらに詳しく',
+      helpMoreText:'App StoreおよびPlayストアで入手できるより高機能な版「iVisualChord」では、歌詞付きの完全な楽譜を生成することもできます。',
+      footerNote:'ギターの運指データ：chords-db（オープンソース）。左手／右手のポジションは音楽理論に基づいて自動計算しています。',
+      errorRoot:'ルート音が認識できません。A〜G の文字を使用してください（例：C, F#, Bb）。',
+      errorQuality:'コードの種類が認識できません（「{q}」）。maj7, m7, sus4, add9, 9, 13 などをお試しください（下記のヘルプ参照）。',
+      legendFinger:'押さえる指',
+      legendMute:'✕ ミュート弦 ・ ○ 開放弦',
+      legendNumbers:'数字：1＝人差し指 ・ 2＝中指 ・ 3＝薬指 ・ 4＝小指',
+      legendLH:'左手（ベース）',
+      legendRH:'右手（コード）',
+      instrumentTagGuitar:'ギター — ネック',
+      instrumentTagUkulele:'ウクレレ（C6）— ネック',
+      instrumentTagPiano:'ピアノ — 鍵盤',
+      generatedNote:'珍しいコードのため、構成音から運指を自動生成しています（登録済みの伝統的なポジションではありません）。',
+      noFingering:'このコードには運指データがありません。',
+      tabPianoNote:'タブ譜はギターとウクレレのみ対応しています。',
+      posOpen:'開放ポジション',
+      posBarre:'バレー – {n}フレット',
+      posWord:'ポジション',
+      posPrevAria:'前のポジション',
+      posNextAria:'次のポジション',
+      handLH:'左手', handRH:'右手',
+      langSwitchLabel:'言語',
+      sequenceHint:'ヒント：複数のコードをスペースで区切って入力すると（例：「C G Am F」）、コード進行をまとめて表示できます。「|」で小節を区切れます（例：「C G | Am F」）。',
+      sequenceTitle:'コード進行',
+      sequenceCount:'{n}コード',
+      sequenceMeasures:'{n}小節',
+      playChord:'このコードを再生',
+      playScale:'スケールを再生',
+      playArpeggio:'アルペジオを再生',
+      audioImportBtn:'音声ファイルを解析',
+      audioImportPlayerLabel:'読み込んだファイル：',
+      audioImportAnalyzing:'解析中…',
+      audioImportError:'この音声ファイルを解析できませんでした。',
+      audioImportNoChords:'このファイルからコードを検出できませんでした。',
+      audioImportNote:'自動検出は概算です。再生して確認し、必要に応じてコードを修正してください。',
+      audioImportUseBtn:'このコード進行を使う',
+      audioImportDismissBtn:'無視する',
+      audioImportSyncBtn:'曲に合わせて再生',
+      audioImportNowPlayingLabel:'再生中：',
+      audioImportGranularityLabel:'解析単位：',
+      audioImportGranularityUnit:'秒',
+      audioImportGranularityHint:'解析する区間の長さです。長くすると安定しますが、コードの変化への反応は遅くなります。',
+      pentatonicToggleLabel:'ペンタトニック',
+      scaleSpeedLabel:'速度',
+      scaleSpeedDownAria:'速度を下げる',
+      scaleSpeedUpAria:'速度を上げる',
+      fretLimitToggleLabel:'5フレット表示',
+      playAria:'再生',
+      muteChordAria:'このコードをミュート（再生しない）',
+      unmuteChordAria:'このコードのミュートを解除',
+      playSequenceBtn:'このまま再生',
+      stopSequenceBtn:'停止',
+      backToSequence:'コード進行に戻る',
+      jazzGridBtn:'ジャズグリッド',
+      tabGridBtn:'タブ譜',
+      cardsGridBtn:'カード表示',
+      seqViewLabel:'表示形式',
+      seqViewCards:'カード',
+      chordViewDiagram:'ダイアグラム',
+      pickerHeading:'入力アシスタント：音をタップしてコードを組み立てられます。入力の手間なしで。',
+      pickerFamilyBass:'ベース', pickerBack:'戻る', pickerTriad:'基本形',
+      printSequenceBtn:'このコード進行を印刷',
+      shareBtn:'リンクを共有',
+      shareCopied:'リンクをクリップボードにコピーしました！',
+      invalidChordLabel:'認識できません',
+      qualities:{
+        major:'メジャー', minor:'マイナー', dim:'ディミニッシュ', dim7:'ディミニッシュセブンス',
+        sus2:'サスペンデッド（sus2）', sus4:'サスペンデッド（sus4）', '7sus4':'セブンス・サスフォー',
+        '9sus4':'ナインス・サスフォー', aug:'オーギュメント', '6':'シックス', '69':'シックスナインス',
+        '7':'ドミナントセブンス', '7b5':'セブンス・フラットファイブ', aug7:'セブンス・シャープファイブ',
+        '9':'ナインス', '9b5':'ナインス・フラットファイブ', aug9:'ナインス・シャープファイブ',
+        '7b9':'セブンス・フラットナイン', '7#9':'セブンス・シャープナイン',
+        '11':'イレブンス', '9#11':'ナインス・シャープイレブン', '13':'サーティーンス',
+        maj7:'メジャーセブンス', maj7b5:'メジャーセブンス・フラットファイブ', 'maj7#5':'メジャーセブンス・シャープファイブ',
+        maj9:'メジャーナインス', maj11:'メジャーイレブンス', maj13:'メジャーサーティーンス',
+        m6:'マイナーシックス', m69:'マイナーシックスナインス', m7:'マイナーセブンス',
+        m7b5:'マイナーセブンス・フラットファイブ（ハーフディミニッシュ）', m9:'マイナーナインス', m11:'マイナーイレブンス',
+        mmaj7:'マイナーメジャーセブンス', mmaj7b5:'マイナーメジャーセブンス・フラットファイブ',
+        mmaj9:'マイナーメジャーナインス', mmaj11:'マイナーメジャーイレブンス',
+        add9:'アド・ナインス', madd9:'マイナー・アド・ナインス', '5':'パワーコード（5度）'
+      },
+      scales:{
+        ionian:'アイオニアン（メジャー）',
+        dorian:'ドリアン',
+        aeolian:'エオリアン（ナチュラルマイナー）',
+        locrian:'ロクリアン',
+        lydian:'リディアン',
+        mixolydian:'ミクソリディアン',
+        melodicMinor:'メロディックマイナー',
+        lydianDominant:'リディアン・ドミナント',
+        lydianAugmented:'リディアン・オーギュメント',
+        wholeTone:'ホールトーン',
+        diminishedWH:'ディミニッシュ（全半）',
+        halfWholeDim:'ディミニッシュ（半全）',
+        majorPentatonic:'メジャーペンタトニック',
+        minorPentatonic:'マイナーペンタトニック'
+      }
+    },
+    ru: {
+      name:'Русский (Russe)',
+      eyebrow:'Гитара, укулеле и фортепиано',
+      intro:'Введите название аккорда и выберите инструмент: гриф гитары, гриф укулеле или клавиатура фортепиано (левая/правая рука) отобразятся мгновенно и готовы к печати.',
+      labelChordName:'Название аккорда',
+      labelChordNamePlural:'Названия аккордов',
+      clearInputAria:'Сбросить аккорды',
+      placeholder:'напр. Cmaj7, Am, F#m7b5, G/B…',
+      labelInstrument:'Инструмент',
+      guitareLabel:'Гитара',
+      ukuleleLabel:'Укулеле (C6)',
+      pianoLabel:'Фортепиано',
+      pianoHandLabel:'Отображение фортепиано',
+      pianoHandBothLabel:'Обе руки',
+      pianoHandLHLabel:'Левая рука',
+      pianoHandRHLabel:'Правая рука',
+      showStaffLabel:'Нотный стан',
+      gammesLabel:'Гаммы',
+      scaleCaption:'Гамма: {scale}',
+      legendScaleRoot:'Тоника',
+      legendScaleNote:'Нота гаммы',
+      scaleNeckAria:'Гамма по всему грифу',
+      scalePianoAria:'Гамма в пределах октавы',
+      arpegesLabel:'Арпеджио',
+      arpeggioCaption:'Арпеджио: {chord}',
+      legendArpeggioNote:'Нота аккорда',
+      arpeggioNeckAria:'Арпеджио по всему грифу',
+      arpeggioPianoAria:'Арпеджио в пределах октавы',
+      staffAria:'Нотный стан аккорда',
+      printBtn:'Распечатать эту схему',
+      helpSummary:'Справка и термины аккордов',
+      helpNotesTitle:'Ноты в англо-саксонской нотации',
+      helpNotesIntro:'Аккорды вводятся буквами A–G (диез # или бемоль b):',
+      helpTypesTitle:'Распознаваемые типы аккордов',
+      gBasic:'Базовые', gSevenths:'Септаккорды', gExtended:'Расширенные (9, 11, 13)', gAddSixth:'Добавленные ноты и секста', gSlash:'Аккорды с басом (обращения)',
+      helpFingersTitle:'Аппликатура',
+      helpFingersText:'Гитара — цифры от 1 до 4: 1=указательный, 2=средний, 3=безымянный, 4=мизинец. ✕ = заглушённая струна, ○ = открытая струна. Фортепиано — золотистые клавиши обозначают <strong>левую руку</strong> (басовая нота), зелёные клавиши — <strong>правую руку</strong> (аккорд целиком). Это стандартное учебное распределение, вы можете адаптировать его по своему усмотрению. Если редкий аккорд отсутствует в базе аппликатур для гитары, аппликатура генерируется автоматически на основе нот аккорда (пометка «сгенерировано»).',
+      helpInstrumentsTitle:'Инструменты и позиции',
+      helpInstrumentsText:'Выберите инструмент (гитара, укулеле C6 или фортепиано) в специальном переключателе. Для гитары и укулеле, когда для одного и того же аккорда существует несколько аппликатур, стрелки ‹ › позволяют перемещаться между разными позициями на грифе (открытая позиция, баррэ). На фортепиано обе руки показаны вместе на одной клавиатуре, выделены цветом и подписями «ЛР» / «ПР» (левая рука = басовая нота, правая рука = полный аккорд); переключатель «Отображение фортепиано» позволяет показывать только левую руку, только правую, или обе.',
+      helpScalesTitle:'Гаммы и арпеджио',
+      helpScalesText:'Вкладки «Гаммы» и «Арпеджио» показывают для введённого аккорда соответствующую гамму (по всему грифу или в пределах одной октавы на фортепиано) либо ноты аккорда, сыгранные одна за другой. Опция «Пентатоника» упрощает гамму до пяти нот, а регулятор «Скорость» задаёт темп воспроизведения.',
+      helpSequencesTitle:'Последовательности аккордов',
+      helpSequencesText:'Введите несколько аккордов через пробел (напр. «C G Am F»), чтобы отобразить всю последовательность, и используйте «|» для разделения тактов (напр. «C G | Am F»). Последовательность можно показать в виде карточек, джазовой сетки, табулатуры, нотного стана или гаммы/арпеджио через меню «Отображение». Каждый аккорд можно отдельно отключить (значок ⊘), чтобы исключить его из воспроизведения без удаления из последовательности. Кнопки «Воспроизвести последовательность» / «Стоп» запускают или останавливают звуковое воспроизведение всей последовательности.',
+      helpToolsTitle:'Помощник ввода, аудио и общий доступ',
+      helpToolsText:'Помощник ввода позволяет собрать аккорд, нажимая на ноты, без необходимости вводить его название. Кнопка «Анализировать аудиофайл» автоматически распознаёт аккорды импортированного трека (приблизительный результат — при необходимости проверьте и исправьте) и может синхронизировать их воспроизведение с исходным файлом; «Детализация» регулирует точность этого распознавания. Значки печати создают версию диаграммы или последовательности, готовую для печати, а «Поделиться ссылкой» копирует URL-адрес, воспроизводящий текущее состояние приложения.',
+      helpMoreTitle:'Что ещё можно',
+      helpMoreText:'Более полная версия, iVisualChord, доступная в App Store и Play Store, позволяет, в частности, создавать полную партитуру с текстом песни.',
+      footerNote:'База аппликатур для гитары: chords-db (открытый исходный код). Позиции для левой/правой руки рассчитаны по теории музыки.',
+      errorRoot:'Основная нота не распознана. Используйте буквы от A до G (напр. C, F#, Bb).',
+      errorQuality:'Тип аккорда не распознан («{q}»). Попробуйте maj7, m7, sus4, add9, 9, 13… (см. справку ниже).',
+      legendFinger:'Палец на ладу',
+      legendMute:'✕ заглушённая струна · ○ открытая струна',
+      legendNumbers:'Цифры: 1 указательный · 2 средний · 3 безымянный · 4 мизинец',
+      legendLH:'Левая рука (бас)',
+      legendRH:'Правая рука (аккорд)',
+      instrumentTagGuitar:'Гитара — гриф',
+      instrumentTagUkulele:'Укулеле (C6) — гриф',
+      instrumentTagPiano:'Фортепиано — клавиатура',
+      generatedNote:'Редкий аккорд: аппликатура сгенерирована автоматически на основе нот аккорда (не взята из традиционной позиции из базы данных).',
+      noFingering:'Аппликатура для этого аккорда недоступна.',
+      tabPianoNote:'Табулатура доступна только для гитары и укулеле.',
+      posOpen:'открытая позиция',
+      posBarre:'баррэ – лад {n}',
+      posWord:'Позиция',
+      posPrevAria:'Предыдущая позиция',
+      posNextAria:'Следующая позиция',
+      handLH:'ЛР', handRH:'ПР',
+      langSwitchLabel:'Язык',
+      sequenceHint:'Подсказка: введите несколько аккордов через пробел (напр. «C G Am F»), чтобы отобразить всю последовательность. Используйте «|» для разделения тактов (напр. «C G | Am F»).',
+      sequenceTitle:'Последовательность аккордов',
+      sequenceCount:'{n} аккордов',
+      sequenceMeasures:'{n} тактов',
+      playChord:'Прослушать этот аккорд',
+      playScale:'Прослушать гамму',
+      playArpeggio:'Прослушать арпеджио',
+      audioImportBtn:'Анализировать аудиофайл',
+      audioImportPlayerLabel:'Загруженный файл:',
+      audioImportAnalyzing:'Идёт анализ…',
+      audioImportError:'Не удалось проанализировать этот аудиофайл.',
+      audioImportNoChords:'В этом файле не обнаружено аккордов.',
+      audioImportNote:'Автоматическое распознавание приблизительно: прослушайте и при необходимости исправьте аккорды перед использованием.',
+      audioImportUseBtn:'Использовать эту последовательность',
+      audioImportDismissBtn:'Игнорировать',
+      audioImportSyncBtn:'Воспроизвести в такт с треком',
+      audioImportNowPlayingLabel:'Сейчас играет:',
+      audioImportGranularityLabel:'Детализация:',
+      audioImportGranularityUnit:'с',
+      audioImportGranularityHint:'Длительность каждого анализируемого отрезка: чем больше, тем стабильнее, но медленнее реакция на быструю смену аккордов.',
+      pentatonicToggleLabel:'Пентатоника',
+      scaleSpeedLabel:'Скорость',
+      scaleSpeedDownAria:'Уменьшить скорость',
+      scaleSpeedUpAria:'Увеличить скорость',
+      fretLimitToggleLabel:'5 ладов',
+      playAria:'Воспроизвести',
+      muteChordAria:'Отключить этот аккорд (не будет звучать)',
+      unmuteChordAria:'Включить этот аккорд снова',
+      playSequenceBtn:'Прослушать последовательность',
+      stopSequenceBtn:'Остановить',
+      backToSequence:'Вернуться к последовательности',
+      jazzGridBtn:'Джазовая сетка',
+      tabGridBtn:'Табулатура',
+      cardsGridBtn:'Вид карточками',
+      seqViewLabel:'Отображение',
+      seqViewCards:'Карточка',
+      chordViewDiagram:'Схема',
+      pickerHeading:'Помощник ввода: коснитесь ноты, чтобы составить аккорд, не вводя его вручную.',
+      pickerFamilyBass:'Бас', pickerBack:'Назад', pickerTriad:'Базовый',
+      printSequenceBtn:'Распечатать эту последовательность',
+      shareBtn:'Поделиться ссылкой',
+      shareCopied:'Ссылка скопирована в буфер обмена!',
+      invalidChordLabel:'не распознан',
+      qualities:{
+        major:'Мажор', minor:'Минор', dim:'Уменьшённый', dim7:'Уменьшённый септаккорд',
+        sus2:'Задержание (sus2)', sus4:'Задержание (sus4)', '7sus4':'Septima с задержанием',
+        '9sus4':'Nona с задержанием', aug:'Увеличенный', '6':'Секста', '69':'Секста/нона',
+        '7':'Доминантсептаккорд', '7b5':'Септаккорд с пониженной квинтой', aug7:'Септаккорд с повышенной квинтой',
+        '9':'Нонаккорд', '9b5':'Нонаккорд с пониженной квинтой', aug9:'Нонаккорд с повышенной квинтой',
+        '7b9':'Септаккорд с пониженной ноной', '7#9':'Септаккорд с повышенной ноной',
+        '11':'Ундецимаккорд', '9#11':'Нонаккорд с повышенной ундецимой', '13':'Терцдецимаккорд',
+        maj7:'Большой мажорный септаккорд', maj7b5:'Мажорный септаккорд с пониженной квинтой', 'maj7#5':'Мажорный септаккорд с повышенной квинтой',
+        maj9:'Мажорный нонаккорд', maj11:'Мажорный ундецимаккорд', maj13:'Мажорный терцдецимаккорд',
+        m6:'Минорная секста', m69:'Минорная секста/нона', m7:'Минорный септаккорд',
+        m7b5:'Минорный септаккорд с пониженной квинтой (полууменьшённый)', m9:'Минорный нонаккорд', m11:'Минорный ундецимаккорд',
+        mmaj7:'Минорный с большой септимой', mmaj7b5:'Минорный с большой септимой и пониженной квинтой',
+        mmaj9:'Минорный с большой септимой и ноной', mmaj11:'Минорный с большой септимой и ундецимой',
+        add9:'С добавленной ноной', madd9:'Минор с добавленной ноной', '5':'Квинтаккорд (пауэр-аккорд)'
+      },
+      scales:{
+        ionian:'Ионийский (мажор)',
+        dorian:'Дорийский',
+        aeolian:'Эолийский (натуральный минор)',
+        locrian:'Локрийский',
+        lydian:'Лидийский',
+        mixolydian:'Миксолидийский',
+        melodicMinor:'Мелодический минор',
+        lydianDominant:'Лидийский доминантовый',
+        lydianAugmented:'Лидийский увеличенный',
+        wholeTone:'Целотоновая гамма',
+        diminishedWH:'Уменьшённая (тон-полутон)',
+        halfWholeDim:'Уменьшённая (полутон-тон)',
+        majorPentatonic:'Мажорная пентатоника',
+        minorPentatonic:'Минорная пентатоника'
+      }
+    },
+    he: {
+      name:'עברית (Hébreu)',
+      eyebrow:'גיטרה, יוקולילי ופסנתר',
+      intro:'הקלידו שם של אקורד ובחרו כלי נגינה: צוואר הגיטרה, צוואר היוקולילי או מקלדת הפסנתר (יד שמאל / יד ימין) יוצגו מיידית, מוכנים להדפסה.',
+      labelChordName:'שם האקורד',
+      labelChordNamePlural:'שמות האקורדים',
+      clearInputAria:'איפוס האקורדים',
+      placeholder:'לדוגמה: Cmaj7, Am, F#m7b5, G/B…',
+      labelInstrument:'כלי נגינה',
+      guitareLabel:'גיטרה',
+      ukuleleLabel:'יוקולילי (C6)',
+      pianoLabel:'פסנתר',
+      pianoHandLabel:'תצוגת פסנתר',
+      pianoHandBothLabel:'שתי הידיים',
+      pianoHandLHLabel:'יד שמאל',
+      pianoHandRHLabel:'יד ימין',
+      showStaffLabel:'תווים',
+      gammesLabel:'סולמות',
+      scaleCaption:'סולם: {scale}',
+      legendScaleRoot:'צליל יסוד',
+      legendScaleNote:'צליל בסולם',
+      scaleNeckAria:'סולם על פני כל הצוואר',
+      scalePianoAria:'סולם באוקטבה אחת',
+      arpegesLabel:'ארפג׳ים',
+      arpeggioCaption:'ארפג׳ו: {chord}',
+      legendArpeggioNote:'צליל מהאקורד',
+      arpeggioNeckAria:'ארפג׳ו על פני כל הצוואר',
+      arpeggioPianoAria:'ארפג׳ו באוקטבה אחת',
+      staffAria:'תווי האקורד',
+      printBtn:'הדפסת תרשים זה',
+      helpSummary:'עזרה ומונחי אקורדים',
+      helpNotesTitle:'תווים בכתיב האנגלו-סכסי',
+      helpNotesIntro:'אקורדים מוקלדים באותיות A–G (דייז # או במול b):',
+      helpTypesTitle:'סוגי אקורדים נתמכים',
+      gBasic:'בסיסיים', gSevenths:'ספטאקורדים', gExtended:'מורחבים (9, 11, 13)', gAddSixth:'תוספות וסקסטה', gSlash:'אקורדים עם בס (היפוכים)',
+      helpFingersTitle:'אצבוע',
+      helpFingersText:'גיטרה — ספרות 1 עד 4: 1=אצבע מורה, 2=אצבע אמה, 3=קמיצה, 4=זרת. ✕ = מיתר מושתק, ○ = מיתר פתוח. פסנתר — המקשים הזהובים מציינים את <strong>יד שמאל</strong> (צליל הבס), המקשים הירוקים את <strong>יד ימין</strong> (האקורד המלא). חלוקה לימודית סטנדרטית, ניתן להתאים אותה באופן חופשי. כאשר אקורד נדיר אינו קיים במאגר האצבוע לגיטרה, האצבוע נוצר אוטומטית מצלילי האקורד (מצוין כ-"נוצר אוטומטית").',
+      helpInstrumentsTitle:'כלים ועמדות אחיזה',
+      helpInstrumentsText:'בחרו את הכלי (גיטרה, יוקולילי C6 או פסנתר) בתפריט הייעודי. בגיטרה וביוקולילי, כאשר קיימות כמה אפשרויות אצבוע לאותו אקורד, החיצים ‹ › מאפשרים לדפדף בין העמדות השונות על הצוואר (עמדה פתוחה, אצבוע מלא). בפסנתר, שתי הידיים מוצגות יחד על אותה מקלדת, מסומנות בצבע ובתוויות "יד ש" / "יד י" (יד שמאל = צליל בס, יד ימין = אקורד מלא); הבורר "תצוגת פסנתר" מאפשר להציג רק את יד שמאל, רק את יד ימין, או את שתיהן.',
+      helpScalesTitle:'סולמות וארפג׳ו',
+      helpScalesText:'הלשוניות "סולמות" ו"ארפג׳ו" מציגות, לאקורד שהוקלד, את הסולם המתאים (על פני כל הצוואר, או על פני אוקטבה אחת בפסנתר) או את צלילי האקורד המתנגנים אחד אחרי השני. האפשרות "פנטטוני" מפשטת את הסולם לחמישה צלילים, והבקרה "מהירות" קובעת את קצב הניגון.',
+      helpSequencesTitle:'רצפי אקורדים',
+      helpSequencesText:'הקלידו כמה אקורדים מופרדים ברווחים (לדוגמה "C G Am F") כדי להציג רצף שלם, והשתמשו ב-"|" להפרדת תיבות (לדוגמה "C G | Am F"). ניתן להציג את הרצף ככרטיסים, רשת ג׳אז, טבלטורה, תווים, או סולם/ארפג׳ו דרך תפריט "תצוגה". כל אקורד ניתן להשתקה בנפרד (סמל ⊘) כדי להחריג אותו מהניגון מבלי להסירו מהרצף. הכפתורים "נגן את הרצף" / "עצור" מפעילים או מפסיקים את הניגון של הרצף כולו.',
+      helpToolsTitle:'עוזר הקלדה, שמע ושיתוף',
+      helpToolsText:'עוזר ההקלדה מאפשר לבנות אקורד על ידי הקשה על תווים, בלי להקליד את שמו. הכפתור "נתח קובץ שמע" מזהה אוטומטית את האקורדים של רצועה מיובאת (הערכה גסה - בדקו ותקנו במידת הצורך) ויכול לסנכרן את הניגון עם הקובץ המקורי; "רזולוציה" מתאימה את רמת הדיוק של הזיהוי. סמלי ההדפסה מייצרים גרסה מוכנה להדפסה של הדיאגרמה או הרצף, ו"שתף קישור" מעתיק כתובת URL שמשחזרת את מצב האפליקציה הנוכחי.',
+      helpMoreTitle:'להמשיך קדימה',
+      helpMoreText:'גרסה מקיפה יותר, iVisualChord, הזמינה ב-App Store וב-Play Store, מאפשרת בין היתר ליצור תזמור מלא עם מילות השיר.',
+      footerNote:'מאגר אצבוע לגיטרה: chords-db (קוד פתוח). עמדות יד שמאל/ימין מחושבות לפי תורת המוזיקה.',
+      errorRoot:'צליל היסוד לא זוהה. השתמשו באותיות A עד G (לדוגמה: C, F#, Bb).',
+      errorQuality:'סוג האקורד לא זוהה ("{q}"). נסו maj7, m7, sus4, add9, 9, 13… (ראו עזרה למטה).',
+      legendFinger:'אצבע להנחה',
+      legendMute:'✕ מיתר מושתק · ○ מיתר פתוח',
+      legendNumbers:'ספרות: 1 אצבע מורה · 2 אצבע אמה · 3 קמיצה · 4 זרת',
+      legendLH:'יד שמאל (בס)',
+      legendRH:'יד ימין (אקורד)',
+      instrumentTagGuitar:'גיטרה — צוואר',
+      instrumentTagUkulele:'יוקולילי (C6) — צוואר',
+      instrumentTagPiano:'פסנתר — מקלדת',
+      generatedNote:'אקורד נדיר: האצבוע נוצר אוטומטית מצלילי האקורד (אינו מבוסס על עמדה מסורתית מהמאגר).',
+      noFingering:'אין נתוני אצבוע עבור אקורד זה.',
+      tabPianoNote:'טבלטורה זמינה רק עבור גיטרה ויוקולילי.',
+      posOpen:'עמדה פתוחה',
+      posBarre:'ברה – סריג {n}',
+      posWord:'עמדה',
+      posPrevAria:'עמדה קודמת',
+      posNextAria:'עמדה הבאה',
+      handLH:'יד ש', handRH:'יד י',
+      langSwitchLabel:'שפה',
+      sequenceHint:'טיפ: הקלידו כמה אקורדים מופרדים ברווחים (לדוגמה: "C G Am F") כדי להציג רצף שלם. השתמשו ב-"|" להפרדת תיבות (לדוגמה: "C G | Am F").',
+      sequenceTitle:'רצף אקורדים',
+      sequenceCount:'{n} אקורדים',
+      sequenceMeasures:'{n} תיבות',
+      playChord:'השמעת אקורד זה',
+      playScale:'השמעת הסולם',
+      playArpeggio:'השמעת הארפג׳ו',
+      audioImportBtn:'ניתוח קובץ שמע',
+      audioImportPlayerLabel:'קובץ שנטען:',
+      audioImportAnalyzing:'מתבצע ניתוח…',
+      audioImportError:'לא ניתן היה לנתח את קובץ השמע הזה.',
+      audioImportNoChords:'לא זוהו אקורדים בקובץ זה.',
+      audioImportNote:'הזיהוי האוטומטי הוא קירוב בלבד: הקשיבו ותקנו את האקורדים לפני השימוש בהם.',
+      audioImportUseBtn:'שימוש ברצף זה',
+      audioImportDismissBtn:'התעלמות',
+      audioImportSyncBtn:'השמעה בקצב השיר',
+      audioImportNowPlayingLabel:'מתנגן כעת:',
+      audioImportGranularityLabel:'רזולוציה:',
+      audioImportGranularityUnit:'שנ׳',
+      audioImportGranularityHint:'משך כל פלח ניתוח: ערך גבוה יותר יציב יותר אך מגיב לאט יותר לשינויי אקורדים מהירים.',
+      pentatonicToggleLabel:'פנטטוני',
+      scaleSpeedLabel:'מהירות',
+      scaleSpeedDownAria:'הפחתת מהירות',
+      scaleSpeedUpAria:'הגברת מהירות',
+      fretLimitToggleLabel:'5 סריגים',
+      playAria:'השמעה',
+      muteChordAria:'השתקת אקורד זה (לא יושמע)',
+      unmuteChordAria:'ביטול ההשתקה של אקורד זה',
+      playSequenceBtn:'השמעת הרצף',
+      stopSequenceBtn:'עצירה',
+      backToSequence:'חזרה לרצף',
+      jazzGridBtn:'רשת ג׳אז',
+      tabGridBtn:'טבלטורה',
+      cardsGridBtn:'תצוגת כרטיסים',
+      seqViewLabel:'תצוגה',
+      seqViewCards:'כרטיס',
+      chordViewDiagram:'תרשים',
+      pickerHeading:'עוזר הקלדה: הקישו על צליל כדי לבנות אקורד, ללא צורך להקליד אותו.',
+      pickerFamilyBass:'בס', pickerBack:'חזרה', pickerTriad:'בסיסי',
+      printSequenceBtn:'הדפסת רצף זה',
+      shareBtn:'שיתוף קישור',
+      shareCopied:'הקישור הועתק ללוח!',
+      invalidChordLabel:'לא זוהה',
+      qualities:{
+        major:'מז׳ור', minor:'מינור', dim:'מוקטן', dim7:'ספטאקורד מוקטן',
+        sus2:'תלוי (sus2)', sus4:'תלוי (sus4)', '7sus4':'ספטימה תלויה',
+        '9sus4':'נונה תלויה', aug:'מוגדל', '6':'סקסטה', '69':'סקסטה/נונה',
+        '7':'ספטאקורד דומיננטי', '7b5':'ספטימה, קווינטה מוקטנת', aug7:'ספטימה, קווינטה מוגדלת',
+        '9':'נונאקורד', '9b5':'נונה, קווינטה מוקטנת', aug9:'נונה, קווינטה מוגדלת',
+        '7b9':'ספטימה, נונה מוקטנת', '7#9':'ספטימה, נונה מוגדלת',
+        '11':'אחד-עשר', '9#11':'נונה, אחד-עשר מוגדל', '13':'שלוש-עשרה',
+        maj7:'מז׳ור ספטימה', maj7b5:'מז׳ור ספטימה, קווינטה מוקטנת', 'maj7#5':'מז׳ור ספטימה, קווינטה מוגדלת',
+        maj9:'מז׳ור נונה', maj11:'מז׳ור אחד-עשר', maj13:'מז׳ור שלוש-עשרה',
+        m6:'מינור סקסטה', m69:'מינור סקסטה/נונה', m7:'מינור ספטימה',
+        m7b5:'מינור ספטימה, קווינטה מוקטנת (מוקטן-למחצה)', m9:'מינור נונה', m11:'מינור אחד-עשר',
+        mmaj7:'מינור עם ספטימה מז׳ורית', mmaj7b5:'מינור עם ספטימה מז׳ורית, קווינטה מוקטנת',
+        mmaj9:'מינור עם ספטימה מז׳ורית ונונה', mmaj11:'מינור עם ספטימה מז׳ורית ואחד-עשר',
+        add9:'הוספת נונה', madd9:'מינור עם הוספת נונה', '5':'אקורד חמישית (power chord)'
+      },
+      scales:{
+        ionian:'יוני (מז׳ור)',
+        dorian:'דורי',
+        aeolian:'אאולי (מינור טבעי)',
+        locrian:'לוקרי',
+        lydian:'לידי',
+        mixolydian:'מיקסולידי',
+        melodicMinor:'מינור מלודי',
+        lydianDominant:'לידי דומיננטי',
+        lydianAugmented:'לידי מוגדל',
+        wholeTone:'סולם טונים שלמים',
+        diminishedWH:'מוקטן (טון-חצי)',
+        halfWholeDim:'מוקטן (חצי-טון)',
+        majorPentatonic:'פנטטוני מז׳ורי',
+        minorPentatonic:'פנטטוני מינורי'
+      }
     }
   };
 
-  var SUPPORTED_LANGS = ['fr','en','de','it','es','zh'];
+  var SUPPORTED_LANGS = ['fr','en','de','it','es','zh','ja','ru','he'];
   var currentLang = 'fr';
   try {
     var savedLang = localStorage.getItem('vcd_lang');
@@ -3729,7 +4300,12 @@
   var BLACK_SEMIS = [1,3,6,8,10];
   var BLACK_BOUNDARY = {1:1,3:2,6:4,8:5,10:6};
 
-  function renderPianoSVG(lh, rh){
+  function renderPianoSVG(lh, rh, handMode){
+    // handMode: 'both' (default, when omitted), 'lh' or 'rh' - which
+    // hand(s) get highlighted. The keyboard's width/octave range is always
+    // computed from BOTH hands regardless, so switching modes never
+    // resizes or shifts the keyboard - it only lights up (or dims back to
+    // a plain key) the notes belonging to the hand that's hidden.
     var whiteW=34, whiteH=132, blackW=20, blackH=82, topPad=32;
     var allNotes = [{pc:lh.pc, octave:lh.octave, hand:'lh'}].concat(rh.map(function(n){ return {pc:n.pc, octave:n.octave, hand:'rh'}; }));
     var minOct = Math.min.apply(null, allNotes.map(function(n){return n.octave;}));
@@ -3740,7 +4316,9 @@
     var H = whiteH+topPad+18;
 
     var hl = {};
-    allNotes.forEach(function(n){ hl[n.octave+'-'+n.pc] = n.hand; });
+    allNotes.forEach(function(n){
+      if(!handMode || handMode==='both' || handMode===n.hand) hl[n.octave+'-'+n.pc] = n.hand;
+    });
 
     var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Diagramme du clavier de piano">';
 
@@ -4766,6 +5344,10 @@
   var instGuitar = document.getElementById('instGuitar');
   var instUkulele = document.getElementById('instUkulele');
   var instPiano = document.getElementById('instPiano');
+  var pianoHandRow = document.getElementById('pianoHandRow');
+  var handBoth = document.getElementById('handBoth');
+  var handLHOnly = document.getElementById('handLHOnly');
+  var handRHOnly = document.getElementById('handRHOnly');
   var errorBox = document.getElementById('errorBox');
   var resultSection = document.getElementById('resultSection');
   var chordNameOut = document.getElementById('chordNameOut');
@@ -4841,7 +5423,14 @@
     audioImportBtnText:'audioImportBtn', audioImportUseBtn:'audioImportUseBtn', audioImportDismissBtn:'audioImportDismissBtn',
     audioImportNoteText:'audioImportNote', audioImportPlayerLabelText:'audioImportPlayerLabel',
     audioImportSyncBtnText:'audioImportSyncBtn', audioImportGranularityLabelText:'audioImportGranularityLabel',
-    syncSequenceBtnText:'audioImportSyncBtn'
+    syncSequenceBtnText:'audioImportSyncBtn',
+    labelPianoHandText:'pianoHandLabel', labelHandBothText:'pianoHandBothLabel',
+    labelHandLHOnlyText:'pianoHandLHLabel', labelHandRHOnlyText:'pianoHandRHLabel',
+    helpInstrumentsTitleText:'helpInstrumentsTitle', helpInstrumentsTextP:'helpInstrumentsText',
+    helpScalesTitleText:'helpScalesTitle', helpScalesTextP:'helpScalesText',
+    helpSequencesTitleText:'helpSequencesTitle', helpSequencesTextP:'helpSequencesText',
+    helpToolsTitleText:'helpToolsTitle', helpToolsTextP:'helpToolsText',
+    helpMoreTitleText:'helpMoreTitle', helpMoreTextP:'helpMoreText'
   };
   var STATIC_HTML_IDS = { helpFingersTextP:'helpFingersText' };
 
@@ -4856,8 +5445,35 @@
     labelEl.textContent = t(tokens.length > 1 ? 'labelChordNamePlural' : 'labelChordName');
   }
 
+  // The language dropdown shows zh/ja/ru/he with a parenthetical
+  // translation next to their native name (e.g. "中文 (Chinois)"). That
+  // translation follows the current UI language - except when the UI
+  // language IS one of those four, in which case the parenthetical is
+  // always shown in English (translating e.g. "Chinese" into Chinese
+  // for the zh option would be redundant/confusing when already
+  // browsing in Chinese).
+  var EXOTIC_LANG_NATIVE_NAMES = { zh:'中文', ja:'日本語', ru:'Русский', he:'עברית' };
+  var EXOTIC_LANG_ENGLISH_NAMES = { zh:'Chinese', ja:'Japanese', ru:'Russian', he:'Hebrew' };
+  var EXOTIC_LANG_TKEYS = { zh:'langNameZh', ja:'langNameJa', ru:'langNameRu', he:'langNameHe' };
+  function updateLangSelectOptionLabels(){
+    if(!langSelect) return;
+    var useEnglish = (EXOTIC_LANG_NATIVE_NAMES[currentLang] !== undefined);
+    Object.keys(EXOTIC_LANG_NATIVE_NAMES).forEach(function(code){
+      var opt = langSelect.querySelector('option[value="' + code + '"]');
+      if(!opt) return;
+      var paren = useEnglish ? EXOTIC_LANG_ENGLISH_NAMES[code] : t(EXOTIC_LANG_TKEYS[code]);
+      opt.textContent = EXOTIC_LANG_NATIVE_NAMES[code] + ' (' + paren + ')';
+    });
+  }
+
   function applyStaticTranslations(){
     document.documentElement.lang = currentLang;
+    // Hebrew is read right-to-left; this flips the browser's default text
+    // flow, form controls and native widgets, which covers most of the
+    // page. Custom flex/grid layouts (e.g. the chord grid, button rows)
+    // are not individually mirrored and may still read left-to-right -
+    // a further pass would be needed to mirror those by hand.
+    document.documentElement.dir = (currentLang === 'he') ? 'rtl' : 'ltr';
     Object.keys(STATIC_TEXT_IDS).forEach(function(id){
       var el = document.getElementById(id);
       if(el) el.textContent = t(STATIC_TEXT_IDS[id]);
@@ -4880,6 +5496,7 @@
       clearChordInputBtn.title = t('clearInputAria');
     }
     if(langSelect) langSelect.value = currentLang;
+    updateLangSelectOptionLabels();
     syncViewControls();
     refreshBuilderTexts();
     updateChordNameLabel();
@@ -5060,6 +5677,24 @@
   function instrument(){
     if(instUkulele && instUkulele.checked) return 'ukulele';
     return instPiano.checked ? 'piano' : 'guitar';
+  }
+  // Which hand(s) to highlight on the piano keyboard diagram - 'both'
+  // (default), 'lh' (left hand / bass note only) or 'rh' (right hand /
+  // chord tones only). Only affects the keyboard diagram itself (single
+  // chord "Diagramme" view and the sequence "cards" view); the grand staff
+  // ("Portée") always shows both clefs together, as a real score would.
+  function pianoHandMode(){
+    if(handLHOnly && handLHOnly.checked) return 'lh';
+    if(handRHOnly && handRHOnly.checked) return 'rh';
+    return 'both';
+  }
+  // The "Affichage du piano" hand switch sits right next to the legend it
+  // complements (legendOut's "Main gauche" / "Main droite" dots), so it
+  // only ever shows for the single-chord piano keyboard diagram - reset to
+  // hidden by default on every render, and switched back on by renderPiano()
+  // itself, the only place that draws that particular legend+diagram pair.
+  function hidePianoHandRow(){
+    if(pianoHandRow) pianoHandRow.style.display = 'none';
   }
   function instrumentTagKey(){
     var inst = instrument();
@@ -5250,13 +5885,15 @@
 
   function renderPiano(p){
     var notes = getPianoNotes(p);
+    var mode = pianoHandMode();
     diagramWrap.className = 'diagram-wrap piano';
-    diagramWrap.innerHTML = renderPianoSVG(notes.lh, notes.rh);
+    diagramWrap.innerHTML = renderPianoSVG(notes.lh, notes.rh, mode);
     posNav.style.display='none';
     noteGenerated.style.display='none';
     legendOut.innerHTML =
-      '<span><span class="dot" style="background:var(--accent)"></span>'+t('legendLH')+'</span>' +
-      '<span><span class="dot" style="background:var(--accent2)"></span>'+t('legendRH')+'</span>';
+      (mode!=='rh' ? '<span><span class="dot" style="background:var(--accent)"></span>'+t('legendLH')+'</span>' : '') +
+      (mode!=='lh' ? '<span><span class="dot" style="background:var(--accent2)"></span>'+t('legendRH')+'</span>' : '');
+    if(pianoHandRow) pianoHandRow.style.display = 'flex';
   }
 
   // Renders the musical staff notation of the chord directly into
@@ -5396,7 +6033,7 @@
         else { diagEl.textContent = t('noFingering'); diagEl.style.fontSize='11px'; diagEl.style.color='var(--ink-soft)'; }
       } else {
         var notes = getPianoNotes(p);
-        diagEl.innerHTML = renderPianoSVG(notes.lh, notes.rh);
+        diagEl.innerHTML = renderPianoSVG(notes.lh, notes.rh, pianoHandMode());
       }
     } else {
       diagEl.textContent = '?';
@@ -6010,6 +6647,7 @@
     var measures = splitChordSequence(raw);
     var flatTokens = [].concat.apply([], measures);
     updateChordNameLabel();
+    hidePianoHandRow();
 
     if(flatTokens.length > 1){
       renderSequence(measures, raw.indexOf('|') !== -1);
@@ -6419,6 +7057,9 @@
   instGuitar.addEventListener('change', render);
   if(instUkulele) instUkulele.addEventListener('change', render);
   instPiano.addEventListener('change', render);
+  if(handBoth) handBoth.addEventListener('change', render);
+  if(handLHOnly) handLHOnly.addEventListener('change', render);
+  if(handRHOnly) handRHOnly.addEventListener('change', render);
   posPrev.addEventListener('click', function(){ if(state.posIndex>0){ state.posIndex--; drawFrettedPosition(); } });
   posNext.addEventListener('click', function(){ if(state.posIndex<state.positions.length-1){ state.posIndex++; drawFrettedPosition(); } });
   printBtn.addEventListener('click', function(){ window.print(); });
