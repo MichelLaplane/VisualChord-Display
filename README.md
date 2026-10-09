@@ -26,6 +26,7 @@ Interface disponible en 6 langues (sélecteur en haut à droite de l'application
 - `apple-touch-icon.png` (+ variantes 167/152) — icône utilisée par iPhone/iPad quand vous ajoutez l'application à l'écran d'accueil.
 - `icon-192.png`, `icon-512.png` — icônes utilisées par Android/Chrome (via `manifest.json`).
 - `favicon-16.png`, `favicon-32.png` — icône affichée dans l'onglet du navigateur.
+- `og-image.jpg` — image affichée en aperçu lorsque le lien du site est partagé (WhatsApp, iMessage, Facebook, etc.), via les balises Open Graph du fichier `index.html`.
 
 ## Utiliser l'application
 
